@@ -33,6 +33,75 @@ button:hover { background: #0056b3; }
 .legend-btn { background: #17a2b8; display: flex; align-items: center; gap: 5px;}
 .legend-btn:hover { background: #138496; }
 
+/* --- LEGEND BAR STYLES --- */
+.legend-bar {
+    display: flex;
+    flex-wrap: wrap; /* Wraps on mobile */
+    gap: 20px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 8px 8px 0 0; /* Rounded top only */
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    color: #555;
+    justify-content: center;
+}
+
+.legend-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-title {
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help;
+}
+
+/* Color Dots for Verdicts */
+.color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.color-dot.golden { background-color: #ffc107; box-shadow: 0 0 2px #b68a00; }
+.color-dot.excellent { background-color: #28a745; }
+.color-dot.good { background-color: #aedae1; }
+.color-dot.dangerous { background-color: #dc3545; }
+
+/* Mini Badges for Spirits */
+.mini-badge {
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+}
+.mini-badge.yellow { background: #fff3cd; border: 1px solid #ffeeba; }
+.mini-badge.black { background: #e9ecef; border: 1px solid #ced4da; }
+
+/* Mobile Adjustment */
+@media (max-width: 600px) {
+    .legend-bar {
+        gap: 10px;
+        justify-content: flex-start;
+    }
+    .legend-group {
+        width: 100%; /* Stack groups on small screens */
+        justify-content: space-between;
+    }
+}
+
 /* FILTER BUTTONS */
 .filter-group { display: flex; gap: 5px; }
 .filter-btn {
@@ -63,7 +132,7 @@ button:hover { background: #0056b3; }
 
 .golden { background-color: var(--bg-gold); border-color: var(--border-gold); }
 .excellent { background-color: var(--bg-green); border-color: var(--border-green); }
-.good { background-color: #e2e6ea; border-color: #dae0e5; }
+.good { background-color: #aedae1; border-color: #dae0e5; }
 .neutral { background-color: var(--bg-neutral); border-color: var(--border-neutral); }
 .avoid { background-color: var(--bg-red); border-color: var(--border-red); }
 .dangerous { background-color: var(--bg-dangerous); border: 2px solid var(--border-dangerous); }
@@ -71,6 +140,7 @@ button:hover { background: #0056b3; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .date-num { font-size: 1.1rem; font-weight: 700; color: #333; }
 .officer-row { font-size: 0.65rem; text-transform: uppercase; color: #666; font-weight: 600; letter-spacing: 0.5px; }
+
 /* --- 12 SPIRITS (YELLOW/BLACK BELT) --- */
 .spirit-badge {
     font-size: 0.75rem;

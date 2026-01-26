@@ -209,34 +209,31 @@ function renderGrid(days) {
     card.dataset.tags = tags.join(",");
 
     // --- CONSTELLATION VISUAL LOGIC ---
-    // We look at the flags to see WHY it is good or bad
     const flags = day.analysis.flags;
 
-    let starIcon = "★"; // Default
-    let starStyle = "color:#888; font-size: 0.75rem;"; // Default Grey
+    let starIcon = "★";
+    // Default: Grey
+    let starStyle = "color:#999; font-size: 0.75rem;";
 
-    // Priority 1: Personal Clash (Red & Bold) - "Bad Star" flag
+    // 1. Personal Clash (Bold Red)
     if (flags.includes("Bad Star")) {
       starIcon = "⛔";
-      starStyle = "color:#dc3545; font-weight:bold; font-size: 0.8rem;";
+      starStyle = "color:#dc3545; font-weight:800; font-size: 0.8rem;";
     }
-    // Priority 2: Personal Noble (Green & Bold) - "Good Star" flag
+    // 2. Personal Noble (Bold Green)
     else if (flags.includes("Good Star")) {
       starIcon = "✨";
-      starStyle = "color:#28a745; font-weight:bold; font-size: 0.8rem;";
+      starStyle = "color:#28a745; font-weight:800; font-size: 0.8rem;";
     }
-    // Priority 3: Global Bad (Purple) - We detect this via the LOG text (or add a specific flag in backend later)
-    // For now, let's assume we add a 'Global Bad' flag in calculator.ts,
-    // OR we just rely on the fact that calculator subtracts score but doesn't set "Bad Star" flag for global.
-    // Let's check the score/log for "Gloomy Star" text if we didn't add a specific flag.
+    // 3. Global Bad (Normal Red) - Check Log text
     else if (day.analysis.log.some((l) => l.includes("Gloomy Star"))) {
       starIcon = "☁️";
-      starStyle = "color:#d63384; font-weight:500; font-size: 0.75rem;"; // Pink/Purple
+      starStyle = "color:#dc3545; font-weight:400; font-size: 0.75rem;";
     }
-    // Priority 4: Global Good (Blue)
+    // 4. Global Good (Normal Green) - Check Log text
     else if (day.analysis.log.some((l) => l.includes("Lucky Star"))) {
       starIcon = "🌟";
-      starStyle = "color:#0d6efd; font-weight:500; font-size: 0.75rem;"; // Blue
+      starStyle = "color:#28a745; font-weight:400; font-size: 0.75rem;";
     }
 
     // --- BADGES LOGIC ---
@@ -306,7 +303,7 @@ function renderGrid(days) {
             ${actionHtml}
 
             <div style="font-size:0.75rem; margin-top:5px; padding-top:5px; border-top:1px dashed #eee; text-align:right; ${starStyle}">
-                ★ ${day.info.constellation}
+                ${starIcon} ${day.info.constellation}
             </div>
 
             <div class="footer-badges">${badges}</div>
@@ -349,26 +346,101 @@ function showLegend() {
   const userId = document.getElementById("userSelect").value;
   const user = allUsersData.find((u) => u._id === userId);
 
+  const legendBody = document.getElementById("legendBody");
+  legendBody.style.display = "block";
+
+  // --- PART 1: STATIC LEGEND ---
+  const staticLegend = `
+        <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #eee;">
+            
+            <h4 style="margin-top:0;">🎨 Verdict Colors</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem; color:#444; margin-bottom:15px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:12px; height:12px; background:#ffc107; border-radius:50%; display:inline-block;"></span>
+                    <span><strong>Golden:</strong> Perfect Day</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:12px; height:12px; background:#28a745; border-radius:50%; display:inline-block;"></span>
+                    <span><strong>Excellent:</strong> High Luck</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:12px; height:12px; background:#aedae1; border-radius:50%; display:inline-block;"></span>
+                    <span><strong>Good:</strong> Supportive</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:12px; height:12px; background:#dc3545; border-radius:50%; display:inline-block;"></span>
+                    <span><strong>Danger:</strong> Breaker/Clash</span>
+                </div>
+            </div>
+
+            <h4 style="margin-top:0;">★ Star Symbols</h4>
+            <ul style="font-size:0.9rem; color:#444; line-height:1.6; padding-left:20px; margin-bottom:15px;">
+                <li>
+                    <span style="color:#28a745; font-weight:800;">✨ Noble (Bold Green):</span> 
+                    Specifically good for YOUR chart.
+                </li>
+                <li>
+                    <span style="color:#28a745; font-weight:400;">🌟 Lucky (Green):</span> 
+                    Universally auspicious star.
+                </li>
+                <li>
+                    <span style="color:#dc3545; font-weight:400;">☁️ Gloomy (Red):</span> 
+                    Universally difficult star.
+                </li>
+                <li>
+                    <span style="color:#dc3545; font-weight:800;">⛔ Clash (Bold Red):</span> 
+                    Specifically harmful to YOUR chart.
+                </li>
+            </ul>
+
+            <h4 style="margin-top:0;">🐉 12 Spirits</h4>
+            <div style="font-size:0.9rem; color:#444; display:flex; gap:15px;">
+                <div>
+                    <span class="spirit-badge spirit-yellow">🐉 Yellow Belt</span>
+                    <br><span style="font-size:0.8rem; color:#666;">Auspicious</span>
+                </div>
+                <div>
+                    <span class="spirit-badge spirit-black">🐯 Black Belt</span>
+                    <br><span style="font-size:0.8rem; color:#666;">Inauspicious</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+  // --- PART 2: DYNAMIC LEGEND ---
+  let dynamicLegend = `<h4 style="margin-top:0;">🎯 ${user ? user.name + "'s" : "User"} Action Rules</h4>`;
+
   if (!user || !user.actionRules || user.actionRules.length === 0) {
-    document.getElementById("legendBody").innerHTML =
-      "<p>No specific action rules found for this user.</p>";
+    dynamicLegend +=
+      "<p style='color:#666; font-style:italic;'>No custom action rules defined.</p>";
   } else {
-    let html = "";
-    user.actionRules.forEach((rule) => {
-      const officers = rule.officers.join(" / ");
-      const elements = rule.elements.join(" / ");
-      html += `
-                <div style="border:1px solid #eee; padding:10px; border-radius:6px; background:#fcfcfc;">
-                    <div style="font-weight:bold; color:#0056b3; margin-bottom:4px;">${rule.icon} ${rule.action}</div>
-                    <div style="font-size:0.85rem; color:#555;">
-                        Requires: <strong>${officers}</strong> + <strong>${elements}</strong>
+    dynamicLegend += user.actionRules
+      .map((rule) => {
+        const officers = rule.officers.join(" / ");
+        // Fallback if elements are missing
+        const elements = rule.elements
+          ? rule.elements.join(" / ")
+          : "Calculated";
+
+        return `
+                <div style="border:1px solid #eee; padding:10px; border-radius:6px; background:#fcfcfc; margin-bottom:8px;">
+                    <div style="font-weight:bold; color:#0056b3; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                        ${rule.icon} ${rule.action}
                     </div>
-                    <div style="font-size:0.8rem; font-style:italic; color:#777; margin-top:4px;">"${rule.description}"</div>
+                    <div style="font-size:0.85rem; color:#555;">
+                        <strong>Requires:</strong> Officer [${officers}]
+                    </div>
+                    <div style="font-size:0.8rem; font-style:italic; color:#777; margin-top:4px; border-top:1px dashed #eee; padding-top:4px;">
+                        "${rule.description}"
+                    </div>
                 </div>
             `;
-    });
-    document.getElementById("legendBody").innerHTML = html;
+      })
+      .join("");
   }
+
+  // --- RENDER ---
+  legendBody.innerHTML = staticLegend + dynamicLegend;
   document.getElementById("legendModal").style.display = "flex";
 }
 
@@ -575,7 +647,7 @@ function closeModal(modalId) {
 function getColorBg(cssClass) {
   if (cssClass === "golden") return "#ffc107";
   if (cssClass === "excellent") return "#28a745";
-  if (cssClass === "good") return "#17a2b8";
+  if (cssClass === "good") return "#aedae1";
   return "#6c757d";
 }
 
