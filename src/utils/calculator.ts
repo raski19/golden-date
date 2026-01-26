@@ -12,6 +12,7 @@ import {
   BAD_STARS,
   GOOD_STARS,
   SAN_SHA_RULES,
+  GOAT_BLADE_RULES,
 } from "./constants";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
@@ -54,7 +55,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // Safety Checks
   if (dayBranch === rules.breaker) {
     flags.push("PERSONAL BREAKER");
-    // We still return badHours even for dangerous days
+    // We still return bad hours even for dangerous days
     const clash = CLASH_PAIRS[dayBranch];
     return {
       score: 0,
@@ -189,7 +190,59 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     });
   }
 
-  // --- SAN SHA CHECK  ---
+  // --- NINE STAR CHECKS (Period 9 Optimized) ---
+  const starName = dayData.nineStar;
+
+  // GOOD STARS
+  if (starName.includes("9 Purple")) {
+    score += 20; // UPGRADED to Highest Priority
+    tags.push("WEALTH", "FAME");
+    log.push(
+      `🔥 9 Purple: The Supreme Wealth Star (Period 9). Maximum visibility, execution, and profit.`,
+    );
+  } else if (starName.includes("1 White")) {
+    score += 10; // UPGRADED (Future Wealth)
+    log.push(
+      `🌊 1 White: Noble People & Future Wealth. Excellent for networking and reputation.`,
+    );
+  } else if (starName.includes("8 White")) {
+    score += 5; // DOWNGRADED from "Strongest" to "Stable"
+    log.push(
+      `💰 8 White: Fading Wealth. Good for salary, savings, and stability (slow growth).`,
+    );
+  } else if (starName.includes("6 White")) {
+    score += 5;
+    log.push(
+      `⚙️ 6 White: Authority & Execution. Good for discipline and technical status.`,
+    );
+  }
+
+  // BAD STARS
+  if (starName.includes("5 Yellow")) {
+    score -= 20;
+    flags.push("5 Yellow");
+    log.push(
+      `☣️ 5 Yellow: The Emperor of Calamity. Avoid all major risks and travel.`,
+    );
+  } else if (starName.includes("2 Black")) {
+    score -= 10;
+    // 2 Black is 'Sickness' but technically 'Fertility/Land' in P9.
+    // Safety First: Block for health, neutral for assets.
+    if (rules.healthElements) {
+      log.push(`💊 2 Black: Strong Illness Energy. Avoid medical procedures.`);
+    } else {
+      log.push(
+        `🧱 2 Black: Sickness Star. Good for buying land, bad for the body.`,
+      );
+    }
+  } else if (starName.includes("3 Jade") || starName.includes("7 Red")) {
+    score -= 5;
+    log.push(
+      `⚔️ Conflict/Robbery: ${starName}. Risk of disputes, theft, or legal issues.`,
+    );
+  }
+
+  // --- SAN SHA CHECK ---
   // Check Month Sha (Immediate effect)
   const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
   if (monthBadBranches.includes(dayBranch)) {
@@ -199,12 +252,31 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       `🗡️ Three Killings: ${dayBranch} opposes the Month's flow. Risk of obstacles/loss.`,
     );
   }
-
   // Check Year Sha (General effect - optional, maybe smaller penalty)
   const yearBadBranches: string[] = SAN_SHA_RULES[yearBranch] || [];
   if (yearBadBranches.includes(dayBranch)) {
     score -= 10;
+    flags.push("Year Sha");
     log.push(`⚔️ Year Sha: Mild obstacle due to year opposition.`);
+  }
+  // --- Goat Blade ---
+  // High intensity star based on User's Day Master
+  const bladeBranch = GOAT_BLADE_RULES[user.dayMaster];
+
+  if (bladeBranch === dayBranch) {
+    score -= 15; // Significant penalty
+    flags.push("Goat Blade");
+
+    // Context-aware logging
+    if (rules.healthElements && rules.healthElements.length > 0) {
+      log.push(
+        `🩸 Goat Blade: High risk of injury or surgery. Avoid risky sports.`,
+      );
+    } else {
+      log.push(
+        `🔪 Goat Blade: Intense aggressive energy. Good for authority, bad for peace.`,
+      );
+    }
   }
 
   // Tagging

@@ -236,6 +236,50 @@ function renderGrid(days) {
       starStyle = "color:#28a745; font-weight:400; font-size: 0.75rem;";
     }
 
+    // --- NINE STAR VISUAL LOGIC (Period 9 Optimized) ---
+    const ns = day.info.nineStar || ""; // e.g. "5 Yellow (Disaster)"
+    const nsNumber = ns.split(" ")[0]; // "5"
+    const nsShort = ns.split("(")[0].trim(); // "5 Yellow"
+
+    let nsStyle = "color:#7f8c8d;"; // Default Metal Grey
+    let nsIcon = "⭐";
+
+    // Logic based on Period 9 Hierarchy
+    if (nsNumber === "9") {
+      // THE KING: Supreme Wealth & Fame (Fire)
+      nsStyle =
+        "color:#8e44ad; font-weight:900; text-shadow: 0px 0px 1px #e056fd;"; // Glowing Purple
+      nsIcon = "🔥";
+    } else if (nsNumber === "1") {
+      // THE QUEEN: Future Wealth & Nobleman (Water)
+      nsStyle = "color:#2980b9; font-weight:bold;"; // Strong Blue
+      nsIcon = "🌊";
+    } else if (nsNumber === "8") {
+      // THE RETIREE: Stable Assets (Earth)
+      nsStyle = "color:#27ae60; font-weight:bold;"; // Green
+      nsIcon = "💰";
+    } else if (nsNumber === "6") {
+      // AUTHORITY: Execution & Status (Metal)
+      nsStyle = "color:#7f8c8d; font-weight:bold;";
+      nsIcon = "⚙️";
+    } else if (nsNumber === "4") {
+      // ACADEMIC: Wisdom & Romance (Wood)
+      nsStyle = "color:#16a085;"; // Teal
+      nsIcon = "🎓";
+    } else if (nsNumber === "5") {
+      // DISASTER: The Emperor of Bad Luck (Earth)
+      nsStyle = "color:#c0392b; font-weight:900;"; // Deep Red
+      nsIcon = "☣️";
+    } else if (nsNumber === "2") {
+      // SICKNESS: Illness (Earth)
+      nsStyle = "color:#2c3e50; font-weight:bold;"; // Dark Grey/Black
+      nsIcon = "💊";
+    } else if (nsNumber === "3" || nsNumber === "7") {
+      // CONFLICT: Robbery & Arguments
+      nsStyle = "color:#d35400; font-weight:bold;"; // Burnt Orange
+      nsIcon = "⚔️";
+    }
+
     // --- BADGES LOGIC ---
     let badges = day.analysis.flags
       .map((f) => {
@@ -247,6 +291,10 @@ function renderGrid(days) {
           return `<span class="badge" style="background:#f8d7da; color:#721c24;">🌸 Social</span>`;
         if (f === "Intellect")
           return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 Smart</span>`;
+        if (f === "San Sha")
+          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ San Sha</span>`;
+        if (f === "Goat Blade")
+          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ Goat Blade</span>`;
         // Hide "Bad Star" / "Good Star" from badges since we show them in the footer text now
         if (f === "Bad Star" || f === "Good Star") return "";
         return `<span class="badge">${f}</span>`;
@@ -304,8 +352,13 @@ function renderGrid(days) {
             
             ${actionHtml}
 
-            <div style="font-size:0.75rem; margin-top:5px; padding-top:5px; border-top:1px dashed #eee; text-align:right; ${starStyle}">
-                ${starIcon} ${day.info.constellation}
+            <div style="font-size:0.75rem; margin-top:5px; padding-top:5px; border-top:1px dashed #eee; display:flex; justify-content:space-between; align-items:center;">
+                <span style="${nsStyle}" title="${ns}">
+                    ${nsIcon} ${nsShort}
+                </span>
+                <span style="${starStyle}" title="${day.info.constellation}">
+                    ${starIcon} ${day.info.constellation}
+                </span>
             </div>
 
             <div class="footer-badges">${badges}</div>
@@ -485,6 +538,8 @@ function showDetails(day) {
   // Get Star Definition
   const starDesc =
     day.info.constellationDesc || "No specific data for this star.";
+  const nineStarDesc =
+    day.info.nineStarDesc || "No specific data for this star.";
 
   document.getElementById("modalDate").innerText =
     `${day.fullDate} (${day.analysis.verdict})`;
@@ -582,6 +637,14 @@ function showDetails(day) {
                 </div>
                 <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
                     "${starDesc}"
+                </div>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
+                    🧭 The ${day.info.nineStar}
+                </div>
+                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
+                    "${nineStarDesc}"
                 </div>
             </div>
         </div>

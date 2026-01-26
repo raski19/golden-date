@@ -28,6 +28,18 @@ export const BRANCH_ELEMENTS: Record<string, string> = {
   Dog: "Earth",
 };
 
+export const CHINESE_NUMBERS: Record<string, string> = {
+  一: "1",
+  二: "2",
+  三: "3",
+  四: "4",
+  五: "5",
+  六: "6",
+  七: "7",
+  八: "8",
+  九: "9",
+};
+
 // 2. Interaction Maps
 export const CLASH_PAIRS: Record<string, string> = {
   Rat: "Horse",
@@ -427,17 +439,38 @@ export const NINE_LUMINARIES: Luminaries[] = [
   { name: "Scarlet Node", element: "Fire", icon: "☄️", color: "#8e44ad" }, // 9 (Ketu)
 ];
 
-export const NINE_STARS: string[] = [
-  "1 White (Noble)",
-  "2 Black (Sickness)",
-  "3 Jade (Conflict)",
-  "4 Green (Wisdom)",
-  "5 Yellow (Disaster)",
-  "6 White (Authority)",
-  "7 Red (Robbery)",
-  "8 White (Wealth)",
-  "9 Purple (Celebration)",
-];
+export const NINE_STARS: Record<string, string> = {
+  "1": "1 White (Noble)",
+  "2": "2 Black (Sickness)",
+  "3": "3 Jade (Conflict)",
+  "4": "4 Green (Wisdom)",
+  "5": "5 Yellow (Disaster)",
+  "6": "6 White (Authority)",
+  "7": "7 Red (Robbery)",
+  "8": "8 White (Asset/Slow)", // Updated from "Wealth"
+  "9": "9 Purple (King/Wealth)", // Updated from "Celebration"
+};
+
+export const NINE_STAR_DEFINITIONS: Record<string, string> = {
+  "1 White (Noble)":
+    "Future Wealth & Noble People. Excellent for networking, reputation, and wisdom.",
+  "2 Black (Sickness)":
+    "The Illness Star. Risk of fatigue and abdominal issues. Avoid medical procedures. Good for land accumulation (long term) only.",
+  "3 Jade (Conflict)":
+    "The Quarrel Star. High risk of arguments, lawsuits, and theft. Keep a low profile.",
+  "4 Green (Wisdom)":
+    "Academic & Romance Star. Excellent for study, writing, and courtship. (Warning: Can cause relationship scandals if misused).",
+  "5 Yellow (Disaster)":
+    "The Five Yellow. Highly unstable. Risk of total calamity, financial loss, and accidents. AVOID ALL IMPORTANT ACTIVITY.",
+  "6 White (Authority)":
+    "The Military Star. Good for execution, discipline, and authority. Favors blue-collar or technical work.",
+  "7 Red (Robbery)":
+    "The Broken Soldier. Risk of theft, betrayal, and injury by metal. Watch your words and your belongings.",
+  "8 White (Asset/Slow)":
+    "The Fading Wealth. Good for salary, savings, and stability. Too slow for investments or launches.",
+  "9 Purple (King/Wealth)":
+    "The Supreme Wealth Star (Period 9). The strongest energy for Money, Fame, Launches, and Visibility.",
+};
 
 export interface Advice {
   good: string[];
@@ -524,4 +557,20 @@ export const SAN_SHA_RULES: Record<string, string[]> = {
   Pig: ["Monkey", "Rooster", "Dog"],
   Rabbit: ["Monkey", "Rooster", "Dog"],
   Goat: ["Monkey", "Rooster", "Dog"],
+};
+
+export const GOAT_BLADE_RULES: Record<string, string> = {
+  // YANG STEMS (True Blade - High Danger)
+  Jia: "Rabbit",
+  Bing: "Horse",
+  Wu: "Horse",
+  Geng: "Rooster",
+  Ren: "Rat",
+
+  // YIN STEMS (Secondary Blade - Moderate Danger)
+  Yi: "Dragon",
+  Ding: "Goat",
+  Ji: "Goat",
+  Xin: "Dog",
+  Gui: "Ox",
 };

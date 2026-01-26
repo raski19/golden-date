@@ -1,4 +1,4 @@
-const { Solar } = require("lunar-javascript");
+const { Lunar } = require("lunar-javascript");
 import { DayInfo } from "../types";
 import {
   STEMS,
@@ -9,7 +9,9 @@ import {
   STAR_DEFINITIONS,
   ELEMENT_LOOKUP,
   YELLOW_BLACK_BELT,
-  // NINE_LUMINARIES,
+  NINE_STAR_DEFINITIONS,
+  CHINESE_NUMBERS,
+  NINE_STARS,
 } from "./constants";
 
 // --- HELPER: Calculate Yellow/Black Belt (Dong Gong) ---
@@ -57,60 +59,61 @@ function getYellowBlackBelt(monthBranch: string, dayBranch: string) {
   return YELLOW_BLACK_BELT[ybIndex];
 }
 
-// --- HELPER 2: Calculate 9 Luminaries ---
-// function getLuminary(dateStr: string) {
-//   const date = new Date(dateStr);
-//   // Arbitrary Anchor: Jan 1 2024 was within a specific cycle.
-//   // For a repeating 9-day cycle, we calculate days elapsed.
-//   const anchor = new Date("2024-01-01").getTime();
-//   const target = date.getTime();
-//
-//   // Days elapsed
-//   const diffDays = Math.floor((target - anchor) / (1000 * 60 * 60 * 24));
-//
-//   // Modulo 9
-//   const index = ((diffDays % 9) + 9) % 9;
-//
-//   return NINE_LUMINARIES[index];
-// }
-
 export const getDayInfo = (dateString: string): DayInfo => {
-  const parts = dateString.split("-").map(Number);
-  // Note: parts[1] is 1-based month, Solar expects 1-based
-  const solar = Solar.fromYmd(parts[0], parts[1], parts[2]);
-  const lunar = solar.getLunar();
-  const eightChar = lunar.getEightChar();
+  // 1. Force Noon to avoid "previous day" errors due to timezone
+  const date = new Date(dateString + "T12:00:00");
+  const lunar = Lunar.fromDate(date);
 
-  const dayGanChar = eightChar.getDayGan();
-  const dayZhiChar = eightChar.getDayZhi();
-  const monthZhiChar = eightChar.getMonthZhi();
-  const yearZhiChar = eightChar.getYearZhi();
+  // 2. Get Raw Characters
+  const dayGanChar = lunar.getDayGan();
+  const dayZhiChar = lunar.getDayZhi();
+  const monthZhiChar = lunar.getMonthZhi();
+  const yearZhiChar = lunar.getYearZhi();
 
+  // Use getZhiXing() for the 12 Day Officers (Establish, Remove...)
   const officerChar = lunar.getZhiXing();
   const starChar = lunar.getXiu();
-  const constellationName = STARS[starChar] || starChar;
-  const starDesc =
-    STAR_DEFINITIONS[constellationName] || "No description available.";
+  const constellation = STARS[starChar] || starChar;
+  const constellationDesc =
+    STAR_DEFINITIONS[constellation] || "No description available.";
+
+  // 5. Nine Star (Flying Star)
+  let nineStar = "Unknown";
+  let nineStarDesc = "";
+
+  try {
+    const nineStarObj = lunar.getDayNineStar();
+    if (nineStarObj) {
+      const starNumChinese = nineStarObj.getNumber(); // Returns "一", "二", "三"...
+      // Convert "三" -> "3" (fallback to original if not found)
+      const starNum = CHINESE_NUMBERS[starNumChinese] || starNumChinese;
+      nineStar = NINE_STARS[starNum] || `Star ${starNum}`;
+      nineStarDesc = NINE_STAR_DEFINITIONS[nineStar] || "";
+    }
+  } catch (e) {
+    console.error(`Error calculating 9 Star for ${dateString}:`, e);
+  }
 
   const stem = STEMS[dayGanChar] || dayGanChar;
   const dayBranch = BRANCHES[dayZhiChar] || dayZhiChar;
   const monthBranch = BRANCHES[monthZhiChar] || monthZhiChar;
   const yearBranch = BRANCHES[yearZhiChar] || yearZhiChar;
 
-  // New Calculations
   const yellowBlackBelt = getYellowBlackBelt(monthBranch, dayBranch);
   // const luminary = getLuminary(dateString);
 
   return {
     date: dateString,
-    stem: stem,
+    stem,
     dayBranch,
     monthBranch,
     yearBranch,
     element: ELEMENT_LOOKUP[stem] || "Unknown",
     officer: OFFICERS[officerChar] || officerChar,
-    constellation: constellationName,
-    constellationDesc: starDesc,
+    constellation,
+    constellationDesc,
+    nineStar,
+    nineStarDesc,
     rawStar: starChar,
 
     yellowBlackBelt,
