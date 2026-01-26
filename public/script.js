@@ -208,16 +208,35 @@ function renderGrid(days) {
     const tags = day.analysis.tags || [];
     card.dataset.tags = tags.join(",");
 
-    // --- 1. DETECT CONSTELLATION STATUS ---
-    const isBadStar = day.analysis.flags.includes("Bad Star");
-    const isGoodStar = day.analysis.flags.includes("Good Star");
+    // --- CONSTELLATION VISUAL LOGIC ---
+    // We look at the flags to see WHY it is good or bad
+    const flags = day.analysis.flags;
 
-    // Apply Red/Bold if it's a Bad Star, Green/Bold if Good, otherwise Gray
-    let starStyle = "color:#666;";
-    if (isBadStar) {
-      starStyle = "color:#dc3545; font-weight:bold;"; // 🔴 RED & BOLD
-    } else if (isGoodStar) {
-      starStyle = "color:#28a745; font-weight:bold;"; // 🟢 GREEN & BOLD
+    let starIcon = "★"; // Default
+    let starStyle = "color:#888; font-size: 0.75rem;"; // Default Grey
+
+    // Priority 1: Personal Clash (Red & Bold) - "Bad Star" flag
+    if (flags.includes("Bad Star")) {
+      starIcon = "⛔";
+      starStyle = "color:#dc3545; font-weight:bold; font-size: 0.8rem;";
+    }
+    // Priority 2: Personal Noble (Green & Bold) - "Good Star" flag
+    else if (flags.includes("Good Star")) {
+      starIcon = "✨";
+      starStyle = "color:#28a745; font-weight:bold; font-size: 0.8rem;";
+    }
+    // Priority 3: Global Bad (Purple) - We detect this via the LOG text (or add a specific flag in backend later)
+    // For now, let's assume we add a 'Global Bad' flag in calculator.ts,
+    // OR we just rely on the fact that calculator subtracts score but doesn't set "Bad Star" flag for global.
+    // Let's check the score/log for "Gloomy Star" text if we didn't add a specific flag.
+    else if (day.analysis.log.some((l) => l.includes("Gloomy Star"))) {
+      starIcon = "☁️";
+      starStyle = "color:#d63384; font-weight:500; font-size: 0.75rem;"; // Pink/Purple
+    }
+    // Priority 4: Global Good (Blue)
+    else if (day.analysis.log.some((l) => l.includes("Lucky Star"))) {
+      starIcon = "🌟";
+      starStyle = "color:#0d6efd; font-weight:500; font-size: 0.75rem;"; // Blue
     }
 
     // --- BADGES LOGIC ---
