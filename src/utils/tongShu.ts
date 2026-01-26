@@ -1,95 +1,81 @@
 const { Solar } = require("lunar-javascript");
 import { DayInfo } from "../types";
+import {
+  STEMS,
+  BRANCHES,
+  BRANCHES_LIST,
+  OFFICERS,
+  STARS,
+  ELEMENT_LOOKUP,
+  YELLOW_BLACK_BELT,
+  NINE_LUMINARIES,
+} from "./constants";
 
-const STEMS: Record<string, string> = {
-  甲: "Jia (Wood)",
-  乙: "Yi (Wood)",
-  丙: "Bing (Fire)",
-  丁: "Ding (Fire)",
-  戊: "Wu (Earth)",
-  己: "Ji (Earth)",
-  庚: "Geng (Metal)",
-  辛: "Xin (Metal)",
-  壬: "Ren (Water)",
-  癸: "Gui (Water)",
-};
+// --- HELPER: Calculate Yellow/Black Belt (Dong Gong) ---
+function getYellowBlackBelt(monthBranch: string, dayBranch: string) {
+  // Branch Order: Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig
+  // const branchList = Object.values(BRANCHES); // Ensure this matches constant order
 
-const BRANCHES: Record<string, string> = {
-  子: "Rat",
-  丑: "Ox",
-  寅: "Tiger",
-  卯: "Rabbit",
-  辰: "Dragon",
-  巳: "Snake",
-  午: "Horse",
-  未: "Goat",
-  申: "Monkey",
-  酉: "Rooster",
-  戌: "Dog",
-  亥: "Pig",
-};
+  let startOffset = 0;
 
-const OFFICERS: Record<string, string> = {
-  建: "Establish",
-  除: "Remove",
-  满: "Full",
-  平: "Balance",
-  定: "Stable",
-  执: "Initiate",
-  破: "Destruction",
-  危: "Danger",
-  成: "Success",
-  收: "Receive",
-  开: "Open",
-  闭: "Close",
-};
+  // Dong Gong Starting Offsets for "Green Dragon"
+  switch (monthBranch) {
+    case "Tiger":
+    case "Monkey":
+      startOffset = 0;
+      break; // Starts on Rat
+    case "Rabbit":
+    case "Rooster":
+      startOffset = 2;
+      break; // Starts on Tiger
+    case "Dragon":
+    case "Dog":
+      startOffset = 4;
+      break; // Starts on Dragon
+    case "Snake":
+    case "Pig":
+      startOffset = 6;
+      break; // Starts on Horse
+    case "Rat":
+    case "Horse":
+      startOffset = 8;
+      break; // Starts on Monkey
+    case "Ox":
+    case "Goat":
+      startOffset = 10;
+      break; // Starts on Dog
+  }
 
-const STARS: Record<string, string> = {
-  角: "Horn",
-  亢: "Neck",
-  氐: "Foundation",
-  房: "House",
-  心: "Heart",
-  尾: "Tail",
-  箕: "Basket",
-  斗: "Dipper",
-  牛: "Ox",
-  女: "Weaving Maiden",
-  虚: "Void",
-  危: "Danger",
-  室: "Room",
-  壁: "Wall",
-  奎: "Astride",
-  娄: "Mound",
-  胃: "Stomach",
-  昴: "Pleiades",
-  毕: "Net",
-  觜: "Beak",
-  参: "Orion",
-  井: "Well",
-  鬼: "Ghost",
-  柳: "Willow",
-  星: "Star",
-  张: "Bow",
-  翼: "Wing",
-  轸: "Carriage",
-};
+  // Find index of the day
+  // Note: We need to match the English string "Rat" to the index 0
+  const dayIndex = BRANCHES_LIST.indexOf(dayBranch);
 
-const ELEMENT_LOOKUP: Record<string, string> = {
-  "Jia (Wood)": "Wood",
-  "Yi (Wood)": "Wood",
-  "Bing (Fire)": "Fire",
-  "Ding (Fire)": "Fire",
-  "Wu (Earth)": "Earth",
-  "Ji (Earth)": "Earth",
-  "Geng (Metal)": "Metal",
-  "Xin (Metal)": "Metal",
-  "Ren (Water)": "Water",
-  "Gui (Water)": "Water",
-};
+  // Formula: (Day - Start + 12) % 12
+  const ybIndex = (dayIndex - startOffset + 12) % 12;
+
+  return YELLOW_BLACK_BELT[ybIndex];
+}
+
+// --- HELPER 2: Calculate 9 Luminaries ---
+// function getLuminary(dateStr: string) {
+//   const date = new Date(dateStr);
+//   // Arbitrary Anchor: Jan 1 2024 was within a specific cycle.
+//   // For a repeating 9-day cycle, we calculate days elapsed.
+//   const anchor = new Date("2024-01-01").getTime();
+//   const target = date.getTime();
+//
+//   // Days elapsed
+//   const diffDays = Math.floor((target - anchor) / (1000 * 60 * 60 * 24));
+//
+//   // Modulo 9
+//   const index = ((diffDays % 9) + 9) % 9;
+//
+//   return NINE_LUMINARIES[index];
+// }
 
 export const getDayInfo = (dateString: string): DayInfo => {
   const parts = dateString.split("-").map(Number);
+  // Note: parts[1] is 1-based month, Solar expects 1-based
   const solar = Solar.fromYmd(parts[0], parts[1], parts[2]);
   const lunar = solar.getLunar();
   const eightChar = lunar.getEightChar();
@@ -104,16 +90,26 @@ export const getDayInfo = (dateString: string): DayInfo => {
 
   const stem = STEMS[dayGanChar] || dayGanChar;
   const branch = BRANCHES[dayZhiChar] || dayZhiChar;
+  const monthBranch = BRANCHES[monthZhiChar] || monthZhiChar;
+  const yearBranch = BRANCHES[yearZhiChar] || yearZhiChar;
+
+  // New Calculations
+  const yellowBlackBelt = getYellowBlackBelt(monthBranch, branch);
+  // const luminary = getLuminary(dateString);
 
   return {
     date: dateString,
     stem: stem,
     branch: branch,
-    monthBranch: BRANCHES[monthZhiChar] || monthZhiChar,
-    yearBranch: BRANCHES[yearZhiChar] || yearZhiChar,
+    monthBranch: monthBranch,
+    yearBranch: yearBranch,
     element: ELEMENT_LOOKUP[stem] || "Unknown",
     officer: OFFICERS[officerChar] || officerChar,
     constellation: STARS[starChar] || starChar,
     rawStar: starChar,
+
+    // Inject the calculated values
+    yellowBlackBelt,
+    // luminary,
   };
 };

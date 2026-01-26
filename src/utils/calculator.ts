@@ -8,6 +8,9 @@ import {
   BRANCH_HOURS,
   STEM_NOBLEMAN,
   BRANCH_START_TIMES,
+  OFFICER_ADVICE,
+  BAD_STARS,
+  GOOD_STARS,
 } from "./constants";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
@@ -64,6 +67,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       specificActions: [],
       badHours: clash ? [`${clash} Hour (${BRANCH_HOURS[clash]})`] : [],
       goodHours: [],
+      generalAdvice: { good: [], bad: [] },
     };
   }
 
@@ -84,10 +88,36 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     log.push(`Element ${dayData.element} is unfavorable.`);
   }
 
+  // --- 1. GLOBAL STAR CHECK ---
+  if (BAD_STARS.includes(dayData.constellation)) {
+    score -= 15;
+    log.push(
+      `☁️ Gloomy Star: '${dayData.constellation}' is generally inauspicious.`,
+    );
+  } else if (GOOD_STARS.includes(dayData.constellation)) {
+    score += 5; // Small universal bonus
+    log.push(
+      `🌟 Lucky Star: '${dayData.constellation}' is generally auspicious.`,
+    );
+  }
+
+  // --- 2. PERSONAL STAR CHECK (Overrules or Adds to Global) ---
+  // User explicitly hates this star (e.g., it's Fire and they hate Fire)
   if ((rules.avoidConstellations || []).includes(dayData.constellation)) {
-    score -= 25;
+    score -= 20;
     flags.push("Bad Star");
-    log.push(`Avoid: Star '${dayData.constellation}' is negative.`);
+    log.push(
+      `⛔ Personal Clash: Star '${dayData.constellation}' conflicts with your chart.`,
+    );
+  }
+
+  // User explicitly loves this star (e.g., it's Water and they need Water)
+  if (rules.favorableConstellations.includes(dayData.constellation)) {
+    score += 15;
+    flags.push("Good Star");
+    log.push(
+      `✨ Personal Noble: Star '${dayData.constellation}' supports your useful god.`,
+    );
   }
 
   // Harmony
@@ -290,6 +320,8 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
         `<strong>${h.branch}</strong> (${BRANCH_HOURS[h.branch]}) - ${h.label.join(" / ")}`,
     );
 
+  const advice = OFFICER_ADVICE[dayData.officer] || { good: [], bad: [] };
+
   return {
     score,
     verdict: verdictText,
@@ -300,6 +332,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     specificActions,
     badHours,
     goodHours,
+    generalAdvice: advice,
   };
 };
 

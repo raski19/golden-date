@@ -50,6 +50,18 @@ export interface DayInfo {
   officer: string;
   constellation: string;
   rawStar: string;
+  yellowBlackBelt: {
+    name: string;
+    type: "Yellow" | "Black";
+    icon: string;
+    desc: string;
+  };
+  // luminary: {
+  //   name: string;
+  //   element: string;
+  //   icon: string;
+  //   color: string;
+  // };
 }
 
 export interface ScoreResult {
@@ -62,6 +74,10 @@ export interface ScoreResult {
   specificActions: { action: string; icon: string; desc: string }[];
   badHours: string[];
   goodHours: string[];
+  generalAdvice: {
+    good: string[];
+    bad: string[];
+  };
 }
 
 export interface TenGodsResult {

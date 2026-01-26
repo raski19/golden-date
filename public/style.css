@@ -70,7 +70,35 @@ button:hover { background: #0056b3; }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .date-num { font-size: 1.1rem; font-weight: 700; color: #333; }
-.officer { font-size: 0.65rem; text-transform: uppercase; color: #666; font-weight: 600; letter-spacing: 0.5px; }
+.officer-row { font-size: 0.65rem; text-transform: uppercase; color: #666; font-weight: 600; letter-spacing: 0.5px; }
+/* --- 12 SPIRITS (YELLOW/BLACK BELT) --- */
+.spirit-badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help; /* Shows the tooltip cursor on hover */
+    white-space: nowrap;
+}
+/* 🐉 YELLOW BELT (Lucky - Green Dragon, Golden Lock, etc.) */
+.spirit-yellow {
+    background-color: #fff8d6; /* Pale Gold Background */
+    color: #856404;           /* Dark Goldenrod Text */
+    border: 1px solid #ffeeba; /* Soft Gold Border */
+}
+/* 🐯 BLACK BELT (Unlucky - White Tiger, Heavenly Prison, etc.) */
+.spirit-black {
+    background-color: #e9ecef; /* Light Grey Background */
+    color: #495057;           /* Dark Grey Text */
+    border: 1px solid #ced4da; /* Grey Border */
+}
+/* Optional: Slight hover effect to encourage checking the tooltip */
+.spirit-badge:hover {
+    filter: brightness(0.95);
+}
 
 .pillars-container { background: rgba(255,255,255,0.5); border-radius: 6px; padding: 4px; margin: 4px 0; }
 .pillar-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 3px; }

@@ -197,6 +197,7 @@ function renderGrid(days) {
   grid.innerHTML = "";
 
   const firstDayOfWeek = new Date(currentYear, currentMonth - 1, 1).getDay();
+  // Adjust logic if you want Mon start vs Sun start. (0=Sun currently)
   for (let i = 0; i < firstDayOfWeek; i++) {
     grid.innerHTML += "<div></div>";
   }
@@ -207,7 +208,19 @@ function renderGrid(days) {
     const tags = day.analysis.tags || [];
     card.dataset.tags = tags.join(",");
 
-    // Footer Badges with Icons
+    // --- 1. DETECT CONSTELLATION STATUS ---
+    const isBadStar = day.analysis.flags.includes("Bad Star");
+    const isGoodStar = day.analysis.flags.includes("Good Star");
+
+    // Apply Red/Bold if it's a Bad Star, Green/Bold if Good, otherwise Gray
+    let starStyle = "color:#666;";
+    if (isBadStar) {
+      starStyle = "color:#dc3545; font-weight:bold;"; // 🔴 RED & BOLD
+    } else if (isGoodStar) {
+      starStyle = "color:#28a745; font-weight:bold;"; // 🟢 GREEN & BOLD
+    }
+
+    // --- BADGES LOGIC ---
     let badges = day.analysis.flags
       .map((f) => {
         if (f === "Nobleman")
@@ -218,6 +231,8 @@ function renderGrid(days) {
           return `<span class="badge" style="background:#f8d7da; color:#721c24;">🌸 Social</span>`;
         if (f === "Intellect")
           return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 Smart</span>`;
+        // Hide "Bad Star" / "Good Star" from badges since we show them in the footer text now
+        if (f === "Bad Star" || f === "Good Star") return "";
         return `<span class="badge">${f}</span>`;
       })
       .join("");
@@ -234,18 +249,28 @@ function renderGrid(days) {
     const stemBadge = tenGods.stemGod || "?";
     const branchBadge = tenGods.branchGod || "?";
 
-    // ACTION MATCHES (Only show first one in grid)
+    // --- ACTION MATCHES ---
     const actions = day.analysis.specificActions || [];
     let actionHtml = "";
     if (actions.length > 0) {
       actionHtml = `<div class="action-row">${actions[0].icon} ${actions[0].action}</div>`;
     }
 
+    // --- YELLOW/BLACK BELT ---
+    const yb = day.info.yellowBlackBelt;
+    const ybClass = yb.type === "Yellow" ? "spirit-yellow" : "spirit-black";
+
     card.className = `day-card ${cssClass}`;
     card.innerHTML = `
             <div class="card-header">
                 <span class="date-num">${day.day}</span>
-                <span class="officer">${day.info.officer}</span>
+                <span class="spirit-badge ${ybClass}" title="${yb.name}: ${yb.desc}">
+                    ${yb.icon} ${yb.name}
+                </span>
+            </div>
+            
+            <div class="officer-row" style="text-align:center; font-size:0.85rem; color:#666; margin-bottom:5px;">
+                ${day.info.officer}
             </div>
             
             <div class="pillars-container">
@@ -261,7 +286,10 @@ function renderGrid(days) {
             
             ${actionHtml}
 
-            <div class="star">★ ${day.info.constellation}</div>
+            <div style="font-size:0.75rem; margin-top:5px; padding-top:5px; border-top:1px dashed #eee; text-align:right; ${starStyle}">
+                ★ ${day.info.constellation}
+            </div>
+
             <div class="footer-badges">${badges}</div>
         `;
 
@@ -332,6 +360,8 @@ function showDetails(day) {
   const actions = day.analysis.specificActions || [];
   const badHours = day.analysis.badHours || [];
   const goodHours = day.analysis.goodHours || [];
+  const yb = day.info.yellowBlackBelt || {};
+  const advice = day.analysis.generalAdvice || { good: [], bad: [] };
 
   document.getElementById("modalDate").innerText =
     `${day.fullDate} (${day.analysis.verdict})`;
@@ -362,13 +392,45 @@ function showDetails(day) {
         </div>`;
   }
 
+  // Build the Do/Don't Lists
+  const goodList = advice.good
+    .map(
+      (item) => `
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <span style="color:#28a745;">✅</span> ${item}
+        </div>
+    `,
+    )
+    .join("");
+  const badList = advice.bad
+    .map(
+      (item) => `
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <span style="color:#dc3545;">❌</span> ${item}
+        </div>
+    `,
+    )
+    .join("");
+
   document.getElementById("modalBody").innerHTML = `
         ${actionDetails}
         <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px;">
             <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
             <strong>Branch:</strong> ${day.info.branch} (${tenGods.branchGod})<br>
             <strong>Officer:</strong> ${day.info.officer}<br>
-            <strong>Star:</strong> ${day.info.constellation}
+            <strong>Star:</strong> ${day.info.constellation}<br>
+            <strong>Yellow and Black Belt:</strong> ${yb.icon} ${yb.name} (${yb.type})
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
+            <div>
+                <h4 style="margin:0 0 10px 0; color:#28a745;">Yi (Suitable)</h4>
+                ${goodList}
+            </div>
+            <div>
+                <h4 style="margin:0 0 10px 0; color:#dc3545;">Ji (Avoid)</h4>
+                ${badList}
+            </div>
         </div>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -381,6 +443,7 @@ function showDetails(day) {
     `;
   modal.style.display = "flex";
 }
+
 // --- SYNERGY / TEAM MODE ---
 
 function openSynergyModal() {
