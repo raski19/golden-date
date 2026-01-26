@@ -262,11 +262,6 @@ function renderGrid(days) {
     if (tags.includes("HEALTH"))
       badges += `<span class="badge" style="background:#d1e7dd; color:#0f5132">🧘</span>`;
 
-    // SAN SHA BADGE
-    if (day.analysis.flags.includes("San Sha")) {
-      badges += `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ San Sha</span>`;
-    }
-
     const simpleStem = day.info.stem.split(" ")[0];
     const tenGods = day.tenGods || { stemGod: "?", branchGod: "?" };
     const stemBadge = tenGods.stemGod || "?";
@@ -482,8 +477,14 @@ function showDetails(day) {
   const actions = day.analysis.specificActions || [];
   const badHours = day.analysis.badHours || [];
   const goodHours = day.analysis.goodHours || [];
-  const yb = day.info.yellowBlackBelt || {};
+  const yb = day.info.yellowBlackBelt;
+
+  // Get Advice
   const advice = day.analysis.generalAdvice || { good: [], bad: [] };
+
+  // Get Star Definition
+  const starDesc =
+    day.info.constellationDesc || "No specific data for this star.";
 
   document.getElementById("modalDate").innerText =
     `${day.fullDate} (${day.analysis.verdict})`;
@@ -514,7 +515,7 @@ function showDetails(day) {
         </div>`;
   }
 
-  // Build the Do/Don't Lists
+  // Do's and Don'ts Lists
   const goodList = advice.good
     .map(
       (item) => `
@@ -524,6 +525,7 @@ function showDetails(day) {
     `,
     )
     .join("");
+
   const badList = advice.bad
     .map(
       (item) => `
@@ -536,14 +538,18 @@ function showDetails(day) {
 
   document.getElementById("modalBody").innerHTML = `
         ${actionDetails}
-        <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px;">
-            <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
-            <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})<br>
-            <strong>Officer:</strong> ${day.info.officer}<br>
-            <strong>Star:</strong> ${day.info.constellation}<br>
-            <strong>Yellow and Black Belt:</strong> ${yb.icon} ${yb.name} (${yb.type})
-        </div>
         
+        <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
+            <div>
+                <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
+                <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
+            </div>
+            <div>
+                <strong>Officer:</strong> ${day.info.officer}<br>
+                <strong>Element:</strong> ${day.info.element}
+            </div>
+        </div>
+
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
             <div>
                 <h4 style="margin:0 0 10px 0; color:#28a745;">Yi (Suitable)</h4>
@@ -555,13 +561,35 @@ function showDetails(day) {
             </div>
         </div>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <h4 style="margin-bottom:5px;">📊 Personal Analysis</h4>
+        <ul style="padding-left:20px; margin-top:5px; margin-bottom:15px; color:#444;">${logHtml}</ul>
+
+        <div style="background:#fff3cd; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
+            <h4 style="margin:0 0 10px 0; color:#856404;">🔮 Energy Deep Dive</h4>
+            
+            <div style="margin-bottom:10px;">
+                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
+                    ${yb.icon} The ${yb.name} Spirit <span style="font-size:0.75rem; font-weight:normal; background:white; padding:2px 6px; border-radius:4px; border:1px solid #ddd;">${yb.type} Belt</span>
+                </div>
+                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
+                    "${yb.desc}"
+                </div>
+            </div>
+
+            <div>
+                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
+                    ★ The ${day.info.constellation} Star
+                </div>
+                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
+                    "${starDesc}"
+                </div>
+            </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
             <div>${goodHoursHtml}</div>
             <div>${badHoursHtml}</div>
         </div>
-
-        <h4>Analysis:</h4>
-        <ul style="padding-left:20px;">${logHtml}</ul>
     `;
   modal.style.display = "flex";
 }

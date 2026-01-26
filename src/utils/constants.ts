@@ -236,6 +236,84 @@ export const STARS: Record<string, string> = {
   轸: "Carriage",
 };
 
+// Dictionary for the 28 Constellations
+export const STAR_DEFINITIONS: Record<string, string> = {
+  // --- EAST (Wood / Green Dragon) ---
+  Horn: "Excellent for marriage, travel, and construction. Represents new growth.",
+  Neck: "Negative for marriage and construction. Good for divorce or separating.",
+  Foundation:
+    "Good for public speaking and property. Bad for construction (Fire risk).",
+  House:
+    "Great for marriage and travel. Increases wealth. The 'Rabbit' of the East.",
+  Heart:
+    "Bad for most activities, especially medical/surgery. Risk of Frauds. Good for travel.",
+  Tail: "Strong auspicious star. Good for closing deals, renovation, and marriage.",
+  Basket:
+    "Good for finance and debt collection. Associated with wind and gossip.",
+
+  // --- NORTH (Water / Black Tortoise) ---
+  Dipper:
+    "The 'Temple of Heaven'. Excellent for commercial alignment and goals.",
+  Ox: "Disastrous for marriage and contracts. Broken promises and stagnation.",
+  "Weaving Maiden": "Good for construction and study. A star of gratitude.",
+  Void: "Darkness and emptiness. Bad for almost all personal and financial actions.",
+  Danger: "Bodily harm and misfortune. AVOID construction and extreme sports.",
+  Room: "The 'Great Wealth' star. Multiplies Wealth. Excellent for marriage, assets, and accumulation. BAD for Burial/Medical/Divorce (Multiplies the bad thing)",
+  Wall: "Protects Wealth. Stability and growth. Good for documents, signing, and intellectual work.",
+
+  // --- WEST (Metal / White Tiger) ---
+  Astride:
+    "Good for travel and renovation. Avoid opening new businesses (legal issues).",
+  Mound:
+    "The Guardian of Wealth. Stores Wealth. Excellent for trading, family, and gathering.",
+  Stomach: "The Storehouse. Good for savings and long-term storage.",
+  Pleiades:
+    "The End. Highly negative. Represents closure, death, or judicial trouble.",
+  Net: "Good for construction and 'catching'. Beneficial for military/police.",
+  Beak: "Highly Negative. Avoid important activities. Risk of doubt and loss.",
+  Orion: "Good for travel and trade. Volatile for marriage or burials.",
+
+  // --- SOUTH (Fire / Red Phoenix) ---
+  Well: "Good for planning and legal appeals. Avoid medical procedures.",
+  Ghost:
+    "Negative for most public events. Good for funerals or spiritual detachment.",
+  Willow: "Cruelty and anxiety. Bad for social events; prone to discord.",
+  Star: "Creativity and negotiation. Good for openings, bad for funerals.",
+  Bow: "Purely positive. Launches Wealth. The 'Reformed' star. Great for new endeavors and marriage.", // Correction: Source says Auspicious
+  Wing: "The 'Changer of Tides'. Unstable. Bad for marriage, good for escaping trouble.",
+  Carriage:
+    "Moves/Transports Wealth. Good for business expansion, transport, and seeking assistance.",
+};
+
+// Inherently Auspicious Stars (Safe bets for Growth, Wealth, & Starts)
+export const GOOD_STARS: string[] = [
+  "Room", // (Shi) The "Multiplier". Best for new business & assets [1].
+  "Wall", // (Bi) "Stability & Prosperity". Blocks negative energy [2].
+  "Mound", // (Lou) "Guardian of Wealth". Always good news for business [3].
+  "Stomach", // (Wei) "Storehouse". Good for fulfillment & promotions [4].
+  "Horn", // (Jiao) "King of Stars". Increases wealth, good for marriage [5].
+  "Tail", // (Wei) "Closing Deals". Excellent for negotiations & renovation [6].
+  "Bow", // (Zhang) "Purely Positive". Great for launches & branding [7].
+  "Carriage", // (Zhen) "Logistics". Fosters cooperation, sales, and returns [8].
+  "Orion", // (Shen) "Achievement". Promotes recognition & business negotiation [9].
+  "Basket", // (Ji) "Receipt of Monies". Good for debt collection & commerce [10].
+];
+
+// Inherently Inauspicious Stars (High Risk / Avoid for important events)
+export const BAD_STARS: string[] = [
+  "Pleiades", // (Mao) "The End". Signifies financial ruin & finality [11].
+  "Ox", // (Niu) "Broken Promises". Disastrous for contracts & marriage [12].
+  "Danger", // (Wei) "Misfortune". Bodily harm & looming danger [13].
+  "Ghost", // (Gui) "Fear". Strong negative influence, withdrawal [14].
+  "Willow", // (Liu) "Discord". Hinders progress, causes anxiety [15].
+  "Beak", // (Zui) "Loss". Highly negative for Date Selection [16].
+  "Wing", // (Yi) "Tides Change". Inauspicious for weddings/partnerships [17].
+  "Heart", // (Xin) "Affliction". Risk of medical issues/disasters [18].
+  "Neck", // (Kang) "Collapse". Scuppers investment & construction plans [19].
+  "Void", // (Xu) "Emptiness". Darkness & grief [20].
+  "Star", // (Xing) "Legal Troubles". Good for openings, but bad for harmony [21, 22].
+];
+
 export const ELEMENT_LOOKUP: Record<string, string> = {
   "Jia (Wood)": "Wood",
   "Yi (Wood)": "Wood",
@@ -425,28 +503,6 @@ export const OFFICER_ADVICE: Record<string, Advice> = {
     bad: ["Eye Surgery", "Opening Business", "Medical Treatment"],
   },
 };
-
-// Inherently Inauspicious Stars (Avoid for everyone usually)
-export const BAD_STARS: string[] = [
-  "Pleiades", // (Mao) Conflict, separation
-  "Ghost", // (Gui) Hidden agendas, theft
-  "Star", // (Xing) Legal disputes, lawsuits
-  "Danger", // (Wei) Physical danger, travel risk
-  "Girl", // (Nu) Gossip, petty people
-  "Void", // (Xu) Emptiness, bad for wealth
-  "Neck", // (Kang) Trials, punishment
-  "Willow", // (Liu) Emotional turbulence, injury
-];
-
-// Inherently Auspicious Stars (Safe bets)
-export const GOOD_STARS: string[] = [
-  "Room", // (Fang) Great for wealth
-  "Wall", // (Bi) Intellectual success, stability
-  "Mound", // (Lou) Harvest, gathering assets
-  "Stomach", // (Wei) Storehouse, savings
-  "Horn", // (Jiao) Growth, new starts
-  "Tail", // (Wei) Accumulation, closing deals
-];
 
 export const SAN_SHA_RULES: Record<string, string[]> = {
   // Water Frame (Shen-Zi-Chen)

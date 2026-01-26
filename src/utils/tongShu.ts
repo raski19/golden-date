@@ -6,9 +6,10 @@ import {
   BRANCHES_LIST,
   OFFICERS,
   STARS,
+  STAR_DEFINITIONS,
   ELEMENT_LOOKUP,
   YELLOW_BLACK_BELT,
-  NINE_LUMINARIES,
+  // NINE_LUMINARIES,
 } from "./constants";
 
 // --- HELPER: Calculate Yellow/Black Belt (Dong Gong) ---
@@ -87,6 +88,9 @@ export const getDayInfo = (dateString: string): DayInfo => {
 
   const officerChar = lunar.getZhiXing();
   const starChar = lunar.getXiu();
+  const constellationName = STARS[starChar] || starChar;
+  const starDesc =
+    STAR_DEFINITIONS[constellationName] || "No description available.";
 
   const stem = STEMS[dayGanChar] || dayGanChar;
   const dayBranch = BRANCHES[dayZhiChar] || dayZhiChar;
@@ -105,7 +109,8 @@ export const getDayInfo = (dateString: string): DayInfo => {
     yearBranch,
     element: ELEMENT_LOOKUP[stem] || "Unknown",
     officer: OFFICERS[officerChar] || officerChar,
-    constellation: STARS[starChar] || starChar,
+    constellation: constellationName,
+    constellationDesc: starDesc,
     rawStar: starChar,
 
     yellowBlackBelt,

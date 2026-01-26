@@ -50,6 +50,7 @@ export interface DayInfo {
   element: string;
   officer: string;
   constellation: string;
+  constellationDesc: string;
   rawStar: string;
   yellowBlackBelt: {
     name: string;
