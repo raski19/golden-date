@@ -11,6 +11,7 @@ import {
   OFFICER_ADVICE,
   BAD_STARS,
   GOOD_STARS,
+  SAN_SHA_RULES,
 } from "./constants";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
@@ -21,6 +22,8 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   let specificActions: { action: string; icon: string; desc: string }[] = [];
 
   const rules = user.rules;
+  const { dayBranch, monthBranch, yearBranch } = dayData;
+  const advice = OFFICER_ADVICE[dayData.officer] || { good: [], bad: [] };
 
   const getRole = (element: string) => {
     if (rules.wealthElements?.includes(element)) return "Wealth (Profit)";
@@ -36,51 +39,47 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     ...(rules.favorableElements || []),
   ];
 
-  if (CLASH_PAIRS[dayData.yearBranch] === dayData.branch) {
+  if (CLASH_PAIRS[yearBranch] === dayBranch) {
     score -= 50;
     flags.push("YEAR BREAKER");
-    log.push(
-      `Year Breaker: ${dayData.branch} clashes with Year ${dayData.yearBranch}.`,
-    );
+    log.push(`Year Breaker: ${dayBranch} clashes with Year ${yearBranch}.`);
   }
 
-  if (CLASH_PAIRS[dayData.monthBranch] === dayData.branch) {
+  if (CLASH_PAIRS[monthBranch] === dayBranch) {
     score -= 40;
     flags.push("MONTH BREAKER");
-    log.push(
-      `Month Breaker: ${dayData.branch} clashes with Month ${dayData.monthBranch}.`,
-    );
+    log.push(`Month Breaker: ${dayBranch} clashes with Month ${monthBranch}.`);
   }
 
   // Safety Checks
-  if (dayData.branch === rules.breaker) {
+  if (dayBranch === rules.breaker) {
     flags.push("PERSONAL BREAKER");
     // We still return badHours even for dangerous days
-    const clash = CLASH_PAIRS[dayData.branch];
+    const clash = CLASH_PAIRS[dayBranch];
     return {
       score: 0,
       verdict: "DANGEROUS",
       cssClass: "dangerous",
       flags,
       tags: [],
-      log: [...log, `DANGER: ${dayData.branch} clashes with your Day Master.`],
+      log: [...log, `DANGER: ${dayBranch} clashes with your Day Master.`],
       specificActions: [],
       badHours: clash ? [`${clash} Hour (${BRANCH_HOURS[clash]})`] : [],
       goodHours: [],
-      generalAdvice: { good: [], bad: [] },
+      generalAdvice: advice,
     };
   }
 
-  if (rules.badBranches.includes(dayData.branch)) {
+  if (rules.badBranches.includes(dayBranch)) {
     score -= 30;
     flags.push("Luck Clash");
-    log.push(`Avoid: ${dayData.branch} harms your Luck Pillar.`);
+    log.push(`Avoid: ${dayBranch} harms your Luck Pillar.`);
   }
 
-  if (dayData.branch === rules.selfPunishment) {
+  if (dayBranch === rules.selfPunishment) {
     score -= 30;
     flags.push("Self Punishment");
-    log.push(`Warning: ${dayData.branch} triggers self-punishment.`);
+    log.push(`Warning: ${dayBranch} triggers self-punishment.`);
   }
 
   if (rules.avoidElements.includes(dayData.element)) {
@@ -88,7 +87,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     log.push(`Element ${dayData.element} is unfavorable.`);
   }
 
-  // --- 1. GLOBAL STAR CHECK ---
+  // --- GLOBAL STAR CHECK ---
   if (BAD_STARS.includes(dayData.constellation)) {
     score -= 15;
     log.push(
@@ -101,7 +100,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     );
   }
 
-  // --- 2. PERSONAL STAR CHECK (Overrules or Adds to Global) ---
+  // --- PERSONAL STAR CHECK (Overrules or Adds to Global) ---
   // User explicitly hates this star (e.g., it's Fire and they hate Fire)
   if ((rules.avoidConstellations || []).includes(dayData.constellation)) {
     score -= 20;
@@ -122,26 +121,26 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   // Harmony
   if (user.baZiBranch) {
-    if (SIX_HARMONY[user.baZiBranch] === dayData.branch) {
+    if (SIX_HARMONY[user.baZiBranch] === dayBranch) {
       score += 20;
-      log.push(`✨ Six Harmony: ${dayData.branch} is your Secret Friend.`);
+      log.push(`✨ Six Harmony: ${dayBranch} is your Secret Friend.`);
       flags.push("6-Harmony");
       tags.push("PEOPLE");
     }
-    if (THREE_HARMONY[user.baZiBranch]?.includes(dayData.branch)) {
+    if (THREE_HARMONY[user.baZiBranch]?.includes(dayBranch)) {
       score += 10;
-      log.push(`🤝 Three Harmony: ${dayData.branch} boosts Social Luck.`);
+      log.push(`🤝 Three Harmony: ${dayBranch} boosts Social Luck.`);
       flags.push("3-Harmony");
       tags.push("PEOPLE");
     }
   }
 
   // Power Boosts
-  if (rules.favorableBranches.includes(dayData.branch)) {
+  if (rules.favorableBranches.includes(dayBranch)) {
     score += 20;
-    const branchElem = BRANCH_ELEMENTS[dayData.branch] || "Unknown";
+    const branchElem = BRANCH_ELEMENTS[dayBranch] || "Unknown";
     const role = getRole(branchElem);
-    log.push(`Great Branch: ${dayData.branch} provides ${role}.`);
+    log.push(`Great Branch: ${dayBranch} provides ${role}.`);
   }
 
   if (allFavorableElements.includes(dayData.element)) {
@@ -165,7 +164,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   if (user.actionRules && score > 0) {
     const dayOfficer = dayData.officer;
     const stemElem = dayData.element;
-    const branchElem = BRANCH_ELEMENTS[dayData.branch] || "Unknown";
+    const branchElem = BRANCH_ELEMENTS[dayBranch] || "Unknown";
 
     let bonusApplied = false;
 
@@ -190,9 +189,27 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     });
   }
 
+  // --- SAN SHA CHECK  ---
+  // Check Month Sha (Immediate effect)
+  const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
+  if (monthBadBranches.includes(dayBranch)) {
+    score -= 20; // Big penalty
+    flags.push("San Sha");
+    log.push(
+      `🗡️ Three Killings: ${dayBranch} opposes the Month's flow. Risk of obstacles/loss.`,
+    );
+  }
+
+  // Check Year Sha (General effect - optional, maybe smaller penalty)
+  const yearBadBranches: string[] = SAN_SHA_RULES[yearBranch] || [];
+  if (yearBadBranches.includes(dayBranch)) {
+    score -= 10;
+    log.push(`⚔️ Year Sha: Mild obstacle due to year opposition.`);
+  }
+
   // Tagging
   const stemElement = dayData.element;
-  const branchElement = BRANCH_ELEMENTS[dayData.branch] || "Unknown";
+  const branchElement = BRANCH_ELEMENTS[dayBranch] || "Unknown";
 
   if (score > 40) {
     if (
@@ -207,10 +224,16 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     ) {
       tags.push("CAREER");
     }
+    if (
+      (rules.healthElements || []).includes(stemElement) ||
+      (rules.healthElements || []).includes(branchElement)
+    ) {
+      tags.push("HEALTH");
+    }
   }
 
   // Special stars (Shen Sha)
-  const stars = calculateShenSha(user, dayData.branch);
+  const stars = calculateShenSha(user, dayBranch);
 
   if (stars.nobleman) {
     score += 25; // Huge Bonus (can save a bad day)
@@ -263,7 +286,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   }
 
   // Bad Hours Calculation
-  const dayClash = CLASH_PAIRS[dayData.branch];
+  const dayClash = CLASH_PAIRS[dayBranch];
   const badHours = [];
   if (dayClash) {
     badHours.push(`${dayClash} Hour (${BRANCH_HOURS[dayClash]})`);
@@ -300,11 +323,11 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   );
 
   // 2. Six Harmony
-  const sixHarmony = SIX_HARMONY[dayData.branch];
+  const sixHarmony = SIX_HARMONY[dayBranch];
   if (sixHarmony) addHour(sixHarmony, "✨ Harmony");
 
   // 3. Three Harmony
-  const threeHarmony = THREE_HARMONY[dayData.branch];
+  const threeHarmony = THREE_HARMONY[dayBranch];
   if (threeHarmony)
     threeHarmony.forEach((branch) => addHour(branch, "🤝 Teamwork"));
 
@@ -319,8 +342,6 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       (h) =>
         `<strong>${h.branch}</strong> (${BRANCH_HOURS[h.branch]}) - ${h.label.join(" / ")}`,
     );
-
-  const advice = OFFICER_ADVICE[dayData.officer] || { good: [], bad: [] };
 
   return {
     score,

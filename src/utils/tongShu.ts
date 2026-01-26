@@ -89,26 +89,25 @@ export const getDayInfo = (dateString: string): DayInfo => {
   const starChar = lunar.getXiu();
 
   const stem = STEMS[dayGanChar] || dayGanChar;
-  const branch = BRANCHES[dayZhiChar] || dayZhiChar;
+  const dayBranch = BRANCHES[dayZhiChar] || dayZhiChar;
   const monthBranch = BRANCHES[monthZhiChar] || monthZhiChar;
   const yearBranch = BRANCHES[yearZhiChar] || yearZhiChar;
 
   // New Calculations
-  const yellowBlackBelt = getYellowBlackBelt(monthBranch, branch);
+  const yellowBlackBelt = getYellowBlackBelt(monthBranch, dayBranch);
   // const luminary = getLuminary(dateString);
 
   return {
     date: dateString,
     stem: stem,
-    branch: branch,
-    monthBranch: monthBranch,
-    yearBranch: yearBranch,
+    dayBranch,
+    monthBranch,
+    yearBranch,
     element: ELEMENT_LOOKUP[stem] || "Unknown",
     officer: OFFICERS[officerChar] || officerChar,
     constellation: STARS[starChar] || starChar,
     rawStar: starChar,
 
-    // Inject the calculated values
     yellowBlackBelt,
     // luminary,
   };

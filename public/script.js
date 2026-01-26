@@ -259,6 +259,13 @@ function renderGrid(days) {
       badges += `<span class="badge" style="background:#cce5ff; color:#004085">🚀</span>`;
     if (tags.includes("PEOPLE"))
       badges += `<span class="badge" style="background:#e0cffc; color:#5a32a3">🤝</span>`;
+    if (tags.includes("HEALTH"))
+      badges += `<span class="badge" style="background:#d1e7dd; color:#0f5132">🧘</span>`;
+
+    // SAN SHA BADGE
+    if (day.analysis.flags.includes("San Sha")) {
+      badges += `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ San Sha</span>`;
+    }
 
     const simpleStem = day.info.stem.split(" ")[0];
     const tenGods = day.tenGods || { stemGod: "?", branchGod: "?" };
@@ -295,7 +302,7 @@ function renderGrid(days) {
                     <span class="god-badge" data-god="${stemBadge}">${stemBadge}</span>
                 </div>
                 <div class="pillar-row">
-                    <span class="pillar-txt">${day.info.branch}</span>
+                    <span class="pillar-txt">${day.info.dayBranch}</span>
                     <span class="god-badge" data-god="${branchBadge}">${branchBadge}</span>
                 </div>
             </div>
@@ -325,6 +332,7 @@ function setFilter(filterType, btn) {
   else if (filterType === "WEALTH") btn.classList.add("wealth-active");
   else if (filterType === "CAREER") btn.classList.add("career-active");
   else if (filterType === "PEOPLE") btn.classList.add("people-active");
+  else if (filterType === "HEALTH") btn.classList.add("health-active");
   applyFilter();
 }
 
@@ -346,10 +354,10 @@ function showLegend() {
   const userId = document.getElementById("userSelect").value;
   const user = allUsersData.find((u) => u._id === userId);
 
+  // Force block display
   const legendBody = document.getElementById("legendBody");
   legendBody.style.display = "block";
 
-  // --- PART 1: STATIC LEGEND ---
   const staticLegend = `
         <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #eee;">
             
@@ -364,7 +372,7 @@ function showLegend() {
                     <span><strong>Excellent:</strong> High Luck</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="width:12px; height:12px; background:#aedae1; border-radius:50%; display:inline-block;"></span>
+                    <span style="width:12px; height:12px; background:#17a2b8; border-radius:50%; display:inline-block;"></span>
                     <span><strong>Good:</strong> Supportive</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -373,42 +381,66 @@ function showLegend() {
                 </div>
             </div>
 
-            <h4 style="margin-top:0;">★ Star Symbols</h4>
+            <h4 style="margin-top:0;">★ Symbols</h4>
             <ul style="font-size:0.9rem; color:#444; line-height:1.6; padding-left:20px; margin-bottom:15px;">
-                <li>
-                    <span style="color:#28a745; font-weight:800;">✨ Noble (Bold Green):</span> 
-                    Specifically good for YOUR chart.
-                </li>
-                <li>
-                    <span style="color:#28a745; font-weight:400;">🌟 Lucky (Green):</span> 
-                    Universally auspicious star.
-                </li>
-                <li>
-                    <span style="color:#dc3545; font-weight:400;">☁️ Gloomy (Red):</span> 
-                    Universally difficult star.
-                </li>
-                <li>
-                    <span style="color:#dc3545; font-weight:800;">⛔ Clash (Bold Red):</span> 
-                    Specifically harmful to YOUR chart.
-                </li>
+                <li><span style="color:#28a745; font-weight:800;">✨ Noble:</span> Specific help for YOUR chart.</li>
+                <li><span style="color:#dc3545; font-weight:800;">⛔ Clash:</span> Specific harm to YOUR chart.</li>
+                <li><span class="spirit-badge spirit-yellow">🐉 Yellow Belt</span>: Auspicious Spirit.</li>
+                <li><span class="spirit-badge spirit-black">🐯 Black Belt</span>: Inauspicious Spirit.</li>
             </ul>
 
-            <h4 style="margin-top:0;">🐉 12 Spirits</h4>
-            <div style="font-size:0.9rem; color:#444; display:flex; gap:15px;">
-                <div>
-                    <span class="spirit-badge spirit-yellow">🐉 Yellow Belt</span>
-                    <br><span style="font-size:0.8rem; color:#666;">Auspicious</span>
-                </div>
-                <div>
-                    <span class="spirit-badge spirit-black">🐯 Black Belt</span>
-                    <br><span style="font-size:0.8rem; color:#666;">Inauspicious</span>
+            <h4 style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">📜 12 Day Officers Guide</h4>
+            
+            <div style="margin-bottom:12px;">
+                <strong style="color:#155724; display:block; margin-bottom:4px;">💰 Wealth & Business</strong>
+                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div><strong>Success:</strong> Most auspicious. Investing.</div>
+                    <div><strong>Open:</strong> Grand openings, new deals.</div>
+                    <div><strong>Full:</strong> Signing contracts, abundance.</div>
+                    <div><strong>Receive:</strong> Collecting debts, banking.</div>
                 </div>
             </div>
+
+            <div style="margin-bottom:12px;">
+                <strong style="color:#004085; display:block; margin-bottom:4px;">🚀 Career & Strategy</strong>
+                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div><strong>Establish:</strong> Starting new jobs/roles.</div>
+                    <div><strong>Initiate:</strong> Negotiations, groundwork.</div>
+                    <div><strong>Jade Hall:</strong> Academic/Career status.</div>
+                    <div><strong>Travel:</strong> Business trips, moving.</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <strong style="color:#0f5132; display:block; margin-bottom:4px;">🧘 Health & Medical</strong>
+                <div style="font-size:0.85rem; color:#555;">
+                    <div style="margin-bottom:4px;">
+                        <em><strong>Restorative Days:</strong> Any Officer tagged <span class="badge" style="background:#d1e7dd; color:#0f5132; font-size:0.7rem;">🧘</span> means the Element heals your specific body type (e.g., Cooling Water for Hot Fire).</em>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; border-top:1px dotted #ccc; padding-top:4px;">
+                        <div><strong>Remove:</strong> Detox, surgery, cleansing.</div>
+                        <div><strong>Destruction:</strong> Removing tumors/illness.</div>
+                        <div><strong>Balance:</strong> Chiropractic, therapy.</div>
+                        <div><strong>Stable:</strong> Long-term medication.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <strong style="color:#5a32a3; display:block; margin-bottom:4px;">🤝 People & Relationships</strong>
+                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div><strong>Balance:</strong> Marriage, equality.</div>
+                    <div><strong>Full:</strong> Parties, gatherings.</div>
+                    <div><strong>Six Harmony:</strong> Bonding, connection.</div>
+                    <div><strong>Peach Blossom:</strong> Romance, likability.</div>
+                </div>
+            </div>
+
         </div>
     `;
 
-  // --- PART 2: DYNAMIC LEGEND ---
-  let dynamicLegend = `<h4 style="margin-top:0;">🎯 ${user ? user.name + "'s" : "User"} Action Rules</h4>`;
+  // --- PART 3: DYNAMIC LEGEND ---
+  let dynamicLegend = `<h4 style="margin-top:0;">🎯 ${user ? user.name + "'s" : "User"} Specific Rules</h4>`;
 
   if (!user || !user.actionRules || user.actionRules.length === 0) {
     dynamicLegend +=
@@ -417,7 +449,6 @@ function showLegend() {
     dynamicLegend += user.actionRules
       .map((rule) => {
         const officers = rule.officers.join(" / ");
-        // Fallback if elements are missing
         const elements = rule.elements
           ? rule.elements.join(" / ")
           : "Calculated";
@@ -507,7 +538,7 @@ function showDetails(day) {
         ${actionDetails}
         <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px;">
             <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
-            <strong>Branch:</strong> ${day.info.branch} (${tenGods.branchGod})<br>
+            <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})<br>
             <strong>Officer:</strong> ${day.info.officer}<br>
             <strong>Star:</strong> ${day.info.constellation}<br>
             <strong>Yellow and Black Belt:</strong> ${yb.icon} ${yb.name} (${yb.type})

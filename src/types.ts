@@ -1,6 +1,6 @@
 export interface StandardRule {
   officers: string[];
-  type: "wealth" | "career";
+  type: "wealth" | "career" | "health";
   action: string;
   icon: string;
   description: string;
@@ -20,6 +20,7 @@ export interface UserRules {
   badBranches: string[];
   wealthElements: string[];
   careerElements: string[];
+  healthElements: string[];
   favorableBranches: string[];
   favorableElements?: string[];
   avoidElements: string[];
@@ -43,7 +44,7 @@ export interface IUser {
 export interface DayInfo {
   date: string;
   stem: string;
-  branch: string;
+  dayBranch: string;
   monthBranch: string;
   yearBranch: string;
   element: string;

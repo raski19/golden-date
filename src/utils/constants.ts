@@ -447,3 +447,25 @@ export const GOOD_STARS: string[] = [
   "Horn", // (Jiao) Growth, new starts
   "Tail", // (Wei) Accumulation, closing deals
 ];
+
+export const SAN_SHA_RULES: Record<string, string[]> = {
+  // Water Frame (Shen-Zi-Chen)
+  Monkey: ["Snake", "Horse", "Goat"],
+  Rat: ["Snake", "Horse", "Goat"],
+  Dragon: ["Snake", "Horse", "Goat"],
+
+  // Fire Frame (Yin-Wu-Xu)
+  Tiger: ["Pig", "Rat", "Ox"],
+  Horse: ["Pig", "Rat", "Ox"],
+  Dog: ["Pig", "Rat", "Ox"],
+
+  // Metal Frame (Si-You-Chou)
+  Snake: ["Tiger", "Rabbit", "Dragon"],
+  Rooster: ["Tiger", "Rabbit", "Dragon"],
+  Ox: ["Tiger", "Rabbit", "Dragon"],
+
+  // Wood Frame (Hai-Mao-Wei)
+  Pig: ["Monkey", "Rooster", "Dog"],
+  Rabbit: ["Monkey", "Rooster", "Dog"],
+  Goat: ["Monkey", "Rooster", "Dog"],
+};

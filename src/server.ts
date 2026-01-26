@@ -67,7 +67,7 @@ app.get(
       const tenGods = calculateTenGods(
         user.dayMaster,
         cleanStem,
-        dayInfo.branch,
+        dayInfo.dayBranch,
       );
 
       monthlyData.push({

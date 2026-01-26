@@ -27,6 +27,7 @@ const UserSchema: Schema = new Schema({
     badBranches: [String],
     wealthElements: [String],
     careerElements: [String],
+    healthElements: [String],
     favorableBranches: [String],
     favorableElements: [String],
     avoidElements: [String],

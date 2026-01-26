@@ -109,11 +109,12 @@ button:hover { background: #0056b3; }
     padding: 6px 12px; border-radius: 20px; font-size: 0.85rem;
     cursor: pointer; transition: all 0.2s;
 }
-.filter-btn:hover { background: #f0f0f0; color: #333; }
-.filter-btn.active { background: #333; color: white; border-color: #333; }
-.filter-btn.wealth-active { background: #28a745; color: white; border-color: #28a745; }
-.filter-btn.career-active { background: #007bff; color: white; border-color: #007bff; }
-.filter-btn.people-active { background: #6f42c1; color: white; border-color: #6f42c1; }
+.filter-btn:hover { background-color: #f0f0f0; color: #333; }
+.filter-btn.active { background-color: #333; color: white; border-color: #333; }
+.filter-btn.wealth-active { background-color: #28a745; color: white; border-color: #28a745; }
+.filter-btn.career-active { background-color: #007bff; color: white; border-color: #007bff; }
+.filter-btn.people-active { background-color: #6f42c1; color: white; border-color: #6f42c1; }
+.filter-btn.health-active { background-color: #20c997; color: white; border-color: #20c997; }
 
 /* CALENDAR GRID */
 .calendar-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
