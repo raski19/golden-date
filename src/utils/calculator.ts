@@ -18,6 +18,7 @@ import {
   STEM_INFO,
   TEN_GODS,
   TEN_GOD_ACTIONS,
+  OFFICER_RECOMMENDATIONS,
 } from "./constants";
 import { calculateRootStrength } from "./rootStrength";
 
@@ -30,13 +31,24 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   const rules = user.rules;
   const { dayBranch, monthBranch, yearBranch } = dayData;
+  const officerName = (dayData.officer || "").trim();
 
   const getRole = (element: string) => {
     if (rules.wealthElements?.includes(element)) return "Wealth (Profit)";
     if (rules.careerElements?.includes(element))
       return "Career (Output/Action)";
+    if (rules.healthElements?.includes(element)) return "Health (Balance)";
     if (rules.favorableElements?.includes(element)) return "Favorable Support";
     return "Unfavorable";
+  };
+
+  // --- OFFICER RECOMMENDATION LOOKUP ---
+  // Lookup or Default
+  const officerRec = OFFICER_RECOMMENDATIONS[officerName] || {
+    action: "Proceed",
+    icon: "⚠️",
+    desc: "Proceed with caution.",
+    reality: "The energy is unstable and unsupported.",
   };
 
   // --- CALCULATE DAY TYPE (Ten God Category) ---
@@ -116,12 +128,13 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       specificActions: [],
       badHours: clash ? [`${clash} Hour (${BRANCH_HOURS[clash]})`] : [],
       goodHours: [],
-      tenGodName: tenGodName,
+      tenGodName,
       actionTitle: guide.title,
       actionTagline: guide.tagline,
       suitableActions: guide.best,
       cautionAction: guide.caution,
       actionKeywords: guide.keywords,
+      officerRec,
     };
   }
 
@@ -204,9 +217,9 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     log.push(`Great Element: ${dayData.element} provides ${role}.`);
   }
 
-  if (rules.favorableOfficers.some((off) => dayData.officer.includes(off))) {
+  if (rules.favorableOfficers.some((off) => officerName.includes(off))) {
     score += 15;
-    log.push(`Officer '${dayData.officer}' is good for action.`);
+    log.push(`Officer '${officerName}' is good for action.`);
   }
 
   if (rules.favorableConstellations.includes(dayData.constellation)) {
@@ -217,7 +230,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   // Action Rules
   if (user.actionRules && score > 0) {
-    const dayOfficer = dayData.officer;
+    const dayOfficer = officerName;
     const stemElem = dayData.element;
     const branchElem = BRANCH_ELEMENTS[dayBranch] || "Unknown";
 
@@ -484,12 +497,13 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     specificActions,
     badHours,
     goodHours,
-    tenGodName: tenGodName,
+    tenGodName,
     actionTitle: guide.title,
     actionTagline: guide.tagline,
     suitableActions: guide.best,
     cautionAction: guide.caution,
     actionKeywords: guide.keywords,
+    officerRec,
   };
 };
 

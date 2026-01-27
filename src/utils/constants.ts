@@ -302,55 +302,91 @@ export const OFFICERS: Record<string, string> = {
 
 export const OFFICER_RECOMMENDATIONS: Record<
   string,
-  { action: string; desc: string }
+  { action: string; icon: string; desc: string; reality: string }
 > = {
   Establish: {
     action: "Launch",
+    icon: "🚀",
     desc: "Start new jobs, propose marriage, business opening.",
+    reality:
+      "Foundations laid today will likely crumble. Do not start what you cannot finish.",
   },
   Remove: {
     action: "Cleanse",
+    icon: "🧹",
     desc: "Medical procedures, decluttering, ending bad habits.",
+    reality:
+      "High risk of removing the wrong thing or medical complications. Postpone procedures.",
   },
   Full: {
     action: "Sign",
-    desc: "Signatures, events, gatherings (abundance). Avoid legal.",
+    icon: "✍️",
+    desc: "Signatures, events, gatherings. Avoid legal disputes.",
+    reality:
+      "You may sign a contract that burdens rather than benefits you. Abundance turns into clutter.",
   },
   Balance: {
     action: "Negotiate",
-    desc: "Resolve conflicts, therapy, marriage, construction leveling.",
+    icon: "⚖️",
+    desc: "Resolve conflicts, therapy, marriage, leveling.",
+    reality:
+      "The scales will likely tip against you. Negotiations will end in unfair terms.",
   },
   Stable: {
     action: "Build",
-    desc: "Long-term activities, marriage, hiring employees.",
+    icon: "🏗️",
+    desc: "Long-term activities, hiring employees, buying assets.",
+    reality:
+      "You are locking yourself into a stagnant or problematic situation with no easy exit.",
   },
   Initiate: {
     action: "Act",
+    icon: "⚡",
     desc: "Starting fast projects, swift actions. Avoid travel.",
+    reality:
+      "Rushing today invites accidents or immediate pushback. Speed kills.",
   },
   Destruction: {
     action: "Demolish",
+    icon: "💣",
     desc: "Tearing down buildings, breaking up, analyzing data.",
+    reality:
+      "Destructive energy may spiral out of control. Avoid risky physical activities.",
   },
   Danger: {
     action: "Pray",
-    desc: "Religious worship, installing beds. High risk generally.",
+    icon: "🙏",
+    desc: "Religious worship only. High risk generally.",
+    reality:
+      "The inherent danger of this day is amplified by your lack of support. Stay safe.",
   },
   Success: {
     action: "Succeed",
+    icon: "🌟",
     desc: "The best general day. Everything goes smoothly.",
+    reality:
+      "Even a 'Success' day fails if your personal chart clashes. Expect unexpected blockers.",
   },
   Receive: {
     action: "Collect",
+    icon: "📥",
     desc: "Collecting debts, asking for a raise, education.",
+    reality:
+      "You are more likely to lose resources than receive them. Do not ask for favors.",
   },
   Open: {
     action: "Welcome",
+    icon: "🎉",
     desc: "Grand openings, housewarming, welcoming guests.",
+    reality:
+      "Public exposure today invites criticism or visible failure. Keep a low profile.",
   },
   Close: {
     action: "Store",
+    icon: "🔒",
     desc: "Storing assets, burying, closing deals. Bad for new starts.",
+    reality:
+      "Energy is stagnant. You risk being trapped in a bad deal with no exit strategy.",
   },
 };
 

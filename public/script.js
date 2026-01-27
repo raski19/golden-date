@@ -572,7 +572,6 @@ function showLegend() {
 function showDetails(day) {
   const modal = document.getElementById("modal");
   const tenGods = day.tenGods || {};
-  const actions = day.analysis.specificActions || [];
   const badHours = day.analysis.badHours || [];
   const goodHours = day.analysis.goodHours || [];
   const yb = day.info.yellowBlackBelt;
@@ -586,98 +585,22 @@ function showDetails(day) {
   document.getElementById("modalDate").innerText =
     `${day.fullDate} (${day.analysis.verdict})`;
 
-  let logHtml = day.analysis.log.map((l) => `<li>${l}</li>`).join("");
-
   // --- 🛡️ SAFETY FILTER LOGIC ---
   // 1. Get Base Recommendation (General Weather)
-  // Note: Ensure you pass this dictionary to frontend or map it here.
-  // For now, let's assume we map it here or pass it in day.info
-  const officerName = day.info.officer;
-
-  // Hardcode the map here if not passed from backend,
-  // OR access it if you added it to day.info in the backend.
-  // Let's assume a helper function or object exists:
-  const officerRecs = {
-    Establish: {
-      action: "Launch",
-      icon: "🚀",
-      desc: "Start new jobs, propose marriage, business opening.",
-    },
-    Remove: {
-      action: "Cleanse",
-      icon: "🧹",
-      desc: "Medical procedures, decluttering, ending bad habits.",
-    },
-    Full: {
-      action: "Sign",
-      icon: "✍️",
-      desc: "Signatures, events, gatherings. Avoid legal.",
-    },
-    Balance: {
-      action: "Negotiate",
-      icon: "⚖️",
-      desc: "Resolve conflicts, therapy, marriage.",
-    },
-    Stable: {
-      action: "Build",
-      icon: "🏗️",
-      desc: "Long-term activities, hiring employees.",
-    },
-    Initiate: {
-      action: "Act",
-      icon: "⚡",
-      desc: "Starting fast projects. Avoid travel.",
-    },
-    Destruction: {
-      action: "Demolish",
-      icon: "💣",
-      desc: "Tearing down, breaking up, analyzing data.",
-    },
-    Danger: {
-      action: "Pray",
-      icon: "🙏",
-      desc: "Worship only. High risk generally.",
-    },
-    Success: {
-      action: "Succeed",
-      icon: "🌟",
-      desc: "The best general day. Smooth sailing.",
-    },
-    Receive: {
-      action: "Collect",
-      icon: "📥",
-      desc: "Collecting debts, asking for a raise.",
-    },
-    Open: {
-      action: "Welcome",
-      icon: "🎉",
-      desc: "Grand openings, housewarming.",
-    },
-    Close: {
-      action: "Store",
-      icon: "🔒",
-      desc: "Storing assets, closing deals.",
-    },
-  };
-
-  const rec = officerRecs[officerName] || {
-    action: "Proceed",
-    icon: "⚠️",
-    desc: "Proceed with caution.",
-  };
+  const officerName = (day.info.officer || "General").trim();
+  const rec = day.analysis.officerRec;
 
   // 2. CHECK DANGER SIGNALS
-  const score = day.analysis.score;
+  const score = day.analysis.score || 0;
   const pScore = day.analysis.pillarScore || 0;
 
-  let recommendationHtml = "";
+  let recHtml = "";
 
-  // CONDITION: If Score is bad OR Pillar Support is critical (<30%)
+  // CONDITION: If Score is bad, OR Pillar Support is critical (<30%)
   if (score < 50 || pScore < 30) {
-    // ⛔ DANGER MODE: Override the advice
-    recommendationHtml = `
+    // ⛔ DANGER MODE
+    recHtml = `
             <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <div style="font-size:0.75rem; color:#dc3545; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">
                         ⚠️ WARNING: UNSTABLE DAY
@@ -694,18 +617,18 @@ function showDetails(day) {
                             Do Not "${rec.action}"
                         </div>
                         <div style="font-size:0.9rem; color:#a71d2a; line-height:1.4;">
-                            While "Open" days are usually for <strong>${rec.desc.toLowerCase()}</strong>, this specific day lacks the structural support to hold your plans.
+                            While "${officerName}" days are usually for <strong>${rec.desc.toLowerCase()}</strong>, this specific day lacks the structural support to hold your plans.
                         </div>
                         <div style="margin-top:8px; font-size:0.85rem; font-style:italic; color:#c53030;">
-                            <strong>Reality Check:</strong> An opening today would likely lead to instability or public failure.
+                            <strong>Reality Check:</strong> ${rec.reality}
                         </div>
                     </div>
                 </div>
             </div>
         `;
   } else {
-    // ✅ SAFE MODE: Show standard advice
-    recommendationHtml = `
+    // ✅ SAFE MODE
+    recHtml = `
             <div style="background:#f0fff4; border-left:4px solid #198754; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <div style="font-size:0.75rem; color:#198754; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                     🎯 Recommended Action
@@ -777,7 +700,7 @@ function showDetails(day) {
                     ⚡
                 </div>
             </div>
-            <div style="padding: 20px;">               
+            <div style="padding: 20px;">
                 <div style="margin-bottom:20px; font-size:0.95rem; color:#555; border-left:3px solid #0d6efd; padding-left:12px; font-style:italic;">
                     ${guideTagline}
                 </div>
@@ -882,7 +805,7 @@ function showDetails(day) {
             ${
               neutrals.length > 0
                 ? `
-                <div style="margin-top:15px; background:#f8f9fa; padding:10px 15px; border-radius:8px; border:1px solid #eee;">
+                <div style="margin:15px 0; background:#f8f9fa; padding:10px 15px; border-radius:8px; border:1px solid #eee;">
                     <div style="font-size:0.8rem; font-weight:bold; color:#666; margin-bottom:5px;">ℹ️ Other Notes</div>
                     ${renderList(neutrals, "🔹", "text-muted")}
                 </div>
@@ -892,24 +815,51 @@ function showDetails(day) {
         </div>
     `;
 
-  let badHoursHtml = "";
-  if (badHours.length > 0) {
-    badHoursHtml = `<div style="margin-top:10px; padding:8px; background:#fff5f5; border:1px solid #f5c6cb; border-radius:4px; color:#721c24;">
-            <strong>⚠️ Bad Hours (Avoid):</strong><br>
-            ${badHours.join("<br>")}
-        </div>`;
-  }
+  // Helper to clean up the HTML string (optional, but good for consistent styling)
+  const formatHourLine = (line, type) => {
+    // The backend sends strings like "<strong>Monkey</strong> (15-17) - Nobleman"
+    // We want to wrap them in a clean list item
+    const icon = type === "good" ? "🌟" : "🚫";
+    return `
+            <li style="display:flex; align-items:start; margin-bottom:6px; font-size:0.9rem; line-height:1.4;">
+                <span style="margin-right:8px; opacity:0.8;">${icon}</span>
+                <span style="color:#444;">${line}</span>
+            </li>
+        `;
+  };
 
-  let goodHoursHtml = "";
-  if (goodHours.length > 0) {
-    goodHoursHtml = `<div style="margin-top:10px; padding:8px; background:#d4edda; border:1px solid #c3e6cb; border-radius:4px; color:#155724;">
-            <strong>🌟 Golden Hours (Act Now):</strong><br>
-            ${goodHours.join("<br>")}
-        </div>`;
-  }
+  const hourlyGrid = `
+        <div style="margin-top:20px;">
+            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; margin-bottom:15px;">
+                ⏰ Hourly Timing
+            </h5>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: linear-gradient(to bottom right, #fff, #f0fff4); border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
+                    <div style="font-weight:bold; color:#155724; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
+                        🌅 Golden Hours <span style="font-size:0.75rem; background:#198754; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Act Now</span>
+                    </div>
+                    ${
+                      goodHours.length > 0
+                        ? `<ul style="list-style:none; padding:0; margin:0;">${goodHours.map((h) => formatHourLine(h, "good")).join("")}</ul>`
+                        : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No specific auspicious hours.</div>`
+                    }
+                </div>
+                <div style="background: linear-gradient(to bottom right, #fff, #fff5f5); border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
+                    <div style="font-weight:bold; color:#721c24; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
+                        ⚠️ Bad Hours <span style="font-size:0.75rem; background:#dc3545; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Avoid</span>
+                    </div>
+                    ${
+                      badHours.length > 0
+                        ? `<ul style="list-style:none; padding:0; margin:0;">${badHours.map((h) => formatHourLine(h, "bad")).join("")}</ul>`
+                        : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No major clashes.</div>`
+                    }
+                </div>
+            </div>
+        </div>
+    `;
 
   document.getElementById("modalBody").innerHTML = `
-        ${recommendationHtml}
+        ${recHtml}
         
         <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
             <div>
@@ -955,10 +905,7 @@ function showDetails(day) {
             </div>
         </div>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
-            <div>${goodHoursHtml}</div>
-            <div>${badHoursHtml}</div>
-        </div>
+        ${hourlyGrid}
     `;
   modal.style.display = "flex";
 }

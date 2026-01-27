@@ -74,8 +74,8 @@ app.get(
         day: d,
         fullDate: dateStr,
         info: dayInfo,
-        analysis: analysis,
-        tenGods: tenGods,
+        analysis,
+        tenGods,
       });
     }
 

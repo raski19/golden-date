@@ -68,6 +68,13 @@ export interface DayInfo {
   // };
 }
 
+export interface OfficerRecommendation {
+  action: string;
+  icon: string;
+  desc: string;
+  reality: string;
+}
+
 export interface ScoreResult {
   pillarNote: string;
   pillarIcon: string;
@@ -88,6 +95,7 @@ export interface ScoreResult {
   suitableActions: string[];
   cautionAction: string;
   actionKeywords: string;
+  officerRec: OfficerRecommendation;
 }
 
 export interface TenGodsResult {
