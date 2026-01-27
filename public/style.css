@@ -391,6 +391,12 @@ button:hover { background: #0056b3; }
 .footer-badges { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 3px; }
 .badge { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); }
 
+.grid-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 20px;
+}
+
 /* --- UNIVERSAL MODAL STYLES --- */
 
 /* The Background Overlay */
@@ -621,6 +627,11 @@ button:hover { background: #0056b3; }
         flex-direction: column; /* Force new row */
         width: 100%;
         gap: 10px;
+    }
+
+    .grid-dashboard {
+        grid-template-columns: 1fr; /* One single column */
+        gap: 15px;
     }
 }
 @media (max-width: 900px) {

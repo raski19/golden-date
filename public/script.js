@@ -787,19 +787,23 @@ function showDetails(day) {
             <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; margin-bottom:15px;">
                 📊 Personal Analysis Breakdown
             </h5>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <div class="grid-dashboard">
+                
                 <div style="background: #f0fff4; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#155724; margin-bottom:12px; display:flex; align-items:center; gap:6px; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">
                         ✨ Boosts & Luck
                     </div>
                     ${renderList(pros, "🟢", "text-success")}
                 </div>
+
                 <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#721c24; margin-bottom:12px; display:flex; align-items:center; gap:6px; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">
                         ⚠️ Risks & Clashes
                     </div>
                     ${renderList(cons, "🔻", "text-danger")}
                 </div>
+
             </div>
 
             ${
@@ -833,7 +837,9 @@ function showDetails(day) {
             <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; margin-bottom:15px;">
                 ⏰ Hourly Timing
             </h5>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <div class="grid-dashboard">
+                
                 <div style="background: linear-gradient(to bottom right, #fff, #f0fff4); border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#155724; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
                         🌅 Golden Hours <span style="font-size:0.75rem; background:#198754; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Act Now</span>
@@ -844,6 +850,7 @@ function showDetails(day) {
                         : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No specific auspicious hours.</div>`
                     }
                 </div>
+
                 <div style="background: linear-gradient(to bottom right, #fff, #fff5f5); border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#721c24; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
                         ⚠️ Bad Hours <span style="font-size:0.75rem; background:#dc3545; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Avoid</span>
@@ -854,6 +861,7 @@ function showDetails(day) {
                         : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No major clashes.</div>`
                     }
                 </div>
+
             </div>
         </div>
     `;
