@@ -17,6 +17,7 @@ import {
   ELEMENT_RELATIONSHIPS,
   STEM_ELEMENTS,
 } from "./constants";
+import { calculateRootStrength } from "./rootStrength";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   let score = 50;
@@ -49,6 +50,16 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     }
   }
 
+  // --- PILLAR STRENGTH (Day Stem vs Day Branch) ---
+  // Does the Branch support the Stem?
+  const stemClean = dayData.stem.split(" ")[0]; // "Jia"
+  const rootInfo = calculateRootStrength(stemClean, dayData.dayBranch);
+  console.log(rootInfo);
+
+  const pillarNote = rootInfo.description;
+  const pillarIcon = rootInfo.icon;
+  const pillarScore = rootInfo.score;
+
   const allFavorableElements = [
     ...(rules.wealthElements || []),
     ...(rules.careerElements || []),
@@ -74,6 +85,9 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     const clash = CLASH_PAIRS[dayBranch];
     return {
       dayType,
+      pillarNote,
+      pillarIcon,
+      pillarScore,
       score: 0,
       verdict: "DANGEROUS",
       cssClass: "dangerous",
@@ -434,6 +448,9 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   return {
     dayType,
+    pillarNote,
+    pillarIcon,
+    pillarScore,
     score,
     verdict: verdictText,
     cssClass,

@@ -220,6 +220,24 @@ function renderGrid(days) {
     if (type === "Output")
       typeStyle = "color:#fd7e14; font-weight:bold; font-size:0.7rem;"; // Orange
 
+    const pScore = day.analysis.pillarScore || 0;
+    const pIcon = day.analysis.pillarIcon || "";
+
+    // 1. TRANSLATE SCORE TO SIMPLE ENGLISH
+    let supportLabel = "Unsupported";
+    let supportColor = "#dc3545"; // Red
+
+    if (pScore >= 85) {
+      supportLabel = "Very Strong";
+      supportColor = "#198754"; // Dark Green
+    } else if (pScore >= 60) {
+      supportLabel = "Supported";
+      supportColor = "#0d6efd"; // Blue
+    } else if (pScore >= 40) {
+      supportLabel = "Weak";
+      supportColor = "#fd7e14"; // Orange
+    }
+
     // --- CONSTELLATION VISUAL LOGIC ---
     const flags = day.analysis.flags;
 
@@ -352,11 +370,23 @@ function renderGrid(days) {
                 <span style="${typeStyle}">(${type})</span>
             </div>
             
-            <div class="pillars-container">
+            <div class="pillars-container" style="position:relative;">
                 <div class="pillar-row">
                     <span class="pillar-txt">${simpleStem}</span>
                     <span class="god-badge" data-god="${stemBadge}">${stemBadge}</span>
                 </div>
+                
+                <div style="text-align:center; margin:4px 0; line-height:1.2;">
+                    <div style="font-size:0.9rem;">${pIcon}</div>
+                    
+                    <div style="font-size:0.65rem; font-weight:bold; color:${supportColor}; text-transform:uppercase; letter-spacing:0.5px;">
+                        ${supportLabel}
+                    </div>
+                    <div style="font-size:0.6rem; color:#888;">
+                        ${pScore}% Support
+                    </div>
+                </div>
+
                 <div class="pillar-row">
                     <span class="pillar-txt">${day.info.dayBranch}</span>
                     <span class="god-badge" data-god="${branchBadge}">${branchBadge}</span>

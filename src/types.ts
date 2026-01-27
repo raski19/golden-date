@@ -70,6 +70,9 @@ export interface DayInfo {
 
 export interface ScoreResult {
   dayType: string;
+  pillarNote: string;
+  pillarIcon: string;
+  pillarScore: number;
   score: number;
   verdict: string;
   cssClass: string;
