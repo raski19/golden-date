@@ -285,9 +285,6 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
     const isYang = YANG_STEMS.includes(user.dayMaster);
 
-    score -= 15;
-    flags.push("Goat Blade");
-
     if (isYang) {
       log.push(
         `🔪 Goat Blade: Intense aggressive energy. High risk of dispute or injury.`,
