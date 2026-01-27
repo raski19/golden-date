@@ -315,7 +315,6 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // Check Month Sha (Immediate effect)
   const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
   if (monthBadBranches.includes(dayBranch)) {
-    score -= 20; // Big penalty
     flags.push("San Sha");
     log.push(
       `🗡️ Three Killings: ${dayBranch} opposes the Month's flow. Risk of obstacles/loss.`,
@@ -324,10 +323,15 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // Check Year Sha (General effect - optional, maybe smaller penalty)
   const yearBadBranches: string[] = SAN_SHA_RULES[yearBranch] || [];
   if (yearBadBranches.includes(dayBranch)) {
-    score -= 10;
     flags.push("Year Sha");
     log.push(`⚔️ Year Sha: Mild obstacle due to year opposition.`);
   }
+  if (flags.includes("San Sha")) {
+    score -= 10;
+  } else if (flags.includes("Year Sha")) {
+    score -= 5;
+  }
+
   // --- Goat Blade ---
   // High intensity star based on User's Day Master
   const bladeBranch = GOAT_BLADE_RULES[user.dayMaster];

@@ -310,26 +310,44 @@ function renderGrid(days) {
       nsIcon = "⚔️";
     }
 
+    const worseBadgesStyle =
+      "background:#343a40; color:#fff; border:1px solid #000;";
+
     // --- BADGES LOGIC ---
     let badges = day.analysis.flags
       .map((f) => {
         if (f === "Nobleman")
-          return `<span class="badge" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba;">🌟 Noble</span>`;
+          return `<span class="badge" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba;">🌟 ${f} </span>`;
         if (f === "Travel")
-          return `<span class="badge" style="background:#e2e3e5; color:#383d41;">🐴 Travel</span>`;
+          return `<span class="badge" style="background:#e2e3e5; color:#383d41;">🐴 ${f} </span>`;
         if (f === "Social")
-          return `<span class="badge" style="background:#f8d7da; color:#721c24;">🌸 Social</span>`;
+          return `<span class="badge" style="color:#721c24;">🌸 ${f} </span>`;
         if (f === "Intellect")
-          return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 Smart</span>`;
-        if (f === "San Sha")
-          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ San Sha</span>`;
-        if (f === "Year Sha")
-          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ Year Sha</span>`;
-        if (f === "Goat Blade")
-          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ Goat Blade</span>`;
+          return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 ${f} </span>`;
+
+        if (f === "3-Harmony" || f === "6-Harmony")
+          return `<span class="badge" style="background:#d4edda; color:#721c24;"> ${f} </span>`;
+
+        // BAD STARS
+        if (
+          f === "5 Yellow" ||
+          f === "Self Punishment" ||
+          f === "San Sha" ||
+          f === "Year Sha"
+        )
+          return `<span class="badge" style="background:#f8d7da; color:#721c24;"> ${f} </span>`;
+        if (
+          f === "PERSONAL BREAKER" ||
+          f === "MONTH BREAKER" ||
+          f === "YEAR BREAKER" ||
+          f === "Luck Clash" ||
+          f === "Goat Blade"
+        )
+          return `<span class="badge" style="${worseBadgesStyle}">🗡️ ${f} </span>`;
+
         // Hide "Bad Star" / "Good Star" from badges since we show them in the footer text now
         if (f === "Bad Star" || f === "Good Star") return "";
-        return `<span class="badge">${f}</span>`;
+        return `<span class="badge"> ${f} </span>`;
       })
       .join("");
 
