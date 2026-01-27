@@ -1,3 +1,6 @@
+export const YANG_STEMS: string[] = ["Jia", "Bing", "Wu", "Geng", "Ren"];
+export const YIN_STEMS: string[] = ["Yi", "Ding", "Ji", "Xin", "Gui"];
+
 export const BRANCH_HOURS: Record<string, string> = {
   Rat: "23:00 - 01:00",
   Ox: "01:00 - 03:00",
@@ -14,18 +17,98 @@ export const BRANCH_HOURS: Record<string, string> = {
 };
 
 export const BRANCH_ELEMENTS: Record<string, string> = {
-  Rat: "Water",
-  Pig: "Water",
   Tiger: "Wood",
   Rabbit: "Wood",
   Snake: "Fire",
   Horse: "Fire",
+  Dragon: "Earth",
+  Dog: "Earth",
+  Ox: "Earth",
+  Goat: "Earth",
   Monkey: "Metal",
   Rooster: "Metal",
-  Ox: "Earth",
-  Dragon: "Earth",
-  Goat: "Earth",
-  Dog: "Earth",
+  Pig: "Water",
+  Rat: "Water",
+};
+
+export const STEM_ELEMENTS: Record<string, string> = {
+  Jia: "Wood",
+  Yi: "Wood",
+  Bing: "Fire",
+  Ding: "Fire",
+  Wu: "Earth",
+  Ji: "Earth",
+  Geng: "Metal",
+  Xin: "Metal",
+  Ren: "Water",
+  Gui: "Water",
+};
+
+export const ELEMENT_RELATIONSHIPS: Record<string, Record<string, string>> = {
+  Wood: {
+    Wood: "Companion",
+    Fire: "Output",
+    Earth: "Wealth",
+    Metal: "Influence",
+    Water: "Resource",
+  },
+  Fire: {
+    Fire: "Companion",
+    Earth: "Output",
+    Metal: "Wealth",
+    Water: "Influence",
+    Wood: "Resource",
+  },
+  Earth: {
+    Earth: "Companion",
+    Metal: "Output",
+    Water: "Wealth",
+    Wood: "Influence",
+    Fire: "Resource",
+  },
+  Metal: {
+    Metal: "Companion",
+    Water: "Output",
+    Wood: "Wealth",
+    Fire: "Influence",
+    Earth: "Resource",
+  },
+  Water: {
+    Water: "Companion",
+    Wood: "Output",
+    Fire: "Wealth",
+    Earth: "Influence",
+    Metal: "Resource",
+  },
+};
+
+export const STEM_INFO: Record<
+  string,
+  { element: string; polarity: "Yang" | "Yin" }
+> = {
+  Jia: { element: "Wood", polarity: "Yang" },
+  Yi: { element: "Wood", polarity: "Yin" },
+  Bing: { element: "Fire", polarity: "Yang" },
+  Ding: { element: "Fire", polarity: "Yin" },
+  Wu: { element: "Earth", polarity: "Yang" },
+  Ji: { element: "Earth", polarity: "Yin" },
+  Geng: { element: "Metal", polarity: "Yang" },
+  Xin: { element: "Metal", polarity: "Yin" },
+  Ren: { element: "Water", polarity: "Yang" },
+  Gui: { element: "Water", polarity: "Yin" },
+};
+
+export const ELEMENT_LOOKUP: Record<string, string> = {
+  "Jia (Wood)": "Wood",
+  "Yi (Wood)": "Wood",
+  "Bing (Fire)": "Fire",
+  "Ding (Fire)": "Fire",
+  "Wu (Earth)": "Earth",
+  "Ji (Earth)": "Earth",
+  "Geng (Metal)": "Metal",
+  "Xin (Metal)": "Metal",
+  "Ren (Water)": "Water",
+  "Gui (Water)": "Water",
 };
 
 export const CHINESE_NUMBERS: Record<string, string> = {
@@ -326,19 +409,6 @@ export const BAD_STARS: string[] = [
   "Star", // (Xing) "Legal Troubles". Good for openings, but bad for harmony [21, 22].
 ];
 
-export const ELEMENT_LOOKUP: Record<string, string> = {
-  "Jia (Wood)": "Wood",
-  "Yi (Wood)": "Wood",
-  "Bing (Fire)": "Fire",
-  "Ding (Fire)": "Fire",
-  "Wu (Earth)": "Earth",
-  "Ji (Earth)": "Earth",
-  "Geng (Metal)": "Metal",
-  "Xin (Metal)": "Metal",
-  "Ren (Water)": "Water",
-  "Gui (Water)": "Water",
-};
-
 interface YellowBlackBelt {
   name: string;
   type: "Yellow" | "Black";
@@ -569,8 +639,8 @@ export const GOAT_BLADE_RULES: Record<string, string> = {
 
   // YIN STEMS (Secondary Blade - Moderate Danger)
   Yi: "Dragon",
-  Ding: "Goat",
-  Ji: "Goat",
+  Ding: "Snake",
+  Ji: "Snake",
   Xin: "Dog",
-  Gui: "Ox",
+  Gui: "Pig",
 };

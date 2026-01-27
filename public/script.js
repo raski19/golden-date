@@ -208,6 +208,18 @@ function renderGrid(days) {
     const tags = day.analysis.tags || [];
     card.dataset.tags = tags.join(",");
 
+    const type = day.analysis.dayType || "";
+    let typeStyle = "color:#999; font-size:0.7rem; font-weight:normal;";
+
+    if (type === "Wealth")
+      typeStyle = "color:#198754; font-weight:bold; font-size:0.7rem;"; // Green
+    if (type === "Influence")
+      typeStyle = "color:#0d6efd; font-weight:bold; font-size:0.7rem;"; // Blue
+    if (type === "Resource")
+      typeStyle = "color:#6610f2; font-weight:bold; font-size:0.7rem;"; // Purple
+    if (type === "Output")
+      typeStyle = "color:#fd7e14; font-weight:bold; font-size:0.7rem;"; // Orange
+
     // --- CONSTELLATION VISUAL LOGIC ---
     const flags = day.analysis.flags;
 
@@ -335,8 +347,9 @@ function renderGrid(days) {
                 </span>
             </div>
             
-            <div class="officer-row" style="text-align:center; font-size:0.85rem; color:#666; margin-bottom:5px;">
-                ${day.info.officer}
+            <div class="officer-row" style="text-align:center; margin-bottom:5px;">
+                <span style="font-size:0.85rem; color:#555; font-weight:600; text-transform: uppercase;">${day.info.officer}</span>
+                <span style="${typeStyle}">(${type})</span>
             </div>
             
             <div class="pillars-container">

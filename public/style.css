@@ -140,7 +140,7 @@ button:hover { background: #0056b3; }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .date-num { font-size: 1.1rem; font-weight: 700; color: #333; }
-.officer-row { font-size: 0.65rem; text-transform: uppercase; color: #666; font-weight: 600; letter-spacing: 0.5px; }
+.officer-row { font-size: 0.65rem; color: #666; font-weight: 600; letter-spacing: 0.5px; }
 
 /* --- 12 SPIRITS (YELLOW/BLACK BELT) --- */
 .spirit-badge {

@@ -69,6 +69,7 @@ export interface DayInfo {
 }
 
 export interface ScoreResult {
+  dayType: string;
   score: number;
   verdict: string;
   cssClass: string;

@@ -13,6 +13,9 @@ import {
   GOOD_STARS,
   SAN_SHA_RULES,
   GOAT_BLADE_RULES,
+  YANG_STEMS,
+  ELEMENT_RELATIONSHIPS,
+  STEM_ELEMENTS,
 } from "./constants";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
@@ -33,6 +36,18 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     if (rules.favorableElements?.includes(element)) return "Favorable Support";
     return "Unfavorable";
   };
+
+  // --- CALCULATE DAY TYPE (Ten God Category) ---
+  const userDmClean = user.dayMaster.split(" ")[0]; // "Bing"
+  const dayStemClean = dayData.stem.split(" ")[0]; // "Jia"
+  const dmElement = STEM_ELEMENTS[userDmClean]; // "Fire"
+  const dayStemElement = STEM_ELEMENTS[dayStemClean]; // "Wood"
+  let dayType = "Unknown";
+  if (dmElement && dayStemElement) {
+    if (ELEMENT_RELATIONSHIPS[dmElement]) {
+      dayType = ELEMENT_RELATIONSHIPS[dmElement][dayStemElement] || "Unknown";
+    }
+  }
 
   const allFavorableElements = [
     ...(rules.wealthElements || []),
@@ -58,6 +73,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     // We still return bad hours even for dangerous days
     const clash = CLASH_PAIRS[dayBranch];
     return {
+      dayType,
       score: 0,
       verdict: "DANGEROUS",
       cssClass: "dangerous",
@@ -267,14 +283,18 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     score -= 15; // Significant penalty
     flags.push("Goat Blade");
 
-    // Context-aware logging
-    if (rules.healthElements && rules.healthElements.length > 0) {
+    const isYang = YANG_STEMS.includes(user.dayMaster);
+
+    score -= 15;
+    flags.push("Goat Blade");
+
+    if (isYang) {
       log.push(
-        `🩸 Goat Blade: High risk of injury or surgery. Avoid risky sports.`,
+        `🔪 Goat Blade: Intense aggressive energy. High risk of dispute or injury.`,
       );
     } else {
       log.push(
-        `🔪 Goat Blade: Intense aggressive energy. Good for authority, bad for peace.`,
+        `🗡️ Goat Blade: Strong stubborn energy. Risk of emotional conflict or mental pressure.`,
       );
     }
   }
@@ -416,6 +436,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     );
 
   return {
+    dayType,
     score,
     verdict: verdictText,
     cssClass,
