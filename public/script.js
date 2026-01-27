@@ -175,7 +175,7 @@ function renderBanner(analysis) {
     return;
   }
 
-  banner.className = analysis.cssClass;
+  banner.className = `month-banner ${analysis.cssClass}`;
   banner.style.display = "flex";
 
   let icon = "📅";

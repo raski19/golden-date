@@ -2,31 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GoldenDate - Tong Shu Planner</title>
     <link rel="stylesheet" href="style.css"></head>
     <script src="script.js" defer></script>
 <body>
     <header>
-        <div class="header-left">
-            <h2 style="margin:0;">📅 GoldenDate</h2>
+        <div class="header-top">
 
-            <select id="userSelect" onchange="handleUserChange()"></select>
-
-            <button onclick="openSynergyModal()" style="background:#6f42c1; color:white; border:none; display:flex; align-items:center; gap:5px;">
-                <span style="filter: brightness(0) invert(1);">👥</span> Team
-            </button>
-
-            <div class="search-bar">
-                <span style="font-size:1.2rem;">🔍</span>
-                <select id="goalSelect">
-                    <option value="">Select a Goal...</option>
-                </select>
-                <button onclick="findDates()" style="background:#007bff;">Find</button>
+            <div class="brand">
+                <span>📅</span> GoldenDate
             </div>
 
-            <button class="legend-btn" onclick="showLegend()">❓ Rules</button>
+            <div class="date-nav">
+                <button class="nav-btn" onclick="changeMonth(-1)" title="Previous Month">◀</button>
 
+                <div class="date-inputs">
+                    <select id="monthSelect" onchange="jumpToDate()">
+                        <option value="1">January</option><option value="2">February</option>
+                        <option value="3">March</option><option value="4">April</option>
+                        <option value="5">May</option><option value="6">June</option>
+                        <option value="7">July</option><option value="8">August</option>
+                        <option value="9">September</option><option value="10">October</option>
+                        <option value="11">November</option><option value="12">December</option>
+                    </select>
+                    <input type="number" id="yearInput" onchange="jumpToDate()" value="2026" style="width: 60px;">
+                </div>
+
+                <button class="nav-btn" onclick="changeMonth(1)" title="Next Month">▶</button>
+                <div style="width:1px; height:20px; background:#ccc; margin:0 8px;"></div>
+                <button class="nav-btn" onclick="resetToCurrent()" style="font-size:0.8rem; font-weight:bold;">Today</button>
+            </div>
+
+            <div class="user-controls">
+                <select id="userSelect" onchange="handleUserChange()" class="modern-select">
+                </select>
+
+                <button onclick="openSynergyModal()" class="btn-primary" style="background: #6f42c1;">
+                    <span style="font-size:1rem;">👥</span> Team
+                </button>
+            </div>
+        </div>
+
+        <div class="header-bottom">
             <div class="filter-group">
                 <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
                 <button class="filter-btn" onclick="setFilter('WEALTH', this)">💰 Wealth</button>
@@ -34,19 +52,18 @@
                 <button class="filter-btn" onclick="setFilter('PEOPLE', this)">🤝 People</button>
                 <button class="filter-btn" onclick="setFilter('HEALTH', this)">🧘 Health</button>
             </div>
-        </div>
 
-        <div class="controls">
-            <button class="today-btn" onclick="resetToCurrent()">Today</button>
-            <button onclick="changeMonth(-1)">◀</button>
-            <select id="monthSelect" onchange="jumpToDate()">
-                <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
-                <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
-                <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
-                <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-            </select>
-            <input type="number" id="yearInput" onchange="jumpToDate()" value="2026">
-            <button onclick="changeMonth(1)">▶</button>
+            <div class="header-tools">
+                <div class="search-container">
+                    <span style="font-size:1rem; opacity:0.6;">🔍</span>
+                    <select id="goalSelect" class="search-select">
+                        <option value="">Find a Goal...</option>
+                    </select>
+                    <button onclick="findDates()" class="btn-search">Find</button>
+                </div>
+
+                <button onclick="showLegend()" class="btn-ghost">Rules & Legend</button>
+            </div>
         </div>
     </header>
 

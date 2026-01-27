@@ -10,15 +10,213 @@
 
 body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; background: #f4f4f9; }
 
-/* HEADER & CONTROLS */
+/* --- MODERN HEADER --- */
 header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px; background: white; padding: 15px;
-    border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    flex-wrap: wrap; gap: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
-.header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-.controls { display: flex; gap: 5px; align-items: center; background: #f8f9fa; padding: 5px; border-radius: 6px; border: 1px solid #eee; }
+
+/* ROW 1: Brand & User Controls */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
+
+.brand span {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.6rem;
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Custom Select Styling */
+.modern-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #dcdfe6;
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.modern-select:hover {
+    border-color: #c0c4cc;
+    background-color: #fff;
+}
+
+.btn-primary {
+    background: #4f46e5; /* Indigo */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary:hover {
+    background: #4338ca;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+/* ROW 2: Navigation & Filters */
+.header-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Date Navigator */
+.date-nav {
+    display: flex;
+    align-items: center;
+    background: #f1f3f5;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #495057;
+    border-radius: 6px;
+}
+
+.nav-btn:hover { background: #e9ecef; }
+
+.date-inputs {
+    display: flex;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+.date-inputs select, .date-inputs input {
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    color: #343a40;
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Filter Pills */
+.filter-group {
+    display: flex;
+    gap: 8px;
+    background: white;
+}
+
+.filter-btn {
+    border: 1px solid #e9ecef;
+    background: white;
+    padding: 6px 16px;
+    border-radius: 20px; /* Pill Shape */
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: #f8f9fa;
+    color: #212529;
+    border-color: #dee2e6;
+}
+
+.filter-btn.active {
+    background: #212529;
+    color: white;
+    border-color: #212529;
+    box-shadow: 0 2px 8px rgba(33, 37, 41, 0.2);
+}
+
+/* Goal Search Bar */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 4px 4px 4px 12px;
+    border-radius: 50px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.search-select {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #495057;
+    width: 140px;
+}
+
+.btn-search {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+.header-tools {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
 select, button, input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
 button { background: #007bff; color: white; border: none; cursor: pointer; transition: background 0.2s; }
@@ -293,9 +491,9 @@ button:hover { background: #0056b3; }
 }
 
 /* MONTH BANNERS */
-.warn-banner { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-.good-banner { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-.neutral-banner { background: #e2e3e5; border: 1px solid #d6d8db; color: #383d41; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+.month-banner { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; margin: 10px 0; padding: 5px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+.warn-banner { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+.good-banner { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
 .banner-icon { font-size: 2rem; }
 .banner-content h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
 .banner-content p { margin: 0; font-size: 0.9rem; }
@@ -325,9 +523,107 @@ button:hover { background: #0056b3; }
     border-left: 5px solid #ffc107;
 }
 
+/* --- MOBILE RESPONSIVENESS (< 768px) --- */
+@media (max-width: 768px) {
+
+    header {
+        padding: 10px 15px;
+        gap: 10px;
+        position: relative; /* Ensure z-index works */
+    }
+
+    /* --- TOP ROW: Brand & User (Row 1), Date (Row 2) --- */
+    .header-top {
+        flex-wrap: wrap; /* Allow items to wrap */
+        gap: 10px;
+    }
+
+    .brand {
+        font-size: 1.2rem;
+        flex-grow: 1; /* Push user controls to right */
+    }
+
+    .user-controls {
+        gap: 8px;
+    }
+
+    /* Shrink the user dropdown slightly on mobile */
+    .user-controls .modern-select {
+        max-width: 100px;
+        padding: 6px 8px;
+    }
+
+    /* Move Date Nav to a new line (Row 2) */
+    .date-nav {
+        order: 3; /* CSS Grid/Flex trick: Force it to position 3 */
+        width: 100%;
+        justify-content: center;
+        margin-top: 5px;
+        background: #f8f9fa; /* Slightly darker to stand out */
+        padding: 8px;
+    }
+
+    /* --- BOTTOM ROW: Filters & Search --- */
+    .header-bottom {
+        flex-direction: column; /* Stack vertically */
+        align-items: stretch; /* Full width */
+        gap: 12px;
+    }
+
+    /* Horizontal Scroll for Filters (Netflix/Instagram style) */
+    .filter-group {
+        width: 100%;
+        overflow-x: auto; /* Enable scroll */
+        white-space: nowrap; /* Prevent wrapping */
+        padding-bottom: 5px; /* Space for hidden scrollbar */
+        gap: 8px;
+        /* Smooth scroll on iOS */
+        -webkit-overflow-scrolling: touch;
+        /* Hide scrollbar for clean look */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .filter-group::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-btn {
+        flex: 0 0 auto; /* Prevent squishing */
+        padding: 8px 16px; /* Larger tap targets */
+    }
+
+    /* Full Width Search Bar */
+    .search-container {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .search-select {
+        flex-grow: 1;
+        width: auto;
+    }
+
+    /* Hide the "Rules" text, keep button accessible */
+    .btn-ghost {
+        font-size: 0.8rem;
+        text-align: center;
+        width: 100%;
+        padding: 10px;
+        background: #f8f9fa; /* Light grey background */
+        border: 1px solid #e9ecef; /* Subtle border */
+        border-radius: 8px; /* Rounded corners */
+        color: #495057;
+        text-decoration: none; /* Remove underline */
+    }
+
+    .header-tools {
+        flex-direction: column; /* Force new row */
+        width: 100%;
+        gap: 10px;
+    }
+}
 @media (max-width: 900px) {
-    header { flex-direction: column; align-items: flex-start; }
-    .controls { width: 100%; justify-content: space-between; flex-wrap: wrap; }
     .calendar-wrapper { grid-template-columns: repeat(2, 1fr); }
     .day-header { display: none; }
 }
