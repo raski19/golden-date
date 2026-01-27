@@ -644,3 +644,170 @@ export const GOAT_BLADE_RULES: Record<string, string> = {
   Xin: "Dog",
   Gui: "Pig",
 };
+
+export const TEN_GODS: Record<string, Record<string, string>> = {
+  Companion: {
+    Same: "Friend", // Bi Jian (Self)
+    Diff: "Rob Wealth", // Jie Cai (Competitor)
+  },
+  Output: {
+    Same: "Eating God", // Shi Shen (Artist)
+    Diff: "Hurting Officer", // Shang Guan (Rebel)
+  },
+  Wealth: {
+    Same: "Indirect Wealth", // Pian Cai (Entrepreneur)
+    Diff: "Direct Wealth", // Zheng Cai (Employee/Manager)
+  },
+  Influence: {
+    Same: "7 Killings", // Qi Sha (General)
+    Diff: "Direct Officer", // Zheng Guan (Official)
+  },
+  Resource: {
+    Same: "Indirect Resource", // Pian Yin (Mystic)
+    Diff: "Direct Resource", // Zheng Yin (Sage)
+  },
+};
+
+export const TEN_GOD_ACTIONS: Record<
+  string,
+  {
+    title: string;
+    tagline: string;
+    best: string[];
+    caution: string;
+    keywords: string;
+  }
+> = {
+  // 🟢 COMPANION
+  Friend: {
+    title: "The Mirror",
+    tagline: "Connecting with equals.",
+    best: [
+      "Consolidation: Strengthening existing partnerships.",
+      "Networking: Meeting peers, colleagues, or people of similar status.",
+      "Self-Reliance: Working solo on personal projects; focusing on confidence.",
+      "Negotiation: Signing 'Win-Win' deals where both sides are equal.",
+    ],
+    caution: "Stubbornness. Avoid arguments where you refuse to compromise.",
+    keywords: "Partnership, Equality, Confidence",
+  },
+  "Rob Wealth": {
+    title: "The Competitor",
+    tagline: "Social magnetism and spending.",
+    best: [
+      "Socializing: Parties, gatherings, and building a 'tribe'.",
+      "Team Building: Rallying people toward a cause.",
+      "Intentional Spending: Investing money in marketing or treating clients.",
+      "Public Speaking: Engaging a crowd with charisma.",
+    ],
+    caution:
+      "Financial loss. Do NOT gamble, lend money, or sign financial guarantees today.",
+    keywords: "Charisma, Spending, Crowds",
+  },
+
+  // 🟠 OUTPUT
+  "Eating God": {
+    title: "The Artist",
+    tagline: "Refined, long-term, gentle expression.",
+    best: [
+      "Strategy: Deep thinking, writing business plans, brainstorming.",
+      "Enjoyment: Fine dining, wine tasting, relaxing, spa days.",
+      "Soft Skills: Teaching, mentoring, or gentle persuasion.",
+      "Creativity: Writing, designing, or artistic hobbies.",
+    ],
+    caution: "Procrastination. You might feel too lazy to do 'hard labor'.",
+    keywords: "Pleasure, Strategy, Creativity",
+  },
+  "Hurting Officer": {
+    title: "The Performer",
+    tagline: "Loud, flashy, fast, rebellious.",
+    best: [
+      "Sales & Pitching: Aggressive marketing, loud presentations, 'Show & Tell'.",
+      "Debate: Winning arguments, legal disputes, or critiquing others.",
+      "Breaking Rules: Disrupting the status quo, innovating, changing systems.",
+      "Performance: Being on stage, public speaking, going viral.",
+    ],
+    caution:
+      "Offending authority. Avoid talking to your boss or the police today.",
+    keywords: "Attention, Disruption, Sales",
+  },
+
+  // 🟢 WEALTH
+  "Direct Wealth": {
+    title: "The Manager",
+    tagline: "Steady, earned, hard work.",
+    best: [
+      "Budgeting: Financial planning, auditing, cutting costs.",
+      "Hard Work: Grinding through tasks, putting in overtime.",
+      "Asset Management: Organizing files, inventory, or property.",
+      "Routine Income: Salary negotiations, signing standard contracts.",
+    ],
+    caution: "Greed. Don't look for shortcuts; they won't work today.",
+    keywords: "Savings, Diligence, Stability",
+  },
+  "Indirect Wealth": {
+    title: "The Entrepreneur",
+    tagline: "Risky, fast, big picture.",
+    best: [
+      "Trading: Stock market, crypto, or high-risk investments.",
+      "Side Hustles: Launching a new revenue stream or project.",
+      "Sales Closings: Closing big, commission-based deals.",
+      "Windfalls: Buying a lottery ticket (if lucky stars align).",
+    ],
+    caution: "Recklessness. High risk of losing money if you are emotional.",
+    keywords: "Opportunity, Risk, Cash Flow",
+  },
+
+  // 🔵 INFLUENCE
+  "Direct Officer": {
+    title: "The Commander",
+    tagline: "Law, order, reputation.",
+    best: [
+      "Official Business: Applying for permits, visas, or dealing with government.",
+      "SOPs: Creating rules, systems, and organizing workflows.",
+      "Discipline: Sticking to a strict diet or gym routine.",
+      "Status: Seeking promotion, meeting with bosses, wearing a suit.",
+    ],
+    caution: "Rigidity. Not a day for creativity or bending the rules.",
+    keywords: "Rules, Authority, Reputation",
+  },
+  "7 Killings": {
+    title: "The General",
+    tagline: "Crisis, intensity, extreme action.",
+    best: [
+      "Problem Solving: Handling emergencies or crises effectively.",
+      "Extreme Action: Surgery, invasive medical procedures, extreme sports.",
+      "Execution: Forcing a difficult decision, firing someone, or aggressive takeovers.",
+      "Discipline: High-intensity interval training (HIIT), fasting.",
+    ],
+    caution:
+      "Stress & Injury. High risk of accidents or burnout. Do not provoke enemies.",
+    keywords: "Pressure, Action, Survival",
+  },
+
+  // 🟣 RESOURCE
+  "Direct Resource": {
+    title: "The Sage",
+    tagline: "Conventional knowledge, health, comfort.",
+    best: [
+      "Learning: Studying textbooks, attending formal classes.",
+      "Health: Doctor visits, rest, recuperation, taking medicine.",
+      "Seeking Help: Asking mentors, teachers, or noble people for advice.",
+      "Planning: Analyzing data and preparing for the future.",
+    ],
+    caution: "Over-thinking. You might analyze too much and take zero action.",
+    keywords: "Knowledge, Health, Mentors",
+  },
+  "Indirect Resource": {
+    title: "The Mystic",
+    tagline: "Intuition, unconventional, mystery.",
+    best: [
+      "Niche Study: Researching metaphysics, crypto, or obscure topics.",
+      "Intuition: Trusting your gut feeling; meditation, spiritual practice.",
+      "Innovation: Finding a 'hack' or unconventional solution to a problem.",
+      "Solitude: Withdrawing from the world to think deeply.",
+    ],
+    caution: "Isolation. You may feel lonely, paranoid, or misunderstood.",
+    keywords: "Intuition, Mystery, Unconventional",
+  },
+};

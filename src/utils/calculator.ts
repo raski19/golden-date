@@ -8,7 +8,6 @@ import {
   BRANCH_HOURS,
   STEM_NOBLEMAN,
   BRANCH_START_TIMES,
-  OFFICER_ADVICE,
   BAD_STARS,
   GOOD_STARS,
   SAN_SHA_RULES,
@@ -16,6 +15,9 @@ import {
   YANG_STEMS,
   ELEMENT_RELATIONSHIPS,
   STEM_ELEMENTS,
+  STEM_INFO,
+  TEN_GODS,
+  TEN_GOD_ACTIONS,
 } from "./constants";
 import { calculateRootStrength } from "./rootStrength";
 
@@ -28,7 +30,6 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   const rules = user.rules;
   const { dayBranch, monthBranch, yearBranch } = dayData;
-  const advice = OFFICER_ADVICE[dayData.officer] || { good: [], bad: [] };
 
   const getRole = (element: string) => {
     if (rules.wealthElements?.includes(element)) return "Wealth (Profit)";
@@ -50,11 +51,29 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     }
   }
 
-  // --- PILLAR STRENGTH (Day Stem vs Day Branch) ---
+  // 1. DETERMINE TEN GOD
+  const userDm = STEM_INFO[user.dayMaster.split(" ")[0]];
+  const dayStem = STEM_INFO[dayData.stem.split(" ")[0]];
+
+  let tenGodName = "Friend"; // Default
+
+  if (userDm && dayStem) {
+    const relationship = ELEMENT_RELATIONSHIPS[userDm.element][dayStem.element];
+    const polarity = userDm.polarity === dayStem.polarity ? "Same" : "Diff";
+
+    if (relationship && TEN_GODS[relationship]) {
+      tenGodName = TEN_GODS[relationship][polarity];
+    }
+  }
+
+  // 2. GET ACTION DATA
+  // Safety check: if tenGodName isn't found, default to Friend
+  const guide = TEN_GOD_ACTIONS[tenGodName] || TEN_GOD_ACTIONS["Friend"];
+
+  // --- PILLAR STRENGTH (Day Stem vs. Day Branch) ---
   // Does the Branch support the Stem?
   const stemClean = dayData.stem.split(" ")[0]; // "Jia"
   const rootInfo = calculateRootStrength(stemClean, dayData.dayBranch);
-  console.log(rootInfo);
 
   const pillarNote = rootInfo.description;
   const pillarIcon = rootInfo.icon;
@@ -97,7 +116,12 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       specificActions: [],
       badHours: clash ? [`${clash} Hour (${BRANCH_HOURS[clash]})`] : [],
       goodHours: [],
-      generalAdvice: advice,
+      tenGodName: tenGodName,
+      actionTitle: guide.title,
+      actionTagline: guide.tagline,
+      suitableActions: guide.best,
+      cautionAction: guide.caution,
+      actionKeywords: guide.keywords,
     };
   }
 
@@ -460,7 +484,12 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     specificActions,
     badHours,
     goodHours,
-    generalAdvice: advice,
+    tenGodName: tenGodName,
+    actionTitle: guide.title,
+    actionTagline: guide.tagline,
+    suitableActions: guide.best,
+    cautionAction: guide.caution,
+    actionKeywords: guide.keywords,
   };
 };
 

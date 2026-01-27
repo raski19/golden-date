@@ -69,7 +69,6 @@ export interface DayInfo {
 }
 
 export interface ScoreResult {
-  dayType: string;
   pillarNote: string;
   pillarIcon: string;
   pillarScore: number;
@@ -82,10 +81,13 @@ export interface ScoreResult {
   specificActions: { action: string; icon: string; desc: string }[];
   badHours: string[];
   goodHours: string[];
-  generalAdvice: {
-    good: string[];
-    bad: string[];
-  };
+  dayType: string;
+  tenGodName: string;
+  actionTitle: string;
+  actionTagline: string;
+  suitableActions: string[];
+  cautionAction: string;
+  actionKeywords: string;
 }
 
 export interface TenGodsResult {

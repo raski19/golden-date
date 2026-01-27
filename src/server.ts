@@ -8,7 +8,7 @@ import { calculateTenGods } from "./utils/tenGods";
 
 const app = express();
 
-const PORT = process.env.APP_PORT || 3000;
+const PORT = process.env.APP_PORT || 3333;
 const MONGO_URI =
   process.env.MONGO_URI || "mongodb://127.0.0.1:27017/goldenDateDB";
 

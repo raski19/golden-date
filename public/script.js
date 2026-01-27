@@ -323,6 +323,8 @@ function renderGrid(days) {
           return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 Smart</span>`;
         if (f === "San Sha")
           return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ San Sha</span>`;
+        if (f === "Year Sha")
+          return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ Year Sha</span>`;
         if (f === "Goat Blade")
           return `<span class="badge" style="background:#343a40; color:#fff; border:1px solid #000;">🗡️ Goat Blade</span>`;
         // Hide "Bad Star" / "Good Star" from badges since we show them in the footer text now
@@ -575,9 +577,6 @@ function showDetails(day) {
   const goodHours = day.analysis.goodHours || [];
   const yb = day.info.yellowBlackBelt;
 
-  // Get Advice
-  const advice = day.analysis.generalAdvice || { good: [], bad: [] };
-
   // Get Star Definition
   const starDesc =
     day.info.constellationDesc || "No specific data for this star.";
@@ -597,6 +596,52 @@ function showDetails(day) {
         </div>`;
   }
 
+  const tenGod = day.analysis.tenGodName || "Day Energy";
+  const guideTitle = day.analysis.actionTitle || "The Guide";
+  const guideTagline = day.analysis.actionTagline || "";
+  const goodList = day.analysis.suitableActions || [];
+  const cautionText = day.analysis.cautionAction || "";
+  const keywords = day.analysis.actionKeywords || "";
+
+  // FORMAT THE LIST: Bold the part before the colon
+  const bestHtml = goodList
+    .map((item) => {
+      const parts = item.split(":");
+      if (parts.length > 1) {
+        // "Learning: Studying..." -> "<b>Learning:</b> Studying..."
+        return `<li style="margin-bottom:6px;"><span style="font-weight:bold; color:#2c3e50;">${parts[0]}:</span>${parts[1]}</li>`;
+      }
+      return `<li style="margin-bottom:6px;">${item}</li>`;
+    })
+    .join("");
+
+  const modalBody = `
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        <div style="background: #fdfdfd; border-radius: 8px; padding: 15px; border: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div style="margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:8px;">
+                <div style="font-size:1.1rem; font-weight:bold; color:#333;">
+                    ${tenGod}
+                </div>
+                <div style="font-size:0.95rem; color:#555; margin-top:2px;">
+                    "${guideTitle}" – <span style="font-style:italic;">${guideTagline}</span>
+                </div>
+            </div>
+            <div style="margin-bottom:15px;">
+                <div style="font-weight:bold; color:#198754; font-size:0.9rem; margin-bottom:5px;">✅ Best Actions:</div>
+                <ul style="list-style:none; padding:0; margin:0; font-size:0.9rem; color:#444; line-height:1.5;">
+                    ${bestHtml}
+                </ul>
+            </div>
+            <div style="margin-bottom:10px;">
+                <span style="font-weight:bold; color:#dc3545; font-size:0.9rem;">⚠️ Caution: </span>
+                <span style="font-size:0.9rem; color:#d63384;">${cautionText}</span>
+            </div>
+            <div style="background:#f1f3f5; padding:6px 10px; border-radius:4px; font-size:0.85rem; color:#495057;">
+                <span style="font-weight:bold;">🔑 Keywords:</span> ${keywords}
+            </div>
+        </div>
+        `;
+
   let badHoursHtml = "";
   if (badHours.length > 0) {
     badHoursHtml = `<div style="margin-top:10px; padding:8px; background:#fff5f5; border:1px solid #f5c6cb; border-radius:4px; color:#721c24;">
@@ -613,27 +658,6 @@ function showDetails(day) {
         </div>`;
   }
 
-  // Do's and Don'ts Lists
-  const goodList = advice.good
-    .map(
-      (item) => `
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-            <span style="color:#28a745;">✅</span> ${item}
-        </div>
-    `,
-    )
-    .join("");
-
-  const badList = advice.bad
-    .map(
-      (item) => `
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-            <span style="color:#dc3545;">❌</span> ${item}
-        </div>
-    `,
-    )
-    .join("");
-
   document.getElementById("modalBody").innerHTML = `
         ${actionDetails}
         
@@ -648,16 +672,7 @@ function showDetails(day) {
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-            <div>
-                <h4 style="margin:0 0 10px 0; color:#28a745;">Yi (Suitable)</h4>
-                ${goodList}
-            </div>
-            <div>
-                <h4 style="margin:0 0 10px 0; color:#dc3545;">Ji (Avoid)</h4>
-                ${badList}
-            </div>
-        </div>
+        ${modalBody}
         
         <h4 style="margin-bottom:5px;">📊 Personal Analysis</h4>
         <ul style="padding-left:20px; margin-top:5px; margin-bottom:15px; color:#444;">${logHtml}</ul>
