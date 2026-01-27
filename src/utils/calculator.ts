@@ -214,7 +214,9 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   if (allFavorableElements.includes(dayData.element)) {
     score += 20;
     const role = getRole(dayData.element);
-    log.push(`Great Element: ${dayData.element} provides ${role}.`);
+    log.push(
+      `🔥 Useful God: ${dayData.element} is your Favorable Element for ${role}.`,
+    );
   }
 
   if (rules.favorableOfficers.some((off) => officerName.includes(off))) {
@@ -396,6 +398,20 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     log.push(`🎓 Academic Star: Good for strategy and contracts.`);
     flags.push("Intellect");
     tags.push("CAREER");
+  }
+
+  // HARD CAP: Prevent "Golden" status on weak days
+  if (pillarScore <= 20) {
+    // Critical Weakness (0-20%): Max Score = 75 (Good, but never Golden)
+    if (score > 75) {
+      score = 75;
+      log.push("⚠️ Score Capped: Day structure is too weak to be Golden.");
+    }
+  } else if (pillarScore <= 40) {
+    // Moderate Weakness (21-40%): Max Score = 80 (Excellent, rarely Golden)
+    if (score > 80) {
+      score = 80;
+    }
   }
 
   // Verdict
