@@ -805,7 +805,7 @@ function showDetails(day) {
             ${
               neutrals.length > 0
                 ? `
-                <div style="margin:15px 0; background:#f8f9fa; padding:10px 15px; border-radius:8px; border:1px solid #eee;">
+                <div style="margin-top:15px; background:#f8f9fa; padding:10px 15px; border-radius:8px; border:1px solid #eee;">
                     <div style="font-size:0.8rem; font-weight:bold; color:#666; margin-bottom:5px;">ℹ️ Other Notes</div>
                     ${renderList(neutrals, "🔹", "text-muted")}
                 </div>
@@ -875,7 +875,7 @@ function showDetails(day) {
         ${officersAdvice}
         ${analysisGrid}
 
-        <div style="background:#fff3cd; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
+        <div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
             <h4 style="margin:0 0 10px 0; color:#856404;">🔮 Energy Deep Dive</h4>
             
             <div style="margin-bottom:10px;">
