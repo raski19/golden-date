@@ -101,24 +101,22 @@
     <div id="calendarGrid" class="calendar-wrapper"></div>
 
     <!-- MODALS -->
-    <div id="modal" class="modal">
+    <div id="detailsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalDate">Date</h3>
-                <span class="close" onclick="closeModal('modal')">&times;</span>
+                <h3 id="detailsTitle">Date Details</h3>
+                <span class="close" onclick="closeModal('detailsModal')">&times;</span>
             </div>
-            <div id="modalBody" class="modal-body">
-            </div>
+            <div id="detailsBody" class="modal-body"></div>
         </div>
     </div>
     <div id="legendModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Details</h2>
+                <h2 id="legendTitle">📖 Legend & Rules</h2>
                 <span class="close" onclick="closeModal('legendModal')">&times;</span>
             </div>
-            <div id="legendBody" class="modal-body">
-            </div>
+            <div id="legendBody" class="modal-body"></div>
         </div>
     </div>
     <div id="searchModal" class="modal">
@@ -127,8 +125,7 @@
                 <h3 id="searchTitle">🎯 Search Results</h3>
                 <span class="close" onclick="closeModal('searchModal')">&times;</span>
             </div>
-            <div id="searchResults" class="modal-body">
-            </div>
+            <div id="searchBody" class="modal-body"></div>
         </div>
     </div>
     <div id="synergyModal" class="modal">

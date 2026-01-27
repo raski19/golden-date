@@ -444,26 +444,19 @@ function applyFilter() {
 
 // --- LEGEND LOGIC ---
 function showLegend() {
-  // 1. Get User Data
+  // 1. Get Data
   const userId = document.getElementById("userSelect").value;
   const user = allUsersData.find((u) => u._id === userId);
 
-  // 2. Target the Unified Modal (detailsModal)
-  // Note: We use the shared modal we styled earlier to keep the look consistent.
-  const modal = document.getElementById("legendModal");
-  const modalBody = document.getElementById("legendBody");
-  const modalTitle = document.getElementById("modalTitle");
+  // 2. Target LEGEND Modal Elements
+  const body = document.getElementById("legendBody");
+  // (Title is static in HTML, no need to set it via JS unless dynamic)
 
-  // 3. Set Title
-  modalTitle.innerText = "📖 Legend & Rules";
-
-  // 4. Build Static Content (The Reference Guide)
+  // 3. Static Content
   const staticLegend = `
         <div class="grid-dashboard">
-            
             <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
                 <h5 style="margin:0 0 12px 0; font-weight:700; color:#333;">🎨 Verdict Colors</h5>
-                
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span class="l-badge lb-gold">Golden</span>
@@ -486,7 +479,6 @@ function showLegend() {
 
             <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
                 <h5 style="margin:0 0 12px 0; font-weight:700; color:#333;">★ Map Symbols</h5>
-
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="l-icon">✨</span>
@@ -512,9 +504,7 @@ function showLegend() {
             📜 12 Day Officers Guide
         </h5>
         
-        
         <div class="grid-dashboard">
-            
             <div class="officer-card">
                 <div class="officer-title" style="color:#155724;">💰 Wealth & Business</div>
                 <div class="officer-list">
@@ -524,7 +514,6 @@ function showLegend() {
                     <div><strong>Receive:</strong> Collecting debts, banking.</div>
                 </div>
             </div>
-
             <div class="officer-card">
                 <div class="officer-title" style="color:#004085;">🚀 Career & Strategy</div>
                 <div class="officer-list">
@@ -534,7 +523,6 @@ function showLegend() {
                     <div><strong>Travel:</strong> Business trips, moving.</div>
                 </div>
             </div>
-
             <div class="officer-card">
                 <div class="officer-title" style="color:#0f5132;">🧘 Health & Medical</div>
                 <div class="officer-list">
@@ -544,7 +532,6 @@ function showLegend() {
                     <div><strong>Stable:</strong> Long-term medication.</div>
                 </div>
             </div>
-
             <div class="officer-card">
                 <div class="officer-title" style="color:#6610f2;">🤝 People & Relationships</div>
                 <div class="officer-list">
@@ -557,7 +544,7 @@ function showLegend() {
         </div>
     `;
 
-  // 5. Build Dynamic Content (User Rules)
+  // 4. Dynamic Content
   let dynamicLegend = `
         <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
             🎯 ${user ? user.name + "'s" : "User"} Specific Rules
@@ -575,7 +562,6 @@ function showLegend() {
       user.actionRules
         .map((rule) => {
           const officers = rule.officers.join(", ");
-          // We create a nice card for each rule
           return `
                 <div style="background:#fff; border:1px solid #dee2e6; border-left:4px solid #0d6efd; padding:12px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                     <div style="font-weight:bold; color:#0d6efd; font-size:1rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
@@ -594,42 +580,47 @@ function showLegend() {
       `</div>`;
   }
 
-  // 6. Inject and Show
-  modalBody.innerHTML = staticLegend + dynamicLegend;
-  modal.style.display = "flex";
+  // 5. Inject & Open
+  body.innerHTML = staticLegend + dynamicLegend;
+  openModalById("legendModal");
 }
 
 // --- DETAILS MODAL ---
 function showDetails(day) {
-  const modal = document.getElementById("modal");
+  // 1. Target DETAILS Modal Elements
+  const titleEl = document.getElementById("detailsTitle");
+  const bodyEl = document.getElementById("detailsBody");
+
+  // 2. Set Title
+  titleEl.innerText = `${day.fullDate} (${day.analysis.verdict})`;
+
+  // 3. Prepare Data
   const tenGods = day.tenGods || {};
   const badHours = day.analysis.badHours || [];
   const goodHours = day.analysis.goodHours || [];
   const yb = day.info.yellowBlackBelt;
+  const starDesc = day.info.constellationDesc || "No specific data.";
+  const nineStarDesc = day.info.nineStarDesc || "No specific data.";
 
-  // Get Star Definition
-  const starDesc =
-    day.info.constellationDesc || "No specific data for this star.";
-  const nineStarDesc =
-    day.info.nineStarDesc || "No specific data for this star.";
-
-  document.getElementById("modalDate").innerText =
-    `${day.fullDate} (${day.analysis.verdict})`;
-
-  // --- 🛡️ SAFETY FILTER LOGIC ---
-  // 1. Get Base Recommendation (General Weather)
+  // --- SAFETY FILTER ---
   const officerName = (day.info.officer || "General").trim();
-  const rec = day.analysis.officerRec;
+  const rec = day.analysis.officerRec || {
+    action: "Proceed",
+    icon: "⚠️",
+    desc: "Caution",
+    reality: "Unstable",
+  };
 
-  // 2. CHECK DANGER SIGNALS
-  const score = day.analysis.score || 0;
+  // Robust Score Check
+  const rawScore =
+    day.score !== undefined ? day.score : day.analysis?.score || 0;
+  const score = Number(rawScore);
   const pScore = day.analysis.pillarScore || 0;
 
   let recHtml = "";
 
-  // CONDITION: If Score is bad, OR Pillar Support is critical (<30%)
   if (score < 50 || pScore < 30) {
-    // ⛔ DANGER MODE
+    // DANGER MODE
     recHtml = `
             <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -640,7 +631,6 @@ function showDetails(day) {
                         Support: ${pScore}%
                     </div>
                 </div>
-                
                 <div style="display:flex; align-items:flex-start; gap:12px;">
                     <div style="font-size:1.8rem; line-height:1;">🛑</div>
                     <div>
@@ -648,17 +638,16 @@ function showDetails(day) {
                             Do Not "${rec.action}"
                         </div>
                         <div style="font-size:0.9rem; color:#a71d2a; line-height:1.4;">
-                            While "${officerName}" days are usually for <strong>${rec.desc.toLowerCase()}</strong>, this specific day lacks the structural support to hold your plans.
+                            While "${officerName}" days are usually for <strong>${rec.desc}</strong>, this specific day lacks support.
                         </div>
                         <div style="margin-top:8px; font-size:0.85rem; font-style:italic; color:#c53030;">
                             <strong>Reality Check:</strong> ${rec.reality}
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
   } else {
-    // ✅ SAFE MODE
+    // SAFE MODE
     recHtml = `
             <div style="background:#f0fff4; border-left:4px solid #198754; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <div style="font-size:0.75rem; color:#198754; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
@@ -671,10 +660,10 @@ function showDetails(day) {
                         <div style="font-size:0.9rem; color:#555;">${rec.desc}</div>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
   }
 
+  // --- ARCHETYPE CARD ---
   const tenGod = day.analysis.tenGodName || "Day Energy";
   const guideTitle = day.analysis.actionTitle || "The Guide";
   const guideTagline = day.analysis.actionTagline || "";
@@ -682,225 +671,122 @@ function showDetails(day) {
   const cautionText = day.analysis.cautionAction || "";
   const rawKeywords = day.analysis.actionKeywords || "";
 
-  // 1. FORMAT LIST ITEMS (Bold Keys)
   const bestHtml = goodList
-    .map((item) => {
-      const parts = item.split(":");
-      // Layout: Checkmark icon + Text block
-      if (parts.length > 1) {
-        return `
-            <li style="display:flex; align-items:flex-start; margin-bottom:8px; line-height:1.4;">
-                <span style="margin-right:8px; font-size:1rem;">✅</span>
-                <span>
-                    <strong style="color:#2c3e50;">${parts[0]}:</strong> <span style="color:#555;">${parts[1]}</span>
-                </span>
-            </li>`;
-      }
-      return `<li style="margin-bottom:6px;">✅ ${item}</li>`;
-    })
+    .map((item) => `<li style="margin-bottom:6px;">✅ ${item}</li>`)
     .join("");
 
-  // 2. FORMAT KEYWORDS AS BADGES
-  // Split "Wealth, Risk, Speed" -> ["Wealth", "Risk", "Speed"] -> HTML Badges
   const keywordHtml = rawKeywords
     .split(",")
     .map((k) => {
       const cleanK = k.trim();
-      if (!cleanK) return "";
-      return `<span style="display:inline-block; background:#f8f9fa; border:1px solid #e9ecef; color:#666; padding:2px 10px; border-radius:12px; font-size:0.75rem; margin-right:4px; margin-bottom:4px;">#${cleanK}</span>`;
+      return cleanK
+        ? `<span style="display:inline-block; background:#f8f9fa; border:1px solid #e9ecef; color:#666; padding:2px 10px; border-radius:12px; font-size:0.75rem; margin-right:4px;">#${cleanK}</span>`
+        : "";
     })
     .join("");
 
-  // 3. CONSTRUCT THE CARD HTML
   const officersAdvice = `
-        <div style="margin: 20px 0;"></div>
-        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-top:20px; margin-bottom:20px;">
             <div style="background: linear-gradient(to right, #f8f9fa, #ffffff); padding: 15px 20px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
                 <div>
-                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:#888; font-weight:600; margin-bottom:2px;">
-                        Archetype
-                    </div>
-                    <div style="font-size:1.25rem; font-weight:700; color:#333; line-height:1.2;">
-                        ${tenGod}
-                    </div>
-                    <div style="font-size:0.9rem; color:#666; font-style:italic;">
-                        "${guideTitle}"
-                    </div>
+                    <div style="font-size:0.75rem; text-transform:uppercase; color:#888; font-weight:600;">Archetype</div>
+                    <div style="font-size:1.25rem; font-weight:700; color:#333;">${tenGod}</div>
+                    <div style="font-size:0.9rem; color:#666; font-style:italic;">"${guideTitle}"</div>
                 </div>
-                <div style="background:#e3f2fd; color:#0d6efd; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
-                    ⚡
-                </div>
+                <div style="background:#e3f2fd; color:#0d6efd; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">⚡</div>
             </div>
             <div style="padding: 20px;">
-                <div style="margin-bottom:20px; font-size:0.95rem; color:#555; border-left:3px solid #0d6efd; padding-left:12px; font-style:italic;">
-                    ${guideTagline}
+                <div style="margin-bottom:15px; font-size:0.95rem; color:#555; border-left:3px solid #0d6efd; padding-left:12px; font-style:italic;">${guideTagline}</div>
+                <ul style="list-style:none; padding:0; margin-bottom:15px; font-size:0.9rem;">${bestHtml}</ul>
+                <div style="background: #fff5f5; border: 1px solid #feb2b2; border-left: 4px solid #e53e3e; border-radius: 6px; padding: 10px;">
+                    <div style="font-weight:700; color:#c53030; font-size:0.8rem; text-transform:uppercase;">⚠️ Caution</div>
+                    <div style="font-size:0.9rem; color:#9b2c2c;">${cautionText}</div>
                 </div>
-                <div style="margin-bottom:20px;">
-                    <h5 style="margin:0 0 10px 0; font-size:0.9rem; font-weight:700; color:#198754; text-transform:uppercase;">
-                        Best Strategy
-                    </h5>
-                    <ul style="list-style:none; padding:0; margin:0; font-size:0.9rem;">
-                        ${bestHtml}
-                    </ul>
-                </div>
-                <div style="background: #fff5f5; border: 1px solid #feb2b2; border-left: 4px solid #e53e3e; border-radius: 6px; padding: 12px 15px;">
-                    <div style="font-weight:700; color:#c53030; font-size:0.85rem; margin-bottom:4px; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
-                        ⚠️ Caution
-                    </div>
-                    <div style="font-size:0.9rem; color:#9b2c2c; line-height:1.4;">
-                        ${cautionText}
-                    </div>
-                </div>
-                <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #eee;">
-                    ${keywordHtml}
-                </div>
+                <div style="margin-top:15px;">${keywordHtml}</div>
             </div>
         </div>
-        `;
+    `;
 
-  // --- ANALYSIS LOGIC: SORT INTO PROS & CONS ---
+  // --- ANALYSIS LOGIC (Pros/Cons) ---
   const logs = day.analysis.log || [];
   const pros = [];
   const cons = [];
   const neutrals = [];
 
   logs.forEach((msg) => {
-    // 1. Identify NEGATIVE triggers
     if (
       msg.includes("Avoid") ||
       msg.includes("Conflict") ||
       msg.includes("Killings") ||
-      msg.includes("Sha") ||
       msg.includes("Clash") ||
-      msg.includes("Penalty") ||
-      msg.includes("Risk") ||
-      msg.includes("Sickness")
+      msg.includes("Risk")
     ) {
       cons.push(msg);
-    }
-    // 2. Identify POSITIVE triggers
-    else if (
+    } else if (
       msg.includes("Lucky") ||
-      msg.includes("Harmony") ||
       msg.includes("Great") ||
       msg.includes("Boost") ||
-      msg.includes("Perfect") ||
-      msg.includes("Noble") ||
-      msg.includes("Wealth")
+      msg.includes("Noble")
     ) {
       pros.push(msg);
-    }
-    // 3. Fallback to Neutral
-    else {
+    } else {
       neutrals.push(msg);
     }
   });
 
-  // Helper to generate list HTML
   const renderList = (items, icon, colorClass) => {
     if (items.length === 0)
       return `<div style="font-size:0.85rem; color:#aaa; font-style:italic;">None</div>`;
     return items
       .map(
-        (text) => `
-            <div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem; line-height:1.4;">
-                <span style="margin-right:8px; font-size:1rem; flex-shrink:0;">${icon}</span>
-                <span style="color:#444;">${text}</span>
-            </div>
-        `,
+        (text) =>
+          `<div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem;"><span style="margin-right:8px;">${icon}</span><span class="${colorClass}">${text}</span></div>`,
       )
       .join("");
   };
 
-  // --- GENERATE THE HTML GRID ---
   const analysisGrid = `
         <div style="margin-top:25px;">
-            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; margin-bottom:15px;">
-                📊 Personal Analysis Breakdown
-            </h5>
-
+            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700;">📊 Personal Analysis</h5>
             <div class="grid-dashboard">
-                
                 <div style="background: #f0fff4; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#155724; margin-bottom:12px; display:flex; align-items:center; gap:6px; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">
-                        ✨ Boosts & Luck
-                    </div>
+                    <div style="font-weight:bold; color:#155724; margin-bottom:12px; font-size:0.8rem;">✨ BOOSTS & LUCK</div>
                     ${renderList(pros, "🟢", "text-success")}
                 </div>
-
                 <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#721c24; margin-bottom:12px; display:flex; align-items:center; gap:6px; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">
-                        ⚠️ Risks & Clashes
-                    </div>
+                    <div style="font-weight:bold; color:#721c24; margin-bottom:12px; font-size:0.8rem;">⚠️ RISKS & CLASHES</div>
                     ${renderList(cons, "🔻", "text-danger")}
                 </div>
-
             </div>
-
-            ${
-              neutrals.length > 0
-                ? `
-                <div style="margin-top:15px; background:#f8f9fa; padding:10px 15px; border-radius:8px; border:1px solid #eee;">
-                    <div style="font-size:0.8rem; font-weight:bold; color:#666; margin-bottom:5px;">ℹ️ Other Notes</div>
-                    ${renderList(neutrals, "🔹", "text-muted")}
-                </div>
-            `
-                : ""
-            }
         </div>
     `;
 
-  // Helper to clean up the HTML string (optional, but good for consistent styling)
+  // --- HOURLY GRID ---
   const formatHourLine = (line, type) => {
-    // The backend sends strings like "<strong>Monkey</strong> (15-17) - Nobleman"
-    // We want to wrap them in a clean list item
     const icon = type === "good" ? "🌟" : "🚫";
-    return `
-            <li style="display:flex; align-items:start; margin-bottom:6px; font-size:0.9rem; line-height:1.4;">
-                <span style="margin-right:8px; opacity:0.8;">${icon}</span>
-                <span style="color:#444;">${line}</span>
-            </li>
-        `;
+    return `<li style="display:flex; align-items:start; margin-bottom:6px; font-size:0.9rem;"><span style="margin-right:8px;">${icon}</span><span style="color:#444;">${line}</span></li>`;
   };
 
   const hourlyGrid = `
         <div style="margin-top:20px;">
-            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; margin-bottom:15px;">
-                ⏰ Hourly Timing
-            </h5>
-
+            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700;">⏰ Hourly Timing</h5>
             <div class="grid-dashboard">
-                
                 <div style="background: linear-gradient(to bottom right, #fff, #f0fff4); border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#155724; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
-                        🌅 Golden Hours <span style="font-size:0.75rem; background:#198754; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Act Now</span>
-                    </div>
-                    ${
-                      goodHours.length > 0
-                        ? `<ul style="list-style:none; padding:0; margin:0;">${goodHours.map((h) => formatHourLine(h, "good")).join("")}</ul>`
-                        : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No specific auspicious hours.</div>`
-                    }
+                    <div style="font-weight:bold; color:#155724; margin-bottom:10px; font-size:0.9rem;">🌅 Golden Hours</div>
+                    ${goodHours.length > 0 ? `<ul style="list-style:none; padding:0; margin:0;">${goodHours.map((h) => formatHourLine(h, "good")).join("")}</ul>` : `<div style="font-size:0.85rem; color:#888;">No specific auspicious hours.</div>`}
                 </div>
-
                 <div style="background: linear-gradient(to bottom right, #fff, #fff5f5); border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#721c24; margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:0.9rem;">
-                        ⚠️ Bad Hours <span style="font-size:0.75rem; background:#dc3545; color:white; padding:1px 6px; border-radius:4px; opacity:0.8;">Avoid</span>
-                    </div>
-                    ${
-                      badHours.length > 0
-                        ? `<ul style="list-style:none; padding:0; margin:0;">${badHours.map((h) => formatHourLine(h, "bad")).join("")}</ul>`
-                        : `<div style="font-size:0.85rem; color:#888; font-style:italic;">No major clashes.</div>`
-                    }
+                    <div style="font-weight:bold; color:#721c24; margin-bottom:10px; font-size:0.9rem;">⚠️ Bad Hours</div>
+                    ${badHours.length > 0 ? `<ul style="list-style:none; padding:0; margin:0;">${badHours.map((h) => formatHourLine(h, "bad")).join("")}</ul>` : `<div style="font-size:0.85rem; color:#888;">No major clashes.</div>`}
                 </div>
-
             </div>
         </div>
     `;
 
-  document.getElementById("modalBody").innerHTML = `
+  // 4. Inject & Open
+  bodyEl.innerHTML = `
         ${recHtml}
-        
-        <div style="padding:0 10px; border-radius:5px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
             <div>
                 <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
                 <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
@@ -910,43 +796,23 @@ function showDetails(day) {
                 <strong>Element:</strong> ${day.info.element}
             </div>
         </div>
-        
         ${officersAdvice}
         ${analysisGrid}
-
         <div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
-            <h4 style="margin:0 0 10px 0; color:#856404;">🔮 Energy Deep Dive</h4>
-            
+            <h4 style="margin:0 0 10px 0; color:#856404; font-size:1rem;">🔮 Energy Deep Dive</h4>
             <div style="margin-bottom:10px;">
-                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
-                    ${yb.icon} The ${yb.name} Spirit <span style="font-size:0.75rem; font-weight:normal; background:white; padding:2px 6px; border-radius:4px; border:1px solid #ddd;">${yb.type} Belt</span>
-                </div>
-                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
-                    "${yb.desc}"
-                </div>
+                <div style="font-weight:bold; color:#555;">${yb.icon} ${yb.name} Spirit</div>
+                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${yb.desc}"</div>
             </div>
-
             <div>
-                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
-                    ★ The ${day.info.constellation} Star
-                </div>
-                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
-                    "${starDesc}"
-                </div>
-            </div>
-            <div style="margin-top:10px;">
-                <div style="font-weight:bold; color:#555; display:flex; align-items:center; gap:6px;">
-                    🧭 The ${day.info.nineStar}
-                </div>
-                <div style="font-size:0.9rem; color:#666; margin-left:24px; font-style:italic;">
-                    "${nineStarDesc}"
-                </div>
+                <div style="font-weight:bold; color:#555;">★ ${day.info.constellation} Star</div>
+                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${starDesc}"</div>
             </div>
         </div>
-        
         ${hourlyGrid}
     `;
-  modal.style.display = "flex";
+
+  openModalById("detailsModal");
 }
 
 // --- SYNERGY / TEAM MODE ---
@@ -1051,11 +917,32 @@ function renderSynergyResults(results) {
 }
 
 // --- UTILS & CLOSERS ---
+
+// Open Modal Helper (Handles Animation)
+function openModalById(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  // 1. Set Display Flex
+  modal.style.display = "flex";
+
+  // 2. Small timeout to allow CSS transition to catch the display change
+  setTimeout(() => {
+    modal.classList.add("show");
+  }, 10);
+}
+
+// Close Modal Helper
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
-  if (modal) {
+  if (!modal) return;
+
+  modal.classList.remove("show");
+
+  // Wait for animation to finish before hiding
+  setTimeout(() => {
     modal.style.display = "none";
-  }
+  }, 200);
 }
 
 function getColorBg(cssClass) {
@@ -1065,9 +952,8 @@ function getColorBg(cssClass) {
   return "#6c757d";
 }
 
-window.onclick = function (e) {
-  // If the element clicked has the class 'modal', it means we clicked the backdrop
-  if (e.target.classList.contains("modal")) {
-    e.target.style.display = "none";
+window.onclick = function (event) {
+  if (event.target.classList.contains("modal")) {
+    closeModal(event.target.id);
   }
 };

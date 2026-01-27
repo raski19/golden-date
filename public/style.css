@@ -211,6 +211,9 @@ header {
     font-size: 0.9rem;
     text-decoration: underline;
 }
+.btn-ghost:hover {
+    background: #e1e1e1;
+}
 
 .header-tools {
     display: flex;
@@ -438,70 +441,94 @@ button:hover { background: #0056b3; }
     gap: 20px;
 }
 
-/* --- UNIVERSAL MODAL STYLES --- */
+/* --- UNIVERSAL MODAL SYSTEM --- */
+
 /* The Background Overlay */
 .modal {
     display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 2000; /* Sit on top of everything */
+    position: fixed;
+    z-index: 2000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    backdrop-filter: blur(4px); /* Glass effect */
 
-    /* Flexbox Centering (Vertical & Horizontal) */
+    /* Centering Magic */
+    display: none; /* JS switches this to 'flex' */
     justify-content: center;
     align-items: center;
+    opacity: 0; /* For animation */
+    transition: opacity 0.2s ease-in-out;
 }
+
+/* When Active (Added by JS) */
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* The White Content Box */
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh; /* 85% of viewport height */
+
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+
+    /* Animation */
+    transform: scale(0.95);
+    transition: transform 0.2s ease-out;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
 /* Sticky Header */
 .modal-header {
     padding: 15px 20px;
     background: #fff;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; /* Never shrink */
+    flex-shrink: 0; /* Prevents header from shrinking */
+    border-radius: 12px 12px 0 0;
 }
-.modal-header h3 {
+
+.modal-header h2, .modal-header h3 {
     margin: 0;
-    font-size: 1.25rem;
-    color: #333;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
+
 .modal-header .close {
-    margin-left: auto; /* Push to right */
     font-size: 28px;
     line-height: 1;
     color: #aaa;
     cursor: pointer;
+    transition: color 0.2s;
+    margin-left: 15px;
 }
-.modal-header .close:hover { color: #333; }
 
-/* The White Content Box */
-.modal-content {
-    background-color: #fefefe;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 85vh; /* Stop it from growing too tall */
-
-    /* THE MAGIC: Flex Column */
-    display: flex;
-    flex-direction: column;
-
-    /* Remove padding here (moved to children) */
-    padding: 0;
-    border: 1px solid #888;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    overflow: hidden; /* Prevent outer scrollbars */
+.modal-header .close:hover {
+    color: #333;
 }
+
 /* Scrollable Body */
 .modal-body {
     padding: 20px;
-    overflow-y: auto; /* Enable Scroll Here */
-    flex-grow: 1;     /* Take remaining space */
+    overflow-y: auto; /* Internal Scrollbar */
+    flex-grow: 1;
 }
 
 /* --- SPECIFIC MODAL TWEAKS --- */
