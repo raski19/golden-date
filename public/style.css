@@ -267,6 +267,47 @@ button:hover { background: #0056b3; }
     cursor: help;
 }
 
+/* --- LEGEND STYLES --- */
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f5;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.legend-item:last-child {
+    border-bottom: none;
+}
+
+/* Color Badges */
+/* Badge & Icon Styles */
+.l-badge {
+    padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
+    font-weight: 700; text-transform: uppercase; min-width: 90px;
+    text-align: center; display: inline-block;
+}
+.lb-gold   { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.lb-green  { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+.lb-blue   { background: #cfe2ff; color: #084298; border: 1px solid #b6d4fe; }
+.lb-red    { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+.l-icon { font-size: 1.2rem; width: 30px; text-align: center; display:inline-block; }
+
+.officer-card {
+    background: #f8f9fa; border: 1px solid #e9ecef;
+    border-radius: 8px; padding: 12px;
+}
+.officer-title {
+    font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+    margin-bottom: 8px; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;
+}
+.officer-list {
+    display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 0.85rem; color: #555;
+}
+
 /* Color Dots for Verdicts */
 .color-dot {
     width: 10px;
@@ -398,7 +439,6 @@ button:hover { background: #0056b3; }
 }
 
 /* --- UNIVERSAL MODAL STYLES --- */
-
 /* The Background Overlay */
 .modal {
     display: none; /* Hidden by default */
@@ -415,7 +455,6 @@ button:hover { background: #0056b3; }
     justify-content: center;
     align-items: center;
 }
-
 /* Sticky Header */
 .modal-header {
     padding: 15px 20px;
@@ -426,13 +465,11 @@ button:hover { background: #0056b3; }
     align-items: center;
     flex-shrink: 0; /* Never shrink */
 }
-
 .modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
     color: #333;
 }
-
 .modal-header .close {
     margin-left: auto; /* Push to right */
     font-size: 28px;
@@ -460,7 +497,6 @@ button:hover { background: #0056b3; }
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     overflow: hidden; /* Prevent outer scrollbars */
 }
-
 /* Scrollable Body */
 .modal-body {
     padding: 20px;
@@ -477,8 +513,6 @@ button:hover { background: #0056b3; }
 #searchResults, #synergyResultsList {
     margin-top: 15px;
 }
-
-#legendBody { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
 
 .search-bar {
     display: flex;

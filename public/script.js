@@ -444,49 +444,80 @@ function applyFilter() {
 
 // --- LEGEND LOGIC ---
 function showLegend() {
+  // 1. Get User Data
   const userId = document.getElementById("userSelect").value;
   const user = allUsersData.find((u) => u._id === userId);
 
-  // Force block display
-  const legendBody = document.getElementById("legendBody");
-  legendBody.style.display = "block";
+  // 2. Target the Unified Modal (detailsModal)
+  // Note: We use the shared modal we styled earlier to keep the look consistent.
+  const modal = document.getElementById("legendModal");
+  const modalBody = document.getElementById("legendBody");
+  const modalTitle = document.getElementById("modalTitle");
 
+  // 3. Set Title
+  modalTitle.innerText = "📖 Legend & Rules";
+
+  // 4. Build Static Content (The Reference Guide)
   const staticLegend = `
-        <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #eee;">
+        <div class="grid-dashboard">
             
-            <h4 style="margin-top:0;">🎨 Verdict Colors</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem; color:#444; margin-bottom:15px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="width:12px; height:12px; background:#ffc107; border-radius:50%; display:inline-block;"></span>
-                    <span><strong>Golden:</strong> Perfect Day</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="width:12px; height:12px; background:#28a745; border-radius:50%; display:inline-block;"></span>
-                    <span><strong>Excellent:</strong> High Luck</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="width:12px; height:12px; background:#17a2b8; border-radius:50%; display:inline-block;"></span>
-                    <span><strong>Good:</strong> Supportive</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="width:12px; height:12px; background:#dc3545; border-radius:50%; display:inline-block;"></span>
-                    <span><strong>Danger:</strong> Breaker/Clash</span>
+            <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
+                <h5 style="margin:0 0 12px 0; font-weight:700; color:#333;">🎨 Verdict Colors</h5>
+                
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="l-badge lb-gold">Golden</span>
+                        <span style="font-size:0.9rem;"><strong>Perfect Day.</strong> Rare luck.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="l-badge lb-green">Excellent</span>
+                        <span style="font-size:0.9rem;"><strong>High Luck.</strong> Action.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="l-badge lb-blue">Good</span>
+                        <span style="font-size:0.9rem;"><strong>Supportive.</strong> Safe.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="l-badge lb-red">Danger</span>
+                        <span style="font-size:0.9rem;"><strong>Clash.</strong> Avoid risks.</span>
+                    </div>
                 </div>
             </div>
 
-            <h4 style="margin-top:0;">★ Symbols</h4>
-            <ul style="font-size:0.9rem; color:#444; line-height:1.6; padding-left:20px; margin-bottom:15px;">
-                <li><span style="color:#28a745; font-weight:800;">✨ Noble:</span> Specific help for YOUR chart.</li>
-                <li><span style="color:#dc3545; font-weight:800;">⛔ Clash:</span> Specific harm to YOUR chart.</li>
-                <li><span class="spirit-badge spirit-yellow">🐉 Yellow Belt</span>: Auspicious Spirit.</li>
-                <li><span class="spirit-badge spirit-black">🐯 Black Belt</span>: Inauspicious Spirit.</li>
-            </ul>
+            <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
+                <h5 style="margin:0 0 12px 0; font-weight:700; color:#333;">★ Map Symbols</h5>
 
-            <h4 style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">📜 12 Day Officers Guide</h4>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="l-icon">✨</span>
+                        <span style="font-size:0.9rem;"><strong>Noble:</strong> Help for YOUR chart.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="l-icon">⛔</span>
+                        <span style="font-size:0.9rem;"><strong>Clash:</strong> Harm to YOUR chart.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="l-icon">🐉</span>
+                        <span style="font-size:0.9rem;"><strong>Yellow Belt:</strong> Good Spirit.</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="l-icon">🐯</span>
+                        <span style="font-size:0.9rem;"><strong>Black Belt:</strong> Bad Spirit.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
+            📜 12 Day Officers Guide
+        </h5>
+        
+        
+        <div class="grid-dashboard">
             
-            <div style="margin-bottom:12px;">
-                <strong style="color:#155724; display:block; margin-bottom:4px;">💰 Wealth & Business</strong>
-                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <div class="officer-card">
+                <div class="officer-title" style="color:#155724;">💰 Wealth & Business</div>
+                <div class="officer-list">
                     <div><strong>Success:</strong> Most auspicious. Investing.</div>
                     <div><strong>Open:</strong> Grand openings, new deals.</div>
                     <div><strong>Full:</strong> Signing contracts, abundance.</div>
@@ -494,78 +525,78 @@ function showLegend() {
                 </div>
             </div>
 
-            <div style="margin-bottom:12px;">
-                <strong style="color:#004085; display:block; margin-bottom:4px;">🚀 Career & Strategy</strong>
-                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <div class="officer-card">
+                <div class="officer-title" style="color:#004085;">🚀 Career & Strategy</div>
+                <div class="officer-list">
                     <div><strong>Establish:</strong> Starting new jobs/roles.</div>
                     <div><strong>Initiate:</strong> Negotiations, groundwork.</div>
-                    <div><strong>Jade Hall:</strong> Academic/Career status.</div>
+                    <div><strong>Jade Hall:</strong> Career status.</div>
                     <div><strong>Travel:</strong> Business trips, moving.</div>
                 </div>
             </div>
 
-            <div style="margin-bottom:12px;">
-                <strong style="color:#0f5132; display:block; margin-bottom:4px;">🧘 Health & Medical</strong>
-                <div style="font-size:0.85rem; color:#555;">
-                    <div style="margin-bottom:4px;">
-                        <em><strong>Restorative Days:</strong> Any Officer tagged <span class="badge" style="background:#d1e7dd; color:#0f5132; font-size:0.7rem;">🧘</span> means the Element heals your specific body type (e.g., Cooling Water for Hot Fire).</em>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; border-top:1px dotted #ccc; padding-top:4px;">
-                        <div><strong>Remove:</strong> Detox, surgery, cleansing.</div>
-                        <div><strong>Destruction:</strong> Removing tumors/illness.</div>
-                        <div><strong>Balance:</strong> Chiropractic, therapy.</div>
-                        <div><strong>Stable:</strong> Long-term medication.</div>
-                    </div>
+            <div class="officer-card">
+                <div class="officer-title" style="color:#0f5132;">🧘 Health & Medical</div>
+                <div class="officer-list">
+                    <div><strong>Remove:</strong> Detox, surgery, cleansing.</div>
+                    <div><strong>Destruction:</strong> Removing tumors/illness.</div>
+                    <div><strong>Balance:</strong> Chiropractic, therapy.</div>
+                    <div><strong>Stable:</strong> Long-term medication.</div>
                 </div>
             </div>
 
-            <div>
-                <strong style="color:#5a32a3; display:block; margin-bottom:4px;">🤝 People & Relationships</strong>
-                <div style="font-size:0.85rem; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <div class="officer-card">
+                <div class="officer-title" style="color:#6610f2;">🤝 People & Relationships</div>
+                <div class="officer-list">
                     <div><strong>Balance:</strong> Marriage, equality.</div>
                     <div><strong>Full:</strong> Parties, gatherings.</div>
-                    <div><strong>Six Harmony:</strong> Bonding, connection.</div>
+                    <div><strong>Harmony:</strong> Bonding, connection.</div>
                     <div><strong>Peach Blossom:</strong> Romance, likability.</div>
                 </div>
             </div>
-
         </div>
     `;
 
-  // --- PART 3: DYNAMIC LEGEND ---
-  let dynamicLegend = `<h4 style="margin-top:0;">🎯 ${user ? user.name + "'s" : "User"} Specific Rules</h4>`;
+  // 5. Build Dynamic Content (User Rules)
+  let dynamicLegend = `
+        <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
+            🎯 ${user ? user.name + "'s" : "User"} Specific Rules
+        </h5>
+    `;
 
   if (!user || !user.actionRules || user.actionRules.length === 0) {
-    dynamicLegend +=
-      "<p style='color:#666; font-style:italic;'>No custom action rules defined.</p>";
+    dynamicLegend += `
+            <div style="background:#f8f9fa; padding:15px; border-radius:8px; text-align:center; color:#666; font-style:italic;">
+                No custom action rules defined for this user.
+            </div>`;
   } else {
-    dynamicLegend += user.actionRules
-      .map((rule) => {
-        const officers = rule.officers.join(" / ");
-        const elements = rule.elements
-          ? rule.elements.join(" / ")
-          : "Calculated";
-
-        return `
-                <div style="border:1px solid #eee; padding:10px; border-radius:6px; background:#fcfcfc; margin-bottom:8px;">
-                    <div style="font-weight:bold; color:#0056b3; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+    dynamicLegend +=
+      `<div class="grid-dashboard">` +
+      user.actionRules
+        .map((rule) => {
+          const officers = rule.officers.join(", ");
+          // We create a nice card for each rule
+          return `
+                <div style="background:#fff; border:1px solid #dee2e6; border-left:4px solid #0d6efd; padding:12px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight:bold; color:#0d6efd; font-size:1rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
                         ${rule.icon} ${rule.action}
                     </div>
-                    <div style="font-size:0.85rem; color:#555;">
-                        <strong>Requires:</strong> Officer [${officers}]
-                    </div>
-                    <div style="font-size:0.8rem; font-style:italic; color:#777; margin-top:4px; border-top:1px dashed #eee; padding-top:4px;">
+                    <div style="font-size:0.85rem; color:#444; margin-bottom:4px;">
                         "${rule.description}"
+                    </div>
+                    <div style="font-size:0.75rem; color:#888; background:#f1f3f5; padding:2px 6px; border-radius:4px; display:inline-block;">
+                        Requires: <strong>${officers}</strong>
                     </div>
                 </div>
             `;
-      })
-      .join("");
+        })
+        .join("") +
+      `</div>`;
   }
 
-  // --- RENDER ---
-  legendBody.innerHTML = staticLegend + dynamicLegend;
-  document.getElementById("legendModal").style.display = "flex";
+  // 6. Inject and Show
+  modalBody.innerHTML = staticLegend + dynamicLegend;
+  modal.style.display = "flex";
 }
 
 // --- DETAILS MODAL ---
