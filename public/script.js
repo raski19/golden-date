@@ -861,7 +861,7 @@ function showDetails(day) {
   document.getElementById("modalBody").innerHTML = `
         ${recHtml}
         
-        <div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
+        <div style="padding:0 10px; border-radius:5px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div>
                 <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
                 <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
