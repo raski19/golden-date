@@ -300,6 +300,60 @@ export const OFFICERS: Record<string, string> = {
   闭: "Close",
 };
 
+export const OFFICER_RECOMMENDATIONS: Record<
+  string,
+  { action: string; desc: string }
+> = {
+  Establish: {
+    action: "Launch",
+    desc: "Start new jobs, propose marriage, business opening.",
+  },
+  Remove: {
+    action: "Cleanse",
+    desc: "Medical procedures, decluttering, ending bad habits.",
+  },
+  Full: {
+    action: "Sign",
+    desc: "Signatures, events, gatherings (abundance). Avoid legal.",
+  },
+  Balance: {
+    action: "Negotiate",
+    desc: "Resolve conflicts, therapy, marriage, construction leveling.",
+  },
+  Stable: {
+    action: "Build",
+    desc: "Long-term activities, marriage, hiring employees.",
+  },
+  Initiate: {
+    action: "Act",
+    desc: "Starting fast projects, swift actions. Avoid travel.",
+  },
+  Destruction: {
+    action: "Demolish",
+    desc: "Tearing down buildings, breaking up, analyzing data.",
+  },
+  Danger: {
+    action: "Pray",
+    desc: "Religious worship, installing beds. High risk generally.",
+  },
+  Success: {
+    action: "Succeed",
+    desc: "The best general day. Everything goes smoothly.",
+  },
+  Receive: {
+    action: "Collect",
+    desc: "Collecting debts, asking for a raise, education.",
+  },
+  Open: {
+    action: "Welcome",
+    desc: "Grand openings, housewarming, welcoming guests.",
+  },
+  Close: {
+    action: "Store",
+    desc: "Storing assets, burying, closing deals. Bad for new starts.",
+  },
+};
+
 export const STARS: Record<string, string> = {
   角: "Horn",
   亢: "Neck",
