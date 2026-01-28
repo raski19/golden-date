@@ -35,12 +35,7 @@
             </div>
 
             <div class="user-controls">
-                <select id="userSelect" onchange="handleUserChange()" class="modern-select">
-                </select>
-
-                <button onclick="openSynergyModal()" class="btn-primary" style="background: #6f42c1;">
-                    <span style="font-size:1rem;">👥</span> Team
-                </button>
+                <select id="userSelect" onchange="handleUserChange()" class="modern-select"></select>
             </div>
         </div>
 
@@ -125,30 +120,7 @@
                 <h3 id="searchTitle">🎯 Search Results</h3>
                 <span class="close" onclick="closeModal('searchModal')">&times;</span>
             </div>
-            <div id="searchBody" class="modal-body"></div>
-        </div>
-    </div>
-    <div id="synergyModal" class="modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">
-                <h3>👥 Build Your Team</h3>
-                <span class="close" onclick="closeModal('synergyModal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p style="color:#666; margin-top:0;">Select members to analyze combined luck.</p>
-                <div id="synergyUserList" style="display:flex; flex-direction:column; gap:10px; margin:15px 0;"></div>
-                <button onclick="calculateSynergy()" style="width:100%; background:#6f42c1; color:white; padding:10px; border:none; border-radius:4px; cursor:pointer;">Analyze Synergy 🚀</button>
-            </div>
-        </div>
-    </div>
-    <div id="synergyResultsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="synergyTitle">🧩 Team Forecast</h3>
-                <span class="close" onclick="closeModal('synergyResultsModal')">&times;</span>
-            </div>
-            <div id="synergyResultsList" class="modal-body">
-            </div>
+            <div id="searchResults" class="modal-body"></div>
         </div>
     </div>
     <!-- MODALS END -->
