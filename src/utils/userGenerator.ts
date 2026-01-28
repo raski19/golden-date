@@ -215,6 +215,8 @@ export function generateUserProfile(
 // 5. EXAMPLE USAGE
 // ==========================================
 
+// Example Usage
+// name, dayMaster, dayBranch, monthBranch
 const zoran = generateUserProfile("Zoran", "Bing", "Horse", "Horse");
 console.log(JSON.stringify(zoran, null, 2));
 

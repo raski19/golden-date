@@ -31,7 +31,7 @@ export interface IUser {
 export interface YellowBlackBelt {
   name: string;
   type: "Yellow" | "Black";
-  icon?: string;
+  icon: string;
   desc: string;
 }
 export interface DayInfo {

@@ -1068,74 +1068,74 @@ export const YELLOW_BLACK_BELT: YellowBlackBelt[] = [
   {
     name: "Green Dragon",
     type: "Yellow",
-    /* icon: "🐉", */
+    icon: "🐉",
     desc: "Supreme Auspicious. Great for everything.",
   },
   {
     name: "Bright Hall",
     type: "Yellow",
-    /* icon: "✨", */
+    icon: "✨",
     desc: "Noble help, success, and clarity.",
   },
   {
     name: "Golden Lock",
     type: "Yellow",
-    /* icon: "🔒", */
+    icon: "🔒",
     desc: "Accumulating wealth, savings, stability.",
   },
   {
     name: "Precious Light",
     type: "Yellow",
-    /* icon: "💎", */
+    icon: "💎",
     desc: "Charisma, status, and recognition.",
   }, // (Heaven Virtue)
   {
     name: "Jade Hall",
     type: "Yellow",
-    /* icon: "🏛️", */
+    icon: "🏛️",
     desc: "Career advancement, study, academic success.",
   },
   {
     name: "Life Governor",
     type: "Yellow",
-    /* icon: "📜", */
+    icon: "📜",
     desc: "Longevity, health, resolving problems.",
   }, // (Heaven Officer)
 
   {
     name: "Heavenly Punishment",
     type: "Black",
-    /* icon: "⚖️", */
+    icon: "⚖️",
     desc: "Legal issues, conflict, punishment.",
   },
   {
     name: "Red Phoenix",
     type: "Black",
-    /* icon: "🐦", */
+    icon: "🐦",
     desc: "Arguments, gossip, and noise.",
   },
   {
     name: "White Tiger",
     type: "Black",
-    /* icon: "🐯", */
+    icon: "🐯",
     desc: "Injury, blood, accidents, travel risks.",
   },
   {
     name: "Heavenly Jail",
     type: "Black",
-    /* icon: "⛓️", */
+    icon: "⛓️",
     desc: "Trapped, delays, feeling stuck.",
   },
   {
     name: "Black Tortoise",
     type: "Black",
-    /* icon: "🐢", */
+    icon: "🐢",
     desc: "Theft, loss, hidden danger, deception.",
   }, // (Gen Wu)
   {
     name: "Grappling Hook",
     type: "Black",
-    /* icon: "🪝", */
+    icon: "🪝",
     desc: "Entanglements, complications, hard to leave.",
   },
 ];

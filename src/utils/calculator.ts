@@ -167,22 +167,34 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // --- 5. ELEMENTAL ANALYSIS ---
   const dayElement = dayData.element;
 
-  if (rules.wealthElements.includes(dayElement)) {
-    score += 15;
-    log.push(`💰 ELEMENT: ${dayElement} supports your Wealth.`);
-    tags.push("WEALTH");
-  } else if (rules.careerElements.includes(dayElement)) {
-    score += 15;
-    log.push(`🚀 ELEMENT: ${dayElement} supports your Career.`);
-    tags.push("CAREER");
-  } else if (rules.healthElements.includes(dayElement)) {
-    score += 10;
-    log.push(`🧘 ELEMENT: ${dayElement} supports your Health.`);
-    tags.push("HEALTH");
-  } else if (rules.avoidElements.includes(dayElement)) {
+  // A. TAGGING (Check ALL independently so filters work)
+  if (rules.wealthElements.includes(dayElement)) tags.push("WEALTH");
+  if (rules.careerElements.includes(dayElement)) tags.push("CAREER");
+  if (rules.healthElements.includes(dayElement)) tags.push("HEALTH");
+
+  // B. SCORING & LOGGING (Priority based to prevent score inflation)
+  // We check Avoid first, then the positives.
+  if (rules.avoidElements.includes(dayElement)) {
     score -= 15;
-    // flags.push("Avoid Element");
     log.push(`⛔ ELEMENT: ${dayElement} is unfavorable for you.`);
+  } else {
+    // Determine the primary benefit for the Log
+    // (We use a flag to ensure we only add the score bonus once)
+    let bonusApplied = false;
+
+    if (rules.wealthElements.includes(dayElement)) {
+      score += 15;
+      log.push(`💰 ELEMENT: ${dayElement} supports your Wealth.`);
+      bonusApplied = true;
+    } else if (rules.careerElements.includes(dayElement)) {
+      score += 15;
+      log.push(`🚀 ELEMENT: ${dayElement} supports your Career.`);
+      bonusApplied = true;
+    } else if (rules.healthElements.includes(dayElement)) {
+      score += 10;
+      log.push(`🧘 ELEMENT: ${dayElement} supports your Health.`);
+      bonusApplied = true;
+    }
   }
 
   // =================================================================
