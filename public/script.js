@@ -147,11 +147,20 @@ function showSearchResults(dates, action) {
     container.innerHTML = dates
       .map(
         (d) => `
-            <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:700; color:#2c3e50; font-size:1.1rem;">${d.date}</div>
-                    <div style="font-size:0.9rem; color:#555;">${d.reason}</div>
+            <div style="border:1px solid #eee; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <strong style="font-size:1.1rem; color:#333;">${d.fullDate}</strong>
+                    <span class="badge ${d.cssClass}" style="font-size:0.85rem;">${d.verdict} (${d.score}pts)</span>
                 </div>
+                
+                <div style="font-size:0.9rem; color:#555; margin-bottom:8px;">
+                     Officer: <strong>${d.dayInfo.officer}</strong> • Star: <strong>${d.dayInfo.constellation}</strong>
+                </div>
+
+                <div style="background:#e8f4fd; color:#004085; padding:8px; border-radius:4px; font-size:0.9rem; border:1px solid #b8daff;">
+                    ${d.matchDetails.icon} <strong>Strategy:</strong> ${d.matchDetails.desc}
+                </div>
+                
                 <div style="background:${d.score >= 85 ? "#fff3cd" : "#d1e7dd"}; 
                             color:${d.score >= 85 ? "#856404" : "#0f5132"}; 
                             padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.85rem;">
