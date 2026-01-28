@@ -369,50 +369,32 @@ function renderGrid(days) {
 
     // --- CONSTELLATION VISUAL LOGIC ---
     const analysis = day.analysis || {};
-    const quality = analysis.starQuality || "Mixed"; // "Good", "Bad", "Mixed"
+    const quality = analysis.starQuality || "Mixed";
     const isFav = analysis.isStarFavorable || false;
     const isAvoid = analysis.isStarAvoid || false;
 
     let starIcon = "★";
     let starColor = "#999"; // Default Grey
-    let starWeight = "400"; // Normal weight
+    let starWeight = "400"; // Normal
 
-    // 1. BAD STARS (Always Red)
-    if (quality === "Bad") {
-      starIcon = "⛔"; // Optional icon change
+    // 1. RED: Explicitly marked as Avoid by backend (Bad Quality OR Good+Breaker)
+    if (isAvoid) {
+      starIcon = "⛔"; // Optional
       starColor = "#dc3545"; // Red
-
-      // Bold ONLY if it also counters the user
-      if (isAvoid) {
-        starWeight = "800";
+      if (quality === "Bad" && analysis.flags.includes("Avoid Element")) {
+        starWeight = "800"; // Bold only if it's a "Double Whammy"
       }
     }
-
-    // 2. GOOD STARS (Always Green)
-    else if (quality === "Good") {
-      starIcon = "🌟"; // Optional icon change
+    // 2. GREEN: Good Quality OR Personally Favorable
+    else if (quality === "Good" || isFav) {
+      starIcon = "🌟";
       starColor = "#28a745"; // Green
-
-      // Bold ONLY if it also favors the user
       if (isFav) {
-        starWeight = "800";
+        starWeight = "800"; // Bold if personally favorable
       }
     }
-
-    // 3. MIXED STARS (Grey unless personally relevant)
-    else {
-      // Turn Red if it clashes with user
-      if (isAvoid) {
-        starColor = "#dc3545";
-        // Normal weight (as requested: "mixed... turn normal red")
-      }
-      // Turn Green if it favors user
-      else if (isFav) {
-        starColor = "#28a745";
-        // Normal weight (as requested: "mixed... turn normal green")
-      }
-      // Otherwise stays Grey #999
-    }
+    // 3. GREY: Mixed & Neutral
+    else starColor = "#999";
 
     const starStyle = `color:${starColor}; font-weight:${starWeight}; font-size: 0.75rem;`;
 

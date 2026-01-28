@@ -186,19 +186,28 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // =================================================================
   // 6. CONSTELLATION CHECK (Runtime Logic)
   // =================================================================
+  const starName = dayData.constellation;
+
+  // Initialize defaults
   let starQuality: "Good" | "Bad" | "Mixed" = "Mixed";
   let isStarFavorable = false;
   let isStarAvoid = false;
 
-  const starName = dayData.constellation;
+  // 1. Check for Day Instability (Breakers)
+  // (We check flags we calculated earlier in the function)
+  const isBrokenDay =
+    flags.includes("YEAR BREAKER") ||
+    flags.includes("MONTH BREAKER") ||
+    flags.includes("PERSONAL BREAKER") ||
+    dayBranch === rules.breaker;
 
   if (starName && CONSTELLATION_DATA[starName]) {
     const starData = CONSTELLATION_DATA[starName];
     const starElement = starData.element;
 
-    // 1. CAPTURE METADATA FOR FRONTEND (Visuals)
-    starQuality = starData.quality; // "Good", "Bad", "Mixed"
+    starQuality = starData.quality;
 
+    // 2. Determine User Relation
     const allUseful = [
       ...rules.wealthElements,
       ...rules.careerElements,
@@ -206,26 +215,38 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     ];
 
     if (allUseful.includes(starElement)) isStarFavorable = true;
-    if (rules.avoidElements.includes(starElement)) isStarAvoid = true;
 
-    // 2. SCORING LOGIC
-    // Bad Quality OR Avoid Element = Penalty
-    if (isStarAvoid || starQuality === "Bad") {
+    // 3. SMART AVOID LOGIC (The Fix)
+    const isAvoidElement = rules.avoidElements.includes(starElement);
+
+    if (starQuality === "Bad") {
+      // Bad stars are always avoided
+      isStarAvoid = true;
+    } else if (starQuality === "Mixed" && isAvoidElement) {
+      // Mixed stars turn Bad if element conflicts
+      isStarAvoid = true;
+    } else if (starQuality === "Good" && isAvoidElement) {
+      // ✨ THE EXCEPTION: Good stars (like Tail) generally OVERRIDE element clashes...
+      // ...UNLESS the day itself is broken.
+      isStarAvoid = isBrokenDay;
+    }
+
+    // 4. SCORING
+    if (isStarAvoid) {
       score -= 10;
 
       let reason = "Negative Star Quality";
-      if (isStarAvoid) reason = `Clash with Avoid Element (${starElement})`;
+      if (starQuality === "Good") reason = "Good star corrupted by Breaker Day";
+      else if (isAvoidElement)
+        reason = `Clash with Avoid Element (${starElement})`;
+
       log.push(`⛔ CONSTELLATION: ${starName} is unfavorable. (${reason})`);
-    }
-    // Good/Mixed Quality AND Favorable Element = Bonus
-    else if (isStarFavorable) {
+    } else if (isStarFavorable) {
       score += 10;
       log.push(
         `✨ CONSTELLATION: ${starName} (${starElement}) matches your useful elements.`,
       );
-    }
-    // Just Good Quality = Small Bonus
-    else if (starQuality === "Good") {
+    } else if (starQuality === "Good") {
       score += 2;
       log.push(`⭐ CONSTELLATION: ${starName} is generally positive.`);
     }
