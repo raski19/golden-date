@@ -257,7 +257,7 @@ function showSearchResults(dates, action) {
             <div style="border:1px solid #eee; margin:5px 0; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                     <strong style="font-size:1.1rem; color:#333;">${d.fullDate}</strong>
-                    <span class="badge ${d.cssClass} ${d.score >= 85 ? "golden" : ""}">${d.verdict} (${d.score}pts)</span>
+                    <span class="badge ${d.cssClass} ${d.score >= 85 ? "golden" : ""}" style="font-weight:bold; letter-spacing:1px;">${d.verdict} (${d.score}pts)</span>
                 </div>
                 
                 <div style="font-size:0.9rem; color:#555; margin-bottom:8px;">

@@ -127,10 +127,8 @@ app.post(
       else if (ruleDef.type === "health")
         requiredElements = user.rules.healthElements;
 
-      console.log(`🔎 Searching: "${action}" (${ruleDef.type})`);
-      console.log(
-        `🎯 Needs: Officer [${ruleDef.officers}] + Elements [${requiredElements}]`,
-      );
+      // console.log(`🔎 Searching: "${action}" (${ruleDef.type})`);
+      // console.log(`🎯 Needs: Officer [${ruleDef.officers}] + Elements [${requiredElements}]`);
 
       // 4. Setup Date Range
       const results: any[] = [];

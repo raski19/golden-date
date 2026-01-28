@@ -6,14 +6,6 @@ export interface StandardRule {
   description: string;
 }
 
-export interface ActionRule {
-  officers: string[];
-  elements: string[];
-  action: string;
-  icon: string;
-  description: string;
-}
-
 export interface UserRules {
   breaker: string;
   selfPunishment: string;
@@ -25,8 +17,6 @@ export interface UserRules {
   favorableElements?: string[];
   avoidElements: string[];
   favorableOfficers: string[];
-  favorableConstellations: string[];
-  avoidConstellations: string[];
 }
 
 export interface IUser {

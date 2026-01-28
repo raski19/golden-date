@@ -32,8 +32,6 @@ const UserSchema: Schema = new Schema({
     favorableElements: [String],
     avoidElements: [String],
     favorableOfficers: [String],
-    favorableConstellations: [String],
-    avoidConstellations: [String],
   },
 });
 

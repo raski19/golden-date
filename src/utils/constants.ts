@@ -343,6 +343,100 @@ export const OFFICERS: Record<string, string> = {
   闭: "Close",
 };
 
+export interface OfficerDefinition {
+  name: string;
+  quality: "Auspicious" | "Neutral" | "Mixed" | "Inauspicious";
+  baseScore: number; // The starting "luck value" before personal elements apply
+  description: string;
+}
+
+export const OFFICER_DATA: Record<string, OfficerDefinition> = {
+  // --- TIER 1: GENERALLY EXCELLENT ---
+  Success: {
+    name: "Success",
+    quality: "Auspicious",
+    baseScore: 15, // High Boost
+    description:
+      "The most auspicious day. Great for almost every positive activity.",
+  },
+  Open: {
+    name: "Open",
+    quality: "Auspicious",
+    baseScore: 10,
+    description: "Good for opening shop, networking, and housewarming.",
+  },
+  Stable: {
+    name: "Stable",
+    quality: "Auspicious",
+    baseScore: 10,
+    description:
+      "Great for long-term activities, marriage, and medical treatments.",
+  },
+  Full: {
+    name: "Full",
+    quality: "Auspicious",
+    baseScore: 10,
+    description: "Good for abundance, signing contracts, and collecting debt.",
+  },
+
+  // --- TIER 2: GOOD / CONTEXTUAL ---
+  Establish: {
+    name: "Establish",
+    quality: "Auspicious",
+    baseScore: 8,
+    description:
+      "Good for starting new jobs, proposing marriage, or business deals.",
+  },
+  Remove: {
+    name: "Remove",
+    quality: "Mixed",
+    baseScore: 5, // Positive for cleansing, negative for acquisition
+    description: "Excellent for detox and cleaning. Bad for signing contracts.",
+  },
+  Balance: {
+    name: "Balance",
+    quality: "Neutral",
+    baseScore: 5,
+    description:
+      "Good for negotiations and marriage. Bad for legal disputes (wins become ties).",
+  },
+  Initiate: {
+    name: "Initiate",
+    quality: "Neutral",
+    baseScore: 2,
+    description: "Good for renovations and groundwork. Often mild energy.",
+  },
+  Receive: {
+    name: "Receive",
+    quality: "Mixed",
+    baseScore: 0, // Neutral because it can mean 'receiving illness' too
+    description: "Good for getting rewards/education. Avoid visiting the sick.",
+  },
+
+  // --- TIER 3: RISKY / SPECIALIST ---
+  Danger: {
+    name: "Danger",
+    quality: "Mixed",
+    baseScore: -5, // Negative baseline, but not terrible
+    description:
+      "Unstable energy. Good for religious acts/bed positioning. Bad for travel/risk.",
+  },
+  Destruction: {
+    name: "Destruction",
+    quality: "Inauspicious",
+    baseScore: -10, // Harsh energy
+    description:
+      "Good only for demolition or surgery. Bad for everything else.",
+  },
+  Close: {
+    name: "Close",
+    quality: "Inauspicious",
+    baseScore: -15, // Stagnant energy
+    description:
+      "Qi is still. Good for burial or saving money. Bad for everything else.",
+  },
+};
+
 export interface StandardRule {
   officers: string[];
   type: "wealth" | "career" | "health";
@@ -558,6 +652,334 @@ export const STARS: Record<string, string> = {
   张: "Bow",
   翼: "Wing",
   轸: "Carriage",
+};
+
+export interface Constellation {
+  name: string;
+  chineseName: string;
+  pinyin: string;
+  group: "East" | "South" | "West" | "North";
+  element: "Wood" | "Fire" | "Earth" | "Metal" | "Water";
+  quality: "Good" | "Bad" | "Mixed";
+  keywords: string[];
+  description: string;
+}
+export const CONSTELLATION_DATA: Record<string, Constellation> = {
+  // --- GREEN DRAGON (EAST) ---
+  Horn: {
+    name: "Horn",
+    chineseName: "角",
+    pinyin: "Jiao",
+    group: "East",
+    element: "Wood", // [1]
+    quality: "Good",
+    keywords: ["Wealth", "Assets", "Marriage", "Travel"],
+    description:
+      "The King of Stars. Excellent for increasing wealth, ground-breaking, and marriage. Avoid funerals.",
+  },
+  Neck: {
+    name: "Neck",
+    chineseName: "亢",
+    pinyin: "Kang",
+    group: "East",
+    element: "Metal", // [2]
+    quality: "Bad",
+    keywords: ["Loss", "Divorce", "Scuppered Plans"],
+    description:
+      "Generally causes loss or failure in business and marriage. Only good for divorce or ending abusive relationships.",
+  },
+  Foundation: {
+    name: "Foundation",
+    chineseName: "氐",
+    pinyin: "Di",
+    group: "East",
+    element: "Earth", // [3]
+    quality: "Mixed",
+    keywords: ["Public Speaking", "Property", "Injury"],
+    description:
+      "Good for public events and property investment. Bad for construction (risk of fire) or travel.",
+  },
+  House: {
+    name: "House",
+    chineseName: "房",
+    pinyin: "Fang",
+    group: "East",
+    element: "Fire", // [4]
+    quality: "Good",
+    keywords: ["Prosperity", "Multiplier", "Container"],
+    description:
+      "The Rabbit Star. Great for wealth accumulation, marriage, and long-distance travel. Contains energy.",
+  },
+  Heart: {
+    name: "Heart",
+    chineseName: "心",
+    pinyin: "Xin",
+    group: "East",
+    element: "Fire", // [5] but associated with Fire star
+    quality: "Bad",
+    keywords: ["Disaster", "Plague", "Affliction"],
+    description:
+      "Inauspicious in most contexts. Risk of medical issues, legal troubles, and disasters. Avoid.",
+  },
+  Tail: {
+    name: "Tail",
+    chineseName: "尾",
+    pinyin: "Wei",
+    group: "East",
+    element: "Fire", // [6]
+    quality: "Good",
+    keywords: ["Negotiation", "Closing Deals", "Renovation"],
+    description:
+      "Excellent for finalising contracts, weddings, and construction. Amplifies good fortune.",
+  },
+  Basket: {
+    name: "Basket",
+    chineseName: "箕",
+    pinyin: "Ji",
+    group: "East",
+    element: "Water", // [7]
+    quality: "Good",
+    keywords: ["Collections", "Feng Shui", "Business"],
+    description:
+      "The Star of Commerce. Best for debt collection, receiving money, and Feng Shui water placement.",
+  },
+
+  // --- RED PHOENIX (SOUTH) ---
+  Well: {
+    name: "Well",
+    chineseName: "井",
+    pinyin: "Jing",
+    group: "South",
+    element: "Wood", // [8]
+    quality: "Mixed",
+    keywords: ["Planning", "Legal", "Obstacles"],
+    description:
+      "Good for planning and legal work, but generally difficult progress. Avoid for marriage.",
+  },
+  Ghost: {
+    name: "Ghost",
+    chineseName: "鬼",
+    pinyin: "Gui",
+    group: "South",
+    element: "Metal", // [9]
+    quality: "Bad",
+    keywords: ["Fear", "Withdrawal", "Negative Influence"],
+    description:
+      "Associated with spirit realm and fear. Avoid for important personal or business activities.",
+  },
+  Willow: {
+    name: "Willow",
+    chineseName: "柳",
+    pinyin: "Liu",
+    group: "South",
+    element: "Earth", // [10]
+    quality: "Bad",
+    keywords: ["Discord", "Anxiety", "Tantrums"],
+    description:
+      "Aggressive energy. Hinders progress and causes relationship disharmony.",
+  },
+  Star: {
+    name: "Star",
+    chineseName: "星",
+    pinyin: "Xing",
+    group: "South",
+    element: "Fire", // [11]
+    quality: "Mixed",
+    keywords: ["Negotiation", "Openings", "Loneliness"],
+    description:
+      "Good for business openings and negotiations. Bad for marriage and funerals.",
+  },
+  Bow: {
+    name: "Bow",
+    chineseName: "張",
+    pinyin: "Zhang",
+    group: "South",
+    element: "Fire", // [12]
+    quality: "Good",
+    keywords: ["Launches", "Branding", "Reunion"],
+    description:
+      "Purely positive. Great for branding, launches, and mending relationships.",
+  },
+  Wing: {
+    name: "Wing",
+    chineseName: "翼",
+    pinyin: "Yi",
+    group: "South",
+    element: "Fire", // [13]
+    quality: "Bad",
+    keywords: ["Treachery", "Change of Tides", "Separation"],
+    description:
+      "Inauspicious. Represents betrayal or sudden negative changes. Avoid for partnerships.",
+  },
+  Carriage: {
+    name: "Carriage",
+    chineseName: "軫",
+    pinyin: "Zhen",
+    group: "South",
+    element: "Water", // [14]
+    quality: "Good",
+    keywords: ["Transport", "Sales", "Return on Investment"],
+    description:
+      "Great for travel, logistics, and business travel. Fosters cooperation and sales.",
+  },
+
+  // --- WHITE TIGER (WEST) ---
+  Astride: {
+    name: "Astride",
+    chineseName: "奎",
+    pinyin: "Kui",
+    group: "West",
+    element: "Wood", // [15]
+    quality: "Good",
+    keywords: ["Renovation", "Travel", "Unity"],
+    description:
+      "The Treasure of the Sky. Good for construction and travel. Bad for opening ceremonies (legal risk).",
+  },
+  Mound: {
+    name: "Mound",
+    chineseName: "婁",
+    pinyin: "Lou",
+    group: "West",
+    element: "Metal", // [16] (Arietis/Metal)
+    quality: "Good",
+    keywords: ["Health", "Wealth Guardian", "Medicine"],
+    description:
+      "Guardian of Wealth. Excellent for seeking medical treatment and long-term asset accumulation.",
+  },
+  Stomach: {
+    name: "Stomach",
+    chineseName: "胃",
+    pinyin: "Wei",
+    group: "West",
+    element: "Earth", // [17]
+    quality: "Good",
+    keywords: ["Storage", "Savings", "Value"],
+    description:
+      "Good for long-term savings, storage, and value retention. Stable energy.",
+  },
+  Pleiades: {
+    name: "Pleiades",
+    chineseName: "昴",
+    pinyin: "Mao",
+    group: "West",
+    element: "Fire", // [18] (Sun/Fire)
+    quality: "Bad",
+    keywords: ["Endings", "Gossip", "Financial Ruin"],
+    description:
+      "Represents finality and the closing of gates. Avoid for all new beginnings.",
+  },
+  Net: {
+    name: "Net",
+    chineseName: "畢",
+    pinyin: "Bi",
+    group: "West",
+    element: "Metal", // [19] associated with Moon/Metal
+    quality: "Mixed",
+    keywords: ["Capture", "Construction", "Hunting"],
+    description:
+      "Good for construction and hunting/capturing. Bad for freedom/release.",
+  },
+  Beak: {
+    name: "Beak",
+    chineseName: "觜",
+    pinyin: "Zui",
+    group: "West",
+    element: "Fire", // [20]
+    quality: "Bad",
+    keywords: ["Arguments", "Legal issues", "Loss"],
+    description:
+      "Highly negative for date selection. Risk of conflict and legal trouble.",
+  },
+  Orion: {
+    name: "Orion",
+    chineseName: "參",
+    pinyin: "Shen",
+    group: "West",
+    element: "Water", // [21]
+    quality: "Mixed",
+    keywords: ["Business", "Promotion", "Construction"],
+    description:
+      "Excellent for business and construction (Three Generals). Bad for marriage (fidelity issues).",
+  },
+
+  // --- BLACK TORTOISE (NORTH) ---
+  Dipper: {
+    name: "Dipper",
+    chineseName: "斗",
+    pinyin: "Dou",
+    group: "North",
+    element: "Water", // [22]
+    quality: "Good",
+    keywords: ["Ambition", "Career", "Feng Shui"],
+    description:
+      "The Temple of Heaven. Great for career advancement, Feng Shui, and commercial activities.",
+  },
+  Ox: {
+    name: "Ox",
+    chineseName: "牛",
+    pinyin: "Niu",
+    group: "North",
+    element: "Metal", // [23]
+    quality: "Bad",
+    keywords: ["Broken Promises", "Loss", "Disaster"],
+    description:
+      "Disastrous for contracts and marriage. Symbolises labour with no reward.",
+  },
+  "Weaving Maiden": {
+    name: "Weaving Maiden",
+    chineseName: "女",
+    pinyin: "Nu",
+    group: "North",
+    element: "Earth", // [24]
+    quality: "Mixed",
+    keywords: ["Disputes", "Construction", "Learning"],
+    description:
+      "Good for academic pursuits and construction. Bad for relationships and legal matters.",
+  },
+  Void: {
+    name: "Void",
+    chineseName: "虛",
+    pinyin: "Xu",
+    group: "North",
+    element: "Fire", // [25]
+    quality: "Bad",
+    keywords: ["Emptiness", "Illness", "Grief"],
+    description:
+      "Exclusively negative for Date Selection. Associated with illness and sadness.",
+  },
+  Danger: {
+    name: "Danger",
+    chineseName: "危",
+    pinyin: "Wei",
+    group: "North",
+    element: "Fire", // [26]
+    quality: "Bad",
+    keywords: ["Danger", "Bodily Harm", "Extreme Risk"],
+    description:
+      "Represents looming danger. Avoid for travel and physical activities.",
+  },
+  Room: {
+    name: "Room",
+    chineseName: "室",
+    pinyin: "Shi",
+    group: "North",
+    element: "Water", // [27]
+    quality: "Good",
+    keywords: ["Multiplier", "Real Estate", "Marriage"],
+    description:
+      "The Room of accumulation. Excellent for marriage, real estate, and multiplying wealth.",
+  },
+  Wall: {
+    name: "Wall",
+    chineseName: "壁",
+    pinyin: "Bi",
+    group: "North",
+    element: "Water", // [28]
+    quality: "Good",
+    keywords: ["Stability", "Protection", "Contracts"],
+    description:
+      "Blocks negative energy. Good for signing contracts, archives, and official openings.",
+  },
 };
 
 // Dictionary for the 28 Constellations
