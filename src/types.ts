@@ -84,6 +84,9 @@ export interface ScoreResult {
   cautionAction: string;
   actionKeywords: string;
   officerRec: OfficerRecommendation;
+  starQuality: string;
+  isStarFavorable: boolean;
+  isStarAvoid: boolean;
 }
 
 export interface TenGodsResult {

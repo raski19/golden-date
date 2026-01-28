@@ -368,32 +368,47 @@ function renderGrid(days) {
     }
 
     // --- CONSTELLATION VISUAL LOGIC ---
-    const flags = day.analysis.flags;
+    const analysis = day.analysis || {};
+    const quality = analysis.starQuality || "Mixed"; // "Good", "Bad", "Mixed"
+    const isFav = analysis.isStarFavorable || false;
+    const isAvoid = analysis.isStarAvoid || false;
 
     let starIcon = "★";
-    // Default: Grey
-    let starStyle = "color:#999; font-size: 0.75rem;";
+    let starColor = "#999"; // Default Grey
+    let starWeight = "400"; // Normal weight
 
-    // 1. Personal Clash (Bold Red)
-    if (flags.includes("Bad Star")) {
+    // 1. RED BOLD: Bad star + Unfavorable Element (or just Avoid Element)
+    if ((quality === "Bad" && isAvoid) || isAvoid) {
       starIcon = "⛔";
-      starStyle = "color:#dc3545; font-weight:800; font-size: 0.8rem;";
+      starColor = "#dc3545"; // Red
+      starWeight = "800"; // Bold
     }
-    // 2. Personal Noble (Bold Green)
-    else if (flags.includes("Good Star")) {
-      starIcon = "✨";
-      starStyle = "color:#28a745; font-weight:800; font-size: 0.8rem;";
-    }
-    // 3. Global Bad (Normal Red) - Check Log text
-    else if (day.analysis.log.some((l) => l.includes("Gloomy Star"))) {
-      starIcon = "☁️";
-      starStyle = "color:#dc3545; font-weight:400; font-size: 0.75rem;";
-    }
-    // 4. Global Good (Normal Green) - Check Log text
-    else if (day.analysis.log.some((l) => l.includes("Lucky Star"))) {
+    // 2. GREEN BOLD: Good star + Favorable Element (Best Case)
+    else if (quality === "Good" && isFav) {
       starIcon = "🌟";
-      starStyle = "color:#28a745; font-weight:400; font-size: 0.75rem;";
+      starColor = "#28a745"; // Green
+      starWeight = "800"; // Bold
     }
+    // 3. GREEN NORMAL: (Good Star) OR (Mixed Star + Favorable Element)
+    else if (quality === "Good" || (quality === "Mixed" && isFav)) {
+      starIcon = "★"; // Keep simple star for normal good
+      starColor = "#28a745"; // Green
+      starWeight = "400"; // Normal
+    }
+    // 4. RED NORMAL: Generally Bad star
+    else if (quality === "Bad") {
+      starIcon = "★";
+      starColor = "#dc3545"; // Red
+      starWeight = "400"; // Normal
+    }
+    // 5. GREY NORMAL: Mixed/Neutral star (Default)
+    else {
+      starIcon = "★";
+      starColor = "#999"; // Grey
+      starWeight = "400"; // Normal
+    }
+
+    const starStyle = `color:${starColor}; font-weight:${starWeight}; font-size: 0.75rem;`;
 
     // --- NINE STAR VISUAL LOGIC (Period 9 Optimized) ---
     const ns = day.info.nineStar || ""; // e.g. "5 Yellow (Disaster)"
