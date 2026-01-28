@@ -190,6 +190,7 @@ header {
     font-size: 0.9rem;
     color: #495057;
     width: 140px;
+    padding: 0;
 }
 
 .btn-search {
@@ -359,6 +360,11 @@ button:hover { background: #0056b3; }
 .filter-btn.health-active { background-color: #20c997; color: white; border-color: #20c997; }
 
 /* CALENDAR GRID */
+
+.star { font-size: 0.75rem; font-style: italic; color: #666; margin-top: 2px; text-align: right;}
+.footer-badges { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 3px; }
+.badge { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); }
+
 .calendar-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
 .day-header { text-align: center; font-weight: bold; padding: 10px; color: #666; background: #e9ecef; border-radius: 4px; }
 .day-card {
@@ -431,10 +437,6 @@ button:hover { background: #0056b3; }
     font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.star { font-size: 0.75rem; font-style: italic; color: #666; margin-top: 2px; text-align: right;}
-.footer-badges { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 3px; }
-.badge { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); }
-
 .grid-dashboard {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Two equal columns */
@@ -445,7 +447,6 @@ button:hover { background: #0056b3; }
 
 /* The Background Overlay */
 .modal {
-    display: none; /* Hidden by default */
     position: fixed;
     z-index: 2000;
     left: 0;
@@ -474,8 +475,8 @@ button:hover { background: #0056b3; }
     background-color: #ffffff;
     border-radius: 12px;
     width: 90%;
-    max-width: 600px;
-    max-height: 85vh; /* 85% of viewport height */
+    max-width: 610px;
+    max-height: 90vh; /* 90% of viewport height */
 
     /* Layout */
     display: flex;

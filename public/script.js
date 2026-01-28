@@ -5,6 +5,114 @@ let currentMonth = currentDate.getMonth() + 1;
 let currentFilter = "all";
 let allUsersData = [];
 
+// TODO: Fetch this from Backend
+const CLIENT_RULES = [
+  // --- WEALTH ---
+  {
+    officers: ["Success"],
+    type: "wealth",
+    action: "Sign Contracts",
+    icon: "📝",
+    description:
+      "The #1 day for closing deals, financial agreements, and binding contracts.",
+  },
+  {
+    officers: ["Open", "Full"],
+    type: "wealth",
+    action: "Networking & Sales",
+    icon: "🥂",
+    description: "Launch projects, host events, or network with crowds.",
+  },
+  {
+    officers: ["Receive"],
+    type: "wealth",
+    action: "Ask for Favors",
+    icon: "🤲",
+    description: "Collect debts, ask for funding, or seek mentorship.",
+  },
+  {
+    officers: ["Full"],
+    type: "wealth",
+    action: "Branding & Visibility",
+    icon: "🌟",
+    description:
+      "Maximize returns, debt collection, and high-visibility marketing.",
+  },
+  // --- CAREER ---
+  {
+    officers: ["Stable"],
+    type: "career",
+    action: "Acquire Assets",
+    icon: "🏦",
+    description:
+      "Buy property, hire key staff, or lock in long-term investments.",
+  },
+  {
+    officers: ["Establish"],
+    type: "career",
+    action: "Start New Role",
+    icon: "🏗️",
+    description: "Begin a new job, lay groundwork, or discuss future strategy.",
+  },
+  {
+    officers: ["Remove"],
+    type: "career",
+    action: "Fix Problems",
+    icon: "🧹",
+    description:
+      "Remove obstacles, fire bad clients, or solve technical issues.",
+  },
+  {
+    officers: ["Balance"],
+    type: "career",
+    action: "Negotiations",
+    icon: "⚖️",
+    description: "Resolve conflicts or negotiate terms with partners.",
+  },
+  // --- HEALTH ---
+  {
+    officers: ["Remove", "Destruction"],
+    type: "health",
+    action: "Health & Reset",
+    icon: "🧘‍♀️",
+    description:
+      "Best day to remove illness, start a detox, have surgery, or break bad habits.",
+  },
+  {
+    officers: ["Balance"],
+    type: "health",
+    action: "Adjustment/Therapy",
+    icon: "🧘",
+    description:
+      "Ideal for alignment (chiropractic), therapy, or balancing diet.",
+  },
+  {
+    officers: ["Stable"],
+    type: "health",
+    action: "Start Long-term Treatment",
+    icon: "💊",
+    description: "Begin a long course of medication or a new fitness regime.",
+  },
+];
+const SEARCH_GOALS = [
+  // --- Wealth ---
+  { value: "Sign Contracts", label: "📝 Sign Contracts" },
+  { value: "Networking & Sales", label: "🥂 Networking & Sales" },
+  { value: "Ask for Favors", label: "🤲 Ask for Favors" },
+  { value: "Branding & Visibility", label: "🌟 Branding & Visibility" },
+
+  // --- Career ---
+  { value: "Acquire Assets", label: "🏦 Acquire Assets" },
+  { value: "Start New Role", label: "🏗️ Start New Role" },
+  { value: "Fix Problems", label: "🧹 Fix Problems" },
+  { value: "Negotiations", label: "⚖️ Negotiations" },
+
+  // --- Health ---
+  { value: "Health & Reset", label: "🧘‍♀️ Health & Reset (Detox)" },
+  { value: "Adjustment/Therapy", label: "🧘 Adjustment / Therapy" },
+  { value: "Start Long-term Treatment", label: "💊 Start Medication" },
+];
+
 // --- INITIALIZATION ---
 // Fetch users immediately when the script loads
 fetch("/api/users")
@@ -22,6 +130,7 @@ fetch("/api/users")
     updateDateInputs();
     // Initialize Calendar & Goal Dropdown
     handleUserChange();
+    populateGoalSelect();
   });
 
 // --- NAVIGATION ---
@@ -69,20 +178,18 @@ function handleUserChange() {
 }
 
 function populateGoalSelect() {
-  const userId = document.getElementById("userSelect").value;
-  const user = allUsersData.find((u) => u._id === userId);
-  const goalSelect = document.getElementById("goalSelect");
+  const select = document.getElementById("goalSelect");
+  if (!select) return;
 
-  goalSelect.innerHTML = '<option value="">Select a Goal...</option>';
+  // Add a default placeholder
+  let html = `<option value="" disabled selected>Select a Goal...</option>`;
 
-  if (user && user.actionRules) {
-    user.actionRules.forEach((rule) => {
-      const opt = document.createElement("option");
-      opt.value = rule.action;
-      opt.innerText = `${rule.icon} ${rule.action}`;
-      goalSelect.appendChild(opt);
-    });
-  }
+  // Add options from our list
+  html += SEARCH_GOALS.map(
+    (g) => `<option value="${g.value}">${g.label}</option>`,
+  ).join("");
+
+  select.innerHTML = html;
 }
 
 async function findDates() {
@@ -147,10 +254,10 @@ function showSearchResults(dates, action) {
     container.innerHTML = dates
       .map(
         (d) => `
-            <div style="border:1px solid #eee; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc;">
+            <div style="border:1px solid #eee; margin:5px 0; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                     <strong style="font-size:1.1rem; color:#333;">${d.fullDate}</strong>
-                    <span class="badge ${d.cssClass}" style="font-size:0.85rem;">${d.verdict} (${d.score}pts)</span>
+                    <span class="badge ${d.cssClass} ${d.score >= 85 ? "golden" : ""}">${d.verdict} (${d.score}pts)</span>
                 </div>
                 
                 <div style="font-size:0.9rem; color:#555; margin-bottom:8px;">
@@ -159,12 +266,6 @@ function showSearchResults(dates, action) {
 
                 <div style="background:#e8f4fd; color:#004085; padding:8px; border-radius:4px; font-size:0.9rem; border:1px solid #b8daff;">
                     ${d.matchDetails.icon} <strong>Strategy:</strong> ${d.matchDetails.desc}
-                </div>
-                
-                <div style="background:${d.score >= 85 ? "#fff3cd" : "#d1e7dd"}; 
-                            color:${d.score >= 85 ? "#856404" : "#0f5132"}; 
-                            padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                    Score: ${d.score}
                 </div>
             </div>
         `,
@@ -490,16 +591,12 @@ function applyFilter() {
 
 // --- LEGEND LOGIC ---
 function showLegend() {
-  // 1. Get Data
-  const userId = document.getElementById("userSelect").value;
-  const user = allUsersData.find((u) => u._id === userId);
-
-  // 2. Target LEGEND Modal Elements
   const body = document.getElementById("legendBody");
-  // (Title is static in HTML, no need to set it via JS unless dynamic)
+  const userId = document.getElementById("userSelect").value;
+  const user = allUsersData ? allUsersData.find((u) => u._id === userId) : null;
 
-  // 3. Static Content
-  const staticLegend = `
+  // A. STATIC CONTENT (Colors, Symbols, 12 Officers)
+  let html = `
         <div class="grid-dashboard">
             <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
                 <h5 style="margin:0 0 12px 0; font-weight:700; color:#333;">🎨 Verdict Colors</h5>
@@ -590,44 +687,51 @@ function showLegend() {
         </div>
     `;
 
-  // 4. Dynamic Content
-  let dynamicLegend = `
-        <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
-            🎯 ${user ? user.name + "'s" : "User"} Specific Rules
-        </h5>
-    `;
+  // B. DYNAMIC USER RULES
+  // This section changes based on who is selected in the dropdown
+  if (user && user.rules) {
+    html += `
+            <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
+                🎯 ${user.name}'s Specific Rules
+            </h5>
+            <div class="grid-dashboard">`;
 
-  if (!user || !user.actionRules || user.actionRules.length === 0) {
-    dynamicLegend += `
-            <div style="background:#f8f9fa; padding:15px; border-radius:8px; text-align:center; color:#666; font-style:italic;">
-                No custom action rules defined for this user.
-            </div>`;
-  } else {
-    dynamicLegend +=
-      `<div class="grid-dashboard">` +
-      user.actionRules
-        .map((rule) => {
-          const officers = rule.officers.join(", ");
-          return `
+    html += CLIENT_RULES.map((rule) => {
+      // 1. Find User's Element for this Rule
+      let elements = [];
+      if (rule.type === "wealth") elements = user.rules.wealthElements || [];
+      else if (rule.type === "career")
+        elements = user.rules.careerElements || [];
+      else if (rule.type === "health")
+        elements = user.rules.healthElements || [];
+
+      const elString = elements.length > 0 ? elements.join(", ") : "None";
+
+      // 2. Render Card (Exact style you requested)
+      return `
                 <div style="background:#fff; border:1px solid #dee2e6; border-left:4px solid #0d6efd; padding:12px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                     <div style="font-weight:bold; color:#0d6efd; font-size:1rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
                         ${rule.icon} ${rule.action}
                     </div>
                     <div style="font-size:0.85rem; color:#444; margin-bottom:4px;">
-                        "${rule.description}"
+                        "${rule.desc}"
                     </div>
-                    <div style="font-size:0.75rem; color:#888; background:#f1f3f5; padding:2px 6px; border-radius:4px; display:inline-block;">
-                        Requires: <strong>${officers}</strong>
+                    <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+                        <span style="font-size:0.75rem; color:#555; background:#f1f3f5; padding:2px 8px; border-radius:4px; border:1px solid #e9ecef;">
+                            Requires: <strong>${rule.officers.join(", ")}</strong>
+                        </span>
+                        <span style="font-size:0.75rem; color:#0f5132; background:#d1e7dd; padding:2px 8px; border-radius:4px; border:1px solid #badbcc;">
+                            Your Element: <strong>${elString}</strong>
+                        </span>
                     </div>
                 </div>
             `;
-        })
-        .join("") +
-      `</div>`;
+    }).join("");
+
+    html += `</div>`;
   }
 
-  // 5. Inject & Open
-  body.innerHTML = staticLegend + dynamicLegend;
+  body.innerHTML = html;
   openModalById("legendModal");
 }
 

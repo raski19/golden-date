@@ -36,8 +36,6 @@ export interface IUser {
   dayMaster: string; // e.g. "Bing"
   baZiBranch: string; // e.g. "Horse"
   description?: string;
-  standardRules?: StandardRule[];
-  actionRules: ActionRule[];
   rules: UserRules;
 }
 

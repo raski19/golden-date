@@ -1,37 +1,16 @@
+// ==========================================
+// CONSTANTS & DATA MAPS
+// ==========================================
+
 export const YANG_STEMS: string[] = ["Jia", "Bing", "Wu", "Geng", "Ren"];
 export const YIN_STEMS: string[] = ["Yi", "Ding", "Ji", "Xin", "Gui"];
 
-export const BRANCH_HOURS: Record<string, string> = {
-  Rat: "23:00 - 01:00",
-  Ox: "01:00 - 03:00",
-  Tiger: "03:00 - 05:00",
-  Rabbit: "05:00 - 07:00",
-  Dragon: "07:00 - 09:00",
-  Snake: "09:00 - 11:00",
-  Horse: "11:00 - 13:00",
-  Goat: "13:00 - 15:00",
-  Monkey: "15:00 - 17:00",
-  Rooster: "17:00 - 19:00",
-  Dog: "19:00 - 21:00",
-  Pig: "21:00 - 23:00",
-};
+// Self-Punishment (刑) - Element amplifies itself negatively
+export const SELF_PUNISHMENT = ["Dragon", "Horse", "Rooster", "Pig"];
 
-export const BRANCH_ELEMENTS: Record<string, string> = {
-  Tiger: "Wood",
-  Rabbit: "Wood",
-  Snake: "Fire",
-  Horse: "Fire",
-  Dragon: "Earth",
-  Dog: "Earth",
-  Ox: "Earth",
-  Goat: "Earth",
-  Monkey: "Metal",
-  Rooster: "Metal",
-  Pig: "Water",
-  Rat: "Water",
-};
-
-export const STEM_ELEMENTS: Record<string, string> = {
+// Element Map (Stems & Branches)
+export const ELEMENT_MAP: Record<string, string> = {
+  // Stems
   Jia: "Wood",
   Yi: "Wood",
   Bing: "Fire",
@@ -42,6 +21,55 @@ export const STEM_ELEMENTS: Record<string, string> = {
   Xin: "Metal",
   Ren: "Water",
   Gui: "Water",
+  // Branches
+  Tiger: "Wood",
+  Rabbit: "Wood",
+  Snake: "Fire",
+  Horse: "Fire",
+  Ox: "Earth",
+  Dragon: "Earth",
+  Goat: "Earth",
+  Dog: "Earth",
+  Monkey: "Metal",
+  Rooster: "Metal",
+  Pig: "Water",
+  Rat: "Water",
+};
+
+// Production Cycle (Mother -> Child)
+export const PRODUCTION_CYCLE: Record<string, string> = {
+  Wood: "Fire",
+  Fire: "Earth",
+  Earth: "Metal",
+  Metal: "Water",
+  Water: "Wood",
+};
+
+// Control Cycle (Controller -> Victim)
+export const CONTROL_CYCLE: Record<string, string> = {
+  Wood: "Earth",
+  Earth: "Water",
+  Water: "Fire",
+  Fire: "Metal",
+  Metal: "Wood",
+};
+
+// Reverse Lookup for Control (Victim -> Controller) - Used for finding Influence
+export const REVERSE_CONTROL_CYCLE: Record<string, string> = {
+  Earth: "Wood",
+  Water: "Earth",
+  Fire: "Water",
+  Metal: "Fire",
+  Wood: "Metal",
+};
+
+// Reverse Lookup for Production (Child -> Mother) - Used for finding Resource
+export const REVERSE_PRODUCTION_CYCLE: Record<string, string> = {
+  Fire: "Wood",
+  Earth: "Fire",
+  Metal: "Earth",
+  Water: "Metal",
+  Wood: "Water",
 };
 
 export const ELEMENT_RELATIONSHIPS: Record<string, Record<string, string>> = {
@@ -111,6 +139,21 @@ export const ELEMENT_LOOKUP: Record<string, string> = {
   "Gui (Water)": "Water",
 };
 
+export const BRANCH_HOURS: Record<string, string> = {
+  Rat: "23:00 - 01:00",
+  Ox: "01:00 - 03:00",
+  Tiger: "03:00 - 05:00",
+  Rabbit: "05:00 - 07:00",
+  Dragon: "07:00 - 09:00",
+  Snake: "09:00 - 11:00",
+  Horse: "11:00 - 13:00",
+  Goat: "13:00 - 15:00",
+  Monkey: "15:00 - 17:00",
+  Rooster: "17:00 - 19:00",
+  Dog: "19:00 - 21:00",
+  Pig: "21:00 - 23:00",
+};
+
 export const CHINESE_NUMBERS: Record<string, string> = {
   一: "1",
   二: "2",
@@ -123,7 +166,6 @@ export const CHINESE_NUMBERS: Record<string, string> = {
   九: "9",
 };
 
-// 2. Interaction Maps
 export const CLASH_PAIRS: Record<string, string> = {
   Rat: "Horse",
   Horse: "Rat",
@@ -169,7 +211,7 @@ export const THREE_HARMONY: Record<string, string[]> = {
   Goat: ["Rabbit", "Pig"],
 };
 
-// 3. Shen Sha (Stars) Logic
+// Based on DM
 export const STEM_NOBLEMAN: Record<string, string[]> = {
   Jia: ["Ox", "Goat"],
   Wu: ["Ox", "Goat"],
@@ -183,6 +225,7 @@ export const STEM_NOBLEMAN: Record<string, string[]> = {
   Xin: ["Horse", "Tiger"],
 };
 
+// Based on Month Pillar
 export const TRAVELING_HORSE: Record<string, string> = {
   Snake: "Pig",
   Rooster: "Pig",
@@ -213,6 +256,7 @@ export const PEACH_BLOSSOM: Record<string, string> = {
   Dragon: "Rooster",
 };
 
+// Based on DM - Intelligence
 export const ACADEMIC_STAR: Record<string, string> = {
   Jia: "Snake",
   Yi: "Horse",
@@ -284,7 +328,6 @@ export const BRANCHES_LIST: string[] = [
   "Pig",
 ];
 
-// 1. Time & Logistics
 export const OFFICERS: Record<string, string> = {
   建: "Establish",
   除: "Remove",
@@ -307,7 +350,6 @@ export interface StandardRule {
   icon: string;
   description: string;
 }
-
 export const STANDARD_RULES: StandardRule[] = [
   // --- WEALTH ---
   {
@@ -579,6 +621,7 @@ export const GOOD_STARS: string[] = [
   "Carriage", // (Zhen) "Logistics". Fosters cooperation, sales, and returns [8].
   "Orion", // (Shen) "Achievement". Promotes recognition & business negotiation [9].
   "Basket", // (Ji) "Receipt of Monies". Good for debt collection & commerce [10].
+  "Star", // (Xing) "Legal Troubles". Good for openings, but bad for harmony [21, 22].
 ];
 
 // Inherently Inauspicious Stars (High Risk / Avoid for important events)
@@ -593,7 +636,6 @@ export const BAD_STARS: string[] = [
   "Heart", // (Xin) "Affliction". Risk of medical issues/disasters [18].
   "Neck", // (Kang) "Collapse". Scuppers investment & construction plans [19].
   "Void", // (Xu) "Emptiness". Darkness & grief [20].
-  "Star", // (Xing) "Legal Troubles". Good for openings, but bad for harmony [21, 22].
 ];
 
 interface YellowBlackBelt {

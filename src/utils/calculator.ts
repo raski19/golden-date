@@ -4,7 +4,7 @@ import {
   CLASH_PAIRS,
   SIX_HARMONY,
   THREE_HARMONY,
-  BRANCH_ELEMENTS,
+  ELEMENT_MAP,
   BRANCH_HOURS,
   STEM_NOBLEMAN,
   BRANCH_START_TIMES,
@@ -14,11 +14,11 @@ import {
   GOAT_BLADE_RULES,
   YANG_STEMS,
   ELEMENT_RELATIONSHIPS,
-  STEM_ELEMENTS,
   STEM_INFO,
   TEN_GODS,
   TEN_GOD_ACTIONS,
   OFFICER_RECOMMENDATIONS,
+  STANDARD_RULES,
 } from "./constants";
 import { calculateRootStrength } from "./rootStrength";
 
@@ -54,8 +54,8 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // --- CALCULATE DAY TYPE (Ten God Category) ---
   const userDmClean = user.dayMaster.split(" ")[0]; // "Bing"
   const dayStemClean = dayData.stem.split(" ")[0]; // "Jia"
-  const dmElement = STEM_ELEMENTS[userDmClean]; // "Fire"
-  const dayStemElement = STEM_ELEMENTS[dayStemClean]; // "Wood"
+  const dmElement = ELEMENT_MAP[userDmClean]; // "Fire"
+  const dayStemElement = ELEMENT_MAP[dayStemClean]; // "Wood"
   let dayType = "Unknown";
   if (dmElement && dayStemElement) {
     if (ELEMENT_RELATIONSHIPS[dmElement]) {
@@ -206,7 +206,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   // Power Boosts
   if (rules.favorableBranches.includes(dayBranch)) {
     score += 20;
-    const branchElem = BRANCH_ELEMENTS[dayBranch] || "Unknown";
+    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown";
     const role = getRole(branchElem);
     log.push(`Great Branch: ${dayBranch} provides ${role}.`);
   }
@@ -231,29 +231,48 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   }
 
   // Action Rules
-  if (user.actionRules && score > 0) {
+  if (score > 40) {
+    // ====================================================
+    // ⚡ DYNAMIC ACTION MATCHING (No DB array needed)
+    // ====================================================
+    // Optimization: Don't check actions for bad days
     const dayOfficer = officerName;
-    const stemElem = dayData.element;
-    const branchElem = BRANCH_ELEMENTS[dayBranch] || "Unknown";
+    const stemElem = dayData.element; // Day Stem Element (e.g. "Fire")
+    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown"; // Day Branch Element
 
     let bonusApplied = false;
 
-    user.actionRules.forEach((rule) => {
-      const officerMatch = rule.officers.includes(dayOfficer);
-      const elementMatch =
-        rule.elements.includes(stemElem) || rule.elements.includes(branchElem);
+    STANDARD_RULES.forEach((rule) => {
+      // 1. Check Officer Match (e.g. Is today "Success"?)
+      if (!rule.officers.includes(dayOfficer)) return;
 
-      if (officerMatch && elementMatch) {
+      // 2. Resolve User's Target Elements based on Rule Type
+      let targetElements: string[] = [];
+      if (rule.type === "wealth") targetElements = user.rules.wealthElements;
+      else if (rule.type === "career")
+        targetElements = user.rules.careerElements;
+      else if (rule.type === "health")
+        targetElements = user.rules.healthElements;
+
+      // 3. Check Element Match
+      // Does the day's Stem or Branch contain the user's needed element?
+      const elementMatch =
+        targetElements.includes(stemElem) ||
+        targetElements.includes(branchElem);
+
+      // 4. If Both Match -> It's a Go!
+      if (elementMatch) {
         specificActions.push({
           action: rule.action,
           icon: rule.icon,
           desc: rule.description,
         });
 
+        // Apply Bonus only once per day (to prevent score inflation)
         if (!bonusApplied) {
           score += 15;
           bonusApplied = true;
-          log.push(`🎯 MATCH: Perfect day for ${rule.action}.`);
+          log.push(`🎯 MATCH: Perfect day for ${rule.action} (${rule.type}).`);
         }
       }
     });
@@ -355,7 +374,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
 
   // Tagging
   const stemElement = dayData.element;
-  const branchElement = BRANCH_ELEMENTS[dayBranch] || "Unknown";
+  const branchElement = ELEMENT_MAP[dayBranch] || "Unknown";
 
   if (score > 40) {
     if (
