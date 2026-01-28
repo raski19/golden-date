@@ -1,3 +1,5 @@
+import { YellowBlackBelt } from "../types";
+
 // ==========================================
 // CONSTANTS & DATA MAPS
 // ==========================================
@@ -1062,83 +1064,78 @@ export const STAR_DEFINITIONS: Record<string, string> = {
     "Moves/Transports Wealth. Good for business expansion, transport, and seeking assistance.",
 };
 
-interface YellowBlackBelt {
-  name: string;
-  type: "Yellow" | "Black";
-  icon: string;
-  desc: string;
-}
 export const YELLOW_BLACK_BELT: YellowBlackBelt[] = [
   {
     name: "Green Dragon",
     type: "Yellow",
-    icon: "🐉",
+    /* icon: "🐉", */
     desc: "Supreme Auspicious. Great for everything.",
   },
   {
     name: "Bright Hall",
     type: "Yellow",
-    icon: "✨",
+    /* icon: "✨", */
     desc: "Noble help, success, and clarity.",
-  },
-  {
-    name: "Heavenly Punishment",
-    type: "Black",
-    icon: "⚖️",
-    desc: "Legal issues, conflict, punishment.",
-  },
-  {
-    name: "Red Phoenix",
-    type: "Black",
-    icon: "🐦",
-    desc: "Arguments, gossip, and noise.",
   },
   {
     name: "Golden Lock",
     type: "Yellow",
-    icon: "🔒",
+    /* icon: "🔒", */
     desc: "Accumulating wealth, savings, stability.",
   },
   {
     name: "Precious Light",
     type: "Yellow",
-    icon: "💎",
+    /* icon: "💎", */
     desc: "Charisma, status, and recognition.",
   }, // (Heaven Virtue)
   {
-    name: "White Tiger",
-    type: "Black",
-    icon: "🐯",
-    desc: "Injury, blood, accidents, travel risks.",
-  },
-  {
     name: "Jade Hall",
     type: "Yellow",
-    icon: "🏛️",
+    /* icon: "🏛️", */
     desc: "Career advancement, study, academic success.",
+  },
+  {
+    name: "Life Governor",
+    type: "Yellow",
+    /* icon: "📜", */
+    desc: "Longevity, health, resolving problems.",
+  }, // (Heaven Officer)
+
+  {
+    name: "Heavenly Punishment",
+    type: "Black",
+    /* icon: "⚖️", */
+    desc: "Legal issues, conflict, punishment.",
+  },
+  {
+    name: "Red Phoenix",
+    type: "Black",
+    /* icon: "🐦", */
+    desc: "Arguments, gossip, and noise.",
+  },
+  {
+    name: "White Tiger",
+    type: "Black",
+    /* icon: "🐯", */
+    desc: "Injury, blood, accidents, travel risks.",
   },
   {
     name: "Heavenly Jail",
     type: "Black",
-    icon: "⛓️",
+    /* icon: "⛓️", */
     desc: "Trapped, delays, feeling stuck.",
   },
   {
     name: "Black Tortoise",
     type: "Black",
-    icon: "🐢",
+    /* icon: "🐢", */
     desc: "Theft, loss, hidden danger, deception.",
   }, // (Gen Wu)
   {
-    name: "Life Governor",
-    type: "Yellow",
-    icon: "📜",
-    desc: "Longevity, health, resolving problems.",
-  }, // (Heaven Officer)
-  {
     name: "Grappling Hook",
     type: "Black",
-    icon: "🪝",
+    /* icon: "🪝", */
     desc: "Entanglements, complications, hard to leave.",
   },
 ];

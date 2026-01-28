@@ -351,6 +351,8 @@ function renderGrid(days) {
 
     const pScore = day.analysis.pillarScore || 0;
     const pIcon = day.analysis.pillarIcon || "";
+    const pNote = day.analysis.pillarNote || "";
+    let strongFoundation = false;
 
     // 1. TRANSLATE SCORE TO SIMPLE ENGLISH
     let supportLabel = "Unsupported";
@@ -362,6 +364,7 @@ function renderGrid(days) {
     } else if (pScore >= 60) {
       supportLabel = "Supported";
       supportColor = "#0d6efd"; // Blue
+      strongFoundation = true;
     } else if (pScore >= 40) {
       supportLabel = "Weak";
       supportColor = "#fd7e14"; // Orange
@@ -522,16 +525,16 @@ function renderGrid(days) {
             <div class="card-header">
                 <span class="date-num">${day.day}</span>
                 <span class="spirit-badge ${ybClass}" title="${yb.name}: ${yb.desc}">
-                    ${yb.icon} ${yb.name}
+                    ${yb.name}
                 </span>
             </div>
             
             <div class="officer-row" style="text-align:center; margin-bottom:5px;">
-                <span style="font-size:0.85rem; color:#555; font-weight:600; text-transform: uppercase;">${day.info.officer}</span>
+                <span style="font-size:0.85rem; color:#555; font-weight:600; text-transform: uppercase;">${strongFoundation ? "️<span title='Strong Foundation'>🏛️</span>" : ""}${day.info.officer}</span>
                 <span style="${typeStyle}">(${type})</span>
             </div>
             
-            <div class="pillars-container" style="position:relative;">
+            <div class="pillars-container" style="position:relative;" title="${pNote}">
                 <div class="pillar-row">
                     <span class="pillar-txt">${simpleStem}</span>
                     <span class="god-badge" data-god="${stemBadge}">${stemBadge}</span>

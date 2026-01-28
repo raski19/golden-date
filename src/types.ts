@@ -28,6 +28,12 @@ export interface IUser {
   rules: UserRules;
 }
 
+export interface YellowBlackBelt {
+  name: string;
+  type: "Yellow" | "Black";
+  icon?: string;
+  desc: string;
+}
 export interface DayInfo {
   date: string;
   stem: string;
@@ -41,12 +47,7 @@ export interface DayInfo {
   nineStar: string;
   nineStarDesc: string;
   rawStar: string;
-  yellowBlackBelt: {
-    name: string;
-    type: "Yellow" | "Black";
-    icon: string;
-    desc: string;
-  };
+  yellowBlackBelt: YellowBlackBelt;
   // luminary: {
   //   name: string;
   //   element: string;

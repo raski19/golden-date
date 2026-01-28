@@ -17,138 +17,44 @@ export const calculateRootStrength = (
   // =========================================================
 
   // Special cases organized by branch-stem combination
+  // prettier-ignore
   const specialCases: Record<string, RootStrengthResult> = {
     // Wu Earth special cases
-    "Wu-Tiger": {
-      level: "Low",
-      description: "False Root (Overpowered)",
-      icon: "🥀",
-      score: 15,
-    },
-    "Wu-Monkey": {
-      level: "Low",
-      description: "False Root (Overpowered)",
-      icon: "🥀",
-      score: 15,
-    },
+    "Wu-Tiger": { level: "Low", description: "False Root (Overpowered)", icon: "🥀", score: 15 },
+    "Wu-Monkey": { level: "Low", description: "False Root (Overpowered)", icon: "🥀", score: 15 },
 
     // Geng Metal special cases
-    "Geng-Snake": {
-      level: "High",
-      description: "Growth Root (Long Life)",
-      icon: "🌱🌳",
-      score: 85,
-    },
-    "Geng-Dog": {
-      level: "Medium",
-      description: "Dry Earth (Forging)",
-      icon: "🛡️",
-      score: 65,
-    },
-    "Geng-Rat": {
-      level: "None",
-      description: "Exhausting to Branch",
-      icon: "⚔️💧",
-      score: 5,
-    },
+    "Geng-Snake": { level: "High", description: "Growth Root (Long Life)", icon: "🌱🌳", score: 85 },
+    "Geng-Dog": { level: "Medium", description: "Dry Earth (Forging)", icon: "🛡️", score: 65 },
+    "Geng-Rat": { level: "None", description: "Exhausting to Branch", icon: "⚔️💧", score: 5 },
 
     // Xin Metal special cases
-    "Xin-Snake": {
-      level: "Low",
-      description: "Trapped/Melted",
-      icon: "🫠",
-      score: 25,
-    },
-    "Xin-Ox": {
-      level: "High",
-      description: "Wet Earth (Nourishing)",
-      icon: "💎",
-      score: 85,
-    },
+    "Xin-Snake": { level: "Low", description: "Trapped/Melted", icon: "🫠", score: 25 },
+    "Xin-Ox": { level: "High", description: "Wet Earth (Nourishing)", icon: "💎", score: 85 },
 
     // Ren Water special cases
-    "Ren-Monkey": {
-      level: "High",
-      description: "Superior Growth Root",
-      icon: "🌊",
-      score: 95,
-    },
-    "Ren-Tiger": {
-      level: "None",
-      description: "Exhausting to Branch",
-      icon: "🌊🌲",
-      score: 5,
-    },
+    "Ren-Monkey": { level: "High", description: "Superior Growth Root", icon: "🌊", score: 95 },
+    "Ren-Tiger": { level: "None", description: "Exhausting to Branch", icon: "🌊🌲", score: 5 },
 
     // Bing Fire special cases
-    "Bing-Tiger": {
-      level: "High",
-      description: "Superior Growth Root",
-      icon: "🔥✨",
-      score: 95,
-    },
+    "Bing-Tiger": { level: "High", description: "Superior Growth Root", icon: "🔥✨", score: 95 },
 
     // Ding Fire special cases
-    "Ding-Ox": {
-      level: "None",
-      description: "Threatened by Hidden Water",
-      icon: "🔥💧",
-      score: 10,
-    },
+    "Ding-Ox": { level: "None", description: "Threatened by Hidden Water", icon: "🔥💧", score: 10 },
 
     // Jia Wood special cases
-    "Jia-Pig": {
-      level: "High",
-      description: "Superior Growth Root",
-      icon: "🌲",
-      score: 95,
-    },
+    "Jia-Pig": { level: "High", description: "Superior Growth Root", icon: "🌲", score: 95 },
 
     // Gui Water special cases
-    "Gui-Ox": {
-      level: "High",
-      description: "Winter Season Root",
-      icon: "❄️",
-      score: 85,
-    },
-    "Gui-Dragon": {
-      level: "Medium",
-      description: "Storage (Restricted)",
-      icon: "💧",
-      score: 60,
-    },
-    "Gui-Rabbit": {
-      level: "Low",
-      description: "Nourishes Branch (Not Rooted)",
-      icon: "💧🌱",
-      score: 15,
-    },
-    "Gui-Goat": {
-      level: "Low",
-      description: "Controlled by Earth, Exhausted by Wood",
-      icon: "🌊⛰️",
-      score: 15,
-    },
+    "Gui-Ox": { level: "High", description: "Winter Season Root", icon: "❄️", score: 85 },
+    "Gui-Dragon": { level: "Medium", description: "Storage (Restricted)", icon: "💧", score: 60 },
+    "Gui-Rabbit": { level: "Low", description: "Nourishes Branch (Not Rooted)", icon: "💧🌱", score: 15 },
+    "Gui-Goat": { level: "Low", description: "Controlled by Earth, Exhausted by Wood", icon: "🌊⛰️", score: 15 },
 
     // Yi Wood special cases
-    "Yi-Dragon": {
-      level: "Low",
-      description: "Graveyard Root (Weak)",
-      icon: "🥀",
-      score: 35,
-    },
-    "Yi-Goat": {
-      level: "Low",
-      description: "Graveyard Root (Weak)",
-      icon: "🥀",
-      score: 35,
-    },
-    "Yi-Snake": {
-      level: "Low",
-      description: "Exhausted by Fire, Cut by Metal",
-      icon: "🪵🔥✂️",
-      score: 15,
-    },
+    "Yi-Dragon": { level: "Low", description: "Graveyard Root (Weak)", icon: "🥀", score: 35 },
+    "Yi-Goat": { level: "Low", description: "Graveyard Root (Weak)", icon: "🥀", score: 35 },
+    "Yi-Snake": { level: "Low", description: "Exhausted by Fire, Cut by Metal", icon: "🪵🔥✂️", score: 15 },
   };
 
   // Check special cases first
@@ -269,47 +175,48 @@ export const calculateRootStrength = (
     }
   }
 
-  // Check for resource root (producing element)
-  const elementProduction: Record<string, string[]> = {
-    Wood: ["Fire"], // Wood produces Fire
-    Fire: ["Earth"], // Fire produces Earth
-    Earth: ["Metal"], // Earth produces Metal
-    Metal: ["Water"], // Metal produces Water
-    Water: ["Wood"], // Water produces Wood
+  const resourceElements: Record<string, string> = {
+    Wood: "Water", // Water produces Wood
+    Fire: "Wood", // Wood produces Fire
+    Earth: "Fire", // Fire produces Earth
+    Metal: "Earth", // Earth produces Metal
+    Water: "Metal", // Metal produces Water
   };
 
-  const resourceElements = elementProduction[element] || [];
-  for (const resourceElement of resourceElements) {
-    const resourceStems = Object.keys(stemElement).filter(
-      (key) => stemElement[key] === resourceElement,
-    );
+  // 1️⃣ What produces the Day Stem?
+  const resourceElement = resourceElements[s];
 
-    for (const resourceStem of resourceStems) {
-      if (hidden.includes(resourceStem)) {
-        const position = hidden.indexOf(resourceStem);
+  // 2️⃣ Which stems belong to that element?
+  const resourceStems = Object.keys(stemElement).filter(
+    (stem) => stemElement[stem] === resourceElement,
+  );
 
-        if (position === 0) {
-          return {
-            level: "Resource",
-            description: "Strong Resource Root",
-            icon: getElementIcon(resourceElement),
-            score: 70,
-          };
-        } else if (position === 1) {
-          return {
-            level: "Resource",
-            description: "Moderate Resource Root",
-            icon: getElementIcon(resourceElement),
-            score: 50,
-          };
-        } else {
-          return {
-            level: "Low",
-            description: "Weak Resource Root",
-            icon: getElementIcon(resourceElement),
-            score: 30,
-          };
-        }
+  // 3️⃣ Check hidden stems by position (root strength)
+  for (let i = 0; i < hidden.length; i++) {
+    const hiddenStem = hidden[i];
+
+    if (resourceStems.includes(hiddenStem)) {
+      if (i === 0) {
+        return {
+          level: "Resource",
+          description: "Strong Resource Root",
+          icon: getElementIcon(resourceElement),
+          score: 70,
+        };
+      } else if (i === 1) {
+        return {
+          level: "Resource",
+          description: "Moderate Resource Root",
+          icon: getElementIcon(resourceElement),
+          score: 50,
+        };
+      } else {
+        return {
+          level: "Low",
+          description: "Weak Resource Root",
+          icon: getElementIcon(resourceElement),
+          score: 30,
+        };
       }
     }
   }
