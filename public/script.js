@@ -377,35 +377,41 @@ function renderGrid(days) {
     let starColor = "#999"; // Default Grey
     let starWeight = "400"; // Normal weight
 
-    // 1. RED BOLD: Bad star + Unfavorable Element (or just Avoid Element)
-    if ((quality === "Bad" && isAvoid) || isAvoid) {
-      starIcon = "⛔";
+    // 1. BAD STARS (Always Red)
+    if (quality === "Bad") {
+      starIcon = "⛔"; // Optional icon change
       starColor = "#dc3545"; // Red
-      starWeight = "800"; // Bold
+
+      // Bold ONLY if it also counters the user
+      if (isAvoid) {
+        starWeight = "800";
+      }
     }
-    // 2. GREEN BOLD: Good star + Favorable Element (Best Case)
-    else if (quality === "Good" && isFav) {
-      starIcon = "🌟";
+
+    // 2. GOOD STARS (Always Green)
+    else if (quality === "Good") {
+      starIcon = "🌟"; // Optional icon change
       starColor = "#28a745"; // Green
-      starWeight = "800"; // Bold
+
+      // Bold ONLY if it also favors the user
+      if (isFav) {
+        starWeight = "800";
+      }
     }
-    // 3. GREEN NORMAL: (Good Star) OR (Mixed Star + Favorable Element)
-    else if (quality === "Good" || (quality === "Mixed" && isFav)) {
-      starIcon = "★"; // Keep simple star for normal good
-      starColor = "#28a745"; // Green
-      starWeight = "400"; // Normal
-    }
-    // 4. RED NORMAL: Generally Bad star
-    else if (quality === "Bad") {
-      starIcon = "★";
-      starColor = "#dc3545"; // Red
-      starWeight = "400"; // Normal
-    }
-    // 5. GREY NORMAL: Mixed/Neutral star (Default)
+
+    // 3. MIXED STARS (Grey unless personally relevant)
     else {
-      starIcon = "★";
-      starColor = "#999"; // Grey
-      starWeight = "400"; // Normal
+      // Turn Red if it clashes with user
+      if (isAvoid) {
+        starColor = "#dc3545";
+        // Normal weight (as requested: "mixed... turn normal red")
+      }
+      // Turn Green if it favors user
+      else if (isFav) {
+        starColor = "#28a745";
+        // Normal weight (as requested: "mixed... turn normal green")
+      }
+      // Otherwise stays Grey #999
     }
 
     const starStyle = `color:${starColor}; font-weight:${starWeight}; font-size: 0.75rem;`;
