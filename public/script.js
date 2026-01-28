@@ -372,25 +372,34 @@ function renderGrid(days) {
     const quality = analysis.starQuality || "Mixed";
     const isFav = analysis.isStarFavorable || false;
     const isAvoid = analysis.isStarAvoid || false;
+    const isAvoidElement = analysis.isAvoidElement || false;
 
     let starIcon = "★";
-    let starColor = "#999"; // Default Grey
-    let starWeight = "400"; // Normal
+    let starColor = "#999";
+    let starWeight = "400";
 
-    // 1. RED: Explicitly marked as Avoid by backend (Bad Quality OR Good+Breaker)
+    // 1. RED (Avoid)
     if (isAvoid) {
-      starIcon = "⛔"; // Optional
+      starIcon = "⛔";
       starColor = "#dc3545"; // Red
-      if (quality === "Bad" && analysis.flags.includes("Avoid Element")) {
-        starWeight = "800"; // Bold only if it's a "Double Whammy"
+
+      // BOLD RED CONDITION:
+      // It is bold if it is inherently Bad AND the Element is also Avoided.
+      // (This covers Pleiades: Bad + Fire Clash = Bold Red)
+      // (This exempts Ghost: Bad + Metal Support = Normal Red)
+      if (quality === "Bad" && isAvoidElement) {
+        starWeight = "800";
       }
     }
-    // 2. GREEN: Good Quality OR Personally Favorable
-    else if (quality === "Good" || isFav) {
+    // 2. GREEN (Positive)
+    else if (quality === "Good" || (quality === "Mixed" && isFav)) {
       starIcon = "🌟";
       starColor = "#28a745"; // Green
-      if (isFav) {
-        starWeight = "800"; // Bold if personally favorable
+
+      // BOLD GREEN CONDITION:
+      // Only if inherent Good AND Favorable Element
+      if (quality === "Good" && isFav) {
+        starWeight = "800";
       }
     }
     // 3. GREY: Mixed & Neutral

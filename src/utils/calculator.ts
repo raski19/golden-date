@@ -20,7 +20,7 @@ import {
   STANDARD_RULES,
   CONSTELLATION_DATA,
 } from "./constants";
-import { calculateRootStrength } from "./rootStrength";
+import { calculateRootStrengthCached } from "./rootStrength";
 
 export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   let score = 50; // Start Neutral
@@ -100,7 +100,8 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   const guide = TEN_GOD_ACTIONS[tenGodName] || TEN_GOD_ACTIONS["Friend"];
 
   // --- 3. PILLAR STRENGTH ---
-  const rootInfo = calculateRootStrength(dayStemClean, dayData.dayBranch);
+  // const rootInfo = calculateRootStrength(dayStemClean, dayData.dayBranch);
+  const rootInfo = calculateRootStrengthCached(dayStemClean, dayData.dayBranch);
   const pillarNote = rootInfo.description;
   const pillarIcon = rootInfo.icon;
   const pillarScore = rootInfo.score;
@@ -146,6 +147,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       starQuality: "mixed",
       isStarFavorable: false,
       isStarAvoid: false,
+      isAvoidElement: false,
     };
   }
 
@@ -192,6 +194,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   let starQuality: "Good" | "Bad" | "Mixed" = "Mixed";
   let isStarFavorable = false;
   let isStarAvoid = false;
+  let isAvoidElement = false;
 
   // 1. Check for Day Instability (Breakers)
   // (We check flags we calculated earlier in the function)
@@ -217,7 +220,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     if (allUseful.includes(starElement)) isStarFavorable = true;
 
     // 3. SMART AVOID LOGIC (The Fix)
-    const isAvoidElement = rules.avoidElements.includes(starElement);
+    isAvoidElement = rules.avoidElements.includes(starElement);
 
     if (starQuality === "Bad") {
       // Bad stars are always avoided
@@ -481,6 +484,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     starQuality,
     isStarFavorable,
     isStarAvoid,
+    isAvoidElement,
   };
 };
 

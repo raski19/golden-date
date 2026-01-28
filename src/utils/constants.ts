@@ -126,6 +126,38 @@ export const STEM_INFO: Record<
   Gui: { element: "Water", polarity: "Yin" },
 };
 
+export const HIDDEN_STEMS: Record<string, string[]> = {
+  Rat: ["Gui"], // Water
+  Ox: ["Ji", "Gui", "Xin"], // Earth, Water, Metal
+  Tiger: ["Jia", "Bing", "Wu"], // Wood, Fire, Earth
+  Rabbit: ["Yi"], // Wood
+  Dragon: ["Wu", "Yi", "Gui"], // Earth, Wood, Water
+  Snake: ["Bing", "Geng", "Wu"], // Fire, Metal, Earth
+  Horse: ["Ding", "Ji"], // Fire, Earth
+  Goat: ["Ji", "Yi", "Ding"], // Earth, Wood, Fire
+  Monkey: ["Geng", "Ren", "Wu"], // Metal, Water, Earth
+  Rooster: ["Xin"], // Metal
+  Dog: ["Wu", "Xin", "Ding"], // Earth, Metal, Fire
+  Pig: ["Ren", "Jia"], // Water, Wood
+};
+
+export const SEASON_BRANCHES: Record<string, string[]> = {
+  Spring: ["Tiger", "Rabbit"], // Wood
+  Summer: ["Snake", "Horse"], // Fire
+  Autumn: ["Monkey", "Rooster"], // Metal
+  Winter: ["Pig", "Rat"], // Water
+  // Earth is associated with the last month of each season: Ox, Dragon, Goat, Dog
+};
+
+// These 5 pairs of stems attract and combine with each other.
+export const STEM_COMBINATIONS: string[][] = [
+  ["Jia", "Ji"], // Combine into Earth
+  ["Yi", "Geng"], // Combine into Metal
+  ["Bing", "Xin"], // Combine into Water
+  ["Ding", "Ren"], // Combine into Wood
+  ["Wu", "Gui"], // Combine into Fire
+];
+
 export const ELEMENT_LOOKUP: Record<string, string> = {
   "Jia (Wood)": "Wood",
   "Yi (Wood)": "Wood",
@@ -349,7 +381,6 @@ export interface OfficerDefinition {
   baseScore: number; // The starting "luck value" before personal elements apply
   description: string;
 }
-
 export const OFFICER_DATA: Record<string, OfficerDefinition> = {
   // --- TIER 1: GENERALLY EXCELLENT ---
   Success: {
@@ -1030,35 +1061,6 @@ export const STAR_DEFINITIONS: Record<string, string> = {
   Carriage:
     "Moves/Transports Wealth. Good for business expansion, transport, and seeking assistance.",
 };
-
-// Inherently Auspicious Stars (Safe bets for Growth, Wealth, & Starts)
-export const GOOD_STARS: string[] = [
-  "Room", // (Shi) The "Multiplier". Best for new business & assets [1].
-  "Wall", // (Bi) "Stability & Prosperity". Blocks negative energy [2].
-  "Mound", // (Lou) "Guardian of Wealth". Always good news for business [3].
-  "Stomach", // (Wei) "Storehouse". Good for fulfillment & promotions [4].
-  "Horn", // (Jiao) "King of Stars". Increases wealth, good for marriage [5].
-  "Tail", // (Wei) "Closing Deals". Excellent for negotiations & renovation [6].
-  "Bow", // (Zhang) "Purely Positive". Great for launches & branding [7].
-  "Carriage", // (Zhen) "Logistics". Fosters cooperation, sales, and returns [8].
-  "Orion", // (Shen) "Achievement". Promotes recognition & business negotiation [9].
-  "Basket", // (Ji) "Receipt of Monies". Good for debt collection & commerce [10].
-  "Star", // (Xing) "Legal Troubles". Good for openings, but bad for harmony [21, 22].
-];
-
-// Inherently Inauspicious Stars (High Risk / Avoid for important events)
-export const BAD_STARS: string[] = [
-  "Pleiades", // (Mao) "The End". Signifies financial ruin & finality [11].
-  "Ox", // (Niu) "Broken Promises". Disastrous for contracts & marriage [12].
-  "Danger", // (Wei) "Misfortune". Bodily harm & looming danger [13].
-  "Ghost", // (Gui) "Fear". Strong negative influence, withdrawal [14].
-  "Willow", // (Liu) "Discord". Hinders progress, causes anxiety [15].
-  "Beak", // (Zui) "Loss". Highly negative for Date Selection [16].
-  "Wing", // (Yi) "Tides Change". Inauspicious for weddings/partnerships [17].
-  "Heart", // (Xin) "Affliction". Risk of medical issues/disasters [18].
-  "Neck", // (Kang) "Collapse". Scuppers investment & construction plans [19].
-  "Void", // (Xu) "Emptiness". Darkness & grief [20].
-];
 
 interface YellowBlackBelt {
   name: string;

@@ -2,295 +2,400 @@ export interface RootStrengthResult {
   level: "High" | "Medium" | "Low" | "None" | "Resource";
   description: string;
   icon: string;
-  score: number; // Added for algorithmic weighting if needed later
+  score: number;
 }
 
 export const calculateRootStrength = (
   stem: string,
   branch: string,
 ): RootStrengthResult => {
-  // Normalize inputs
   const s = stem.trim();
   const b = branch.trim();
 
   // =========================================================
-  // 1. CRITICAL EXCEPTIONS (Source: 60 Pillars & Qualifying 10 Gods)
+  // 1. PRIMARY EXCEPTIONS (Higher priority overrides)
   // =========================================================
 
-  // [A] The "False Root" Exception (Wu Earth)
-  // Wu Earth contains Fire/Earth Qi, but Tiger/Monkey seasonal Qi overpowers it.
-  if (s === "Wu" && ["Tiger", "Monkey"].includes(b)) {
-    return {
+  // Special cases organized by branch-stem combination
+  const specialCases: Record<string, RootStrengthResult> = {
+    // Wu Earth special cases
+    "Wu-Tiger": {
       level: "Low",
       description: "False Root (Overpowered)",
       icon: "🥀",
-      score: 10,
-    };
-  }
+      score: 15,
+    },
+    "Wu-Monkey": {
+      level: "Low",
+      description: "False Root (Overpowered)",
+      icon: "🥀",
+      score: 15,
+    },
 
-  // [B] The "Hot Root" Nuance (Metal on Snake)
-  // Snake is Fire, but it is the "Birth Place" of Metal.
-  if (b === "Snake") {
-    if (s === "Geng") {
-      // Geng on Snake is "Long Life" (Growth). Very strong but volatile.
-      return {
-        level: "High",
-        description: "Growth Root (Volatile)",
-        icon: "🌋",
-        score: 80,
-      };
-    }
-    if (s === "Xin") {
-      // Xin is jewelry; Snake Fire melts it. It is trapped.
-      return {
-        level: "Low",
-        description: "Trapped / Melted",
-        icon: "🫠",
-        score: 30,
-      };
-    }
-  }
+    // Geng Metal special cases
+    "Geng-Snake": {
+      level: "High",
+      description: "Growth Root (Long Life)",
+      icon: "🌋",
+      score: 85,
+    },
+    "Geng-Dog": {
+      level: "Medium",
+      description: "Dry Earth (Forging)",
+      icon: "🛡️",
+      score: 65,
+    },
+    "Geng-Rat": {
+      level: "None",
+      description: "Exhausting to Branch",
+      icon: "⚔️💧",
+      score: 5,
+    },
 
-  // [C] The "Superior Growth" Roots (Yang Stems)
-  // Yang Stems sitting on their "Birth" branch get massive support.
-  if (s === "Ren" && b === "Monkey")
-    return {
+    // Xin Metal special cases
+    "Xin-Snake": {
+      level: "Low",
+      description: "Trapped/Melted",
+      icon: "🫠",
+      score: 25,
+    },
+    "Xin-Ox": {
+      level: "High",
+      description: "Wet Earth (Nourishing)",
+      icon: "💎",
+      score: 85,
+    },
+
+    // Ren Water special cases
+    "Ren-Monkey": {
       level: "High",
       description: "Superior Growth Root",
       icon: "🌊",
       score: 95,
-    };
-  if (s === "Bing" && b === "Tiger")
-    return {
+    },
+    "Ren-Tiger": {
+      level: "None",
+      description: "Exhausting to Branch",
+      icon: "🌊🌲",
+      score: 5,
+    },
+
+    // Bing Fire special cases
+    "Bing-Tiger": {
       level: "High",
       description: "Superior Growth Root",
       icon: "🔥",
       score: 95,
-    };
-  if (s === "Jia" && b === "Pig")
-    return {
+    },
+
+    // Ding Fire special cases
+    "Ding-Ox": {
+      level: "None",
+      description: "Threatened by Hidden Water",
+      icon: "🔥💧",
+      score: 10,
+    },
+
+    // Jia Wood special cases
+    "Jia-Pig": {
       level: "High",
       description: "Superior Growth Root",
       icon: "🌲",
       score: 95,
+    },
+
+    // Gui Water special cases
+    "Gui-Ox": {
+      level: "High",
+      description: "Winter Season Root",
+      icon: "❄️",
+      score: 85,
+    },
+    "Gui-Dragon": {
+      level: "Medium",
+      description: "Storage (Restricted)",
+      icon: "💧",
+      score: 60,
+    },
+    "Gui-Rabbit": {
+      level: "Low",
+      description: "Nourishes Branch (Not Rooted)",
+      icon: "💧🌱",
+      score: 15,
+    },
+    "Gui-Goat": {
+      level: "Low",
+      description: "Controlled by Earth, Exhausted by Wood",
+      icon: "🌊⛰️",
+      score: 15,
+    },
+
+    // Yi Wood special cases
+    "Yi-Dragon": {
+      level: "Low",
+      description: "Graveyard Root (Weak)",
+      icon: "🥀",
+      score: 35,
+    },
+    "Yi-Goat": {
+      level: "Low",
+      description: "Graveyard Root (Weak)",
+      icon: "🥀",
+      score: 35,
+    },
+    "Yi-Snake": {
+      level: "Low",
+      description: "Exhausted by Fire, Cut by Metal",
+      icon: "🪵🔥",
+      score: 15,
+    },
+  };
+
+  // Check special cases first
+  const key = `${s}-${b}`;
+  if (specialCases[key]) {
+    return specialCases[key];
+  }
+
+  // =========================================================
+  // 2. HIDDEN STEMS ANALYSIS (Core Logic)
+  // =========================================================
+
+  // Hidden stems for each branch (Main, Secondary, Tertiary)
+  const hiddenStems: Record<string, string[]> = {
+    Rat: ["Gui"], // 100% Water
+    Ox: ["Ji", "Gui", "Xin"], // Earth, Water, Metal
+    Tiger: ["Jia", "Bing", "Wu"], // Wood, Fire, Earth
+    Rabbit: ["Yi"], // 100% Wood
+    Dragon: ["Wu", "Yi", "Gui"], // Earth, Wood, Water
+    Snake: ["Bing", "Geng", "Wu"], // Fire, Metal, Earth
+    Horse: ["Ding", "Ji"], // Fire, Earth
+    Goat: ["Ji", "Yi", "Ding"], // Earth, Wood, Fire
+    Monkey: ["Geng", "Ren", "Wu"], // Metal, Water, Earth
+    Rooster: ["Xin"], // 100% Metal
+    Dog: ["Wu", "Xin", "Ding"], // Earth, Metal, Fire
+    Pig: ["Ren", "Jia"], // Water, Wood
+  };
+
+  // Element mapping
+  const stemElement: Record<string, string> = {
+    Jia: "Wood",
+    Yi: "Wood",
+    Bing: "Fire",
+    Ding: "Fire",
+    Wu: "Earth",
+    Ji: "Earth",
+    Geng: "Metal",
+    Xin: "Metal",
+    Ren: "Water",
+    Gui: "Water",
+  };
+
+  // =========================================================
+  // 3. ROOT STRENGTH CALCULATION
+  // =========================================================
+
+  const element = stemElement[s];
+  const hidden = hiddenStems[b];
+
+  if (!hidden) {
+    return {
+      level: "None",
+      description: "Invalid Branch",
+      icon: "❌",
+      score: 0,
     };
-
-  // [D] Gui Water Specifics (Dragon vs. Ox)
-  if (s === "Gui") {
-    if (b === "Ox")
-      return {
-        level: "High",
-        description: "Winter Season Root",
-        icon: "❄️",
-        score: 85,
-      }; // Ox is part of Winter
-    if (b === "Dragon")
-      return {
-        level: "Medium",
-        description: "Storage (Restricted)",
-        icon: "💧",
-        score: 60,
-      }; // Grave of Water
   }
 
-  // =========================================================
-  // 2. ELEMENTAL LOGIC
-  // =========================================================
+  // Check for direct root (same stem in hidden stems)
+  if (hidden.includes(s)) {
+    const position = hidden.indexOf(s);
 
-  // 🌲 WOOD STEMS (Jia / Yi)
-  if (["Jia", "Yi"].includes(s)) {
-    // Main Qi (Season)
-    if (["Tiger", "Rabbit"].includes(b)) {
+    if (position === 0) {
       return {
         level: "High",
-        description: "Rooted (Main Qi)",
-        icon: "🌲",
+        description: "Direct Root (Main Qi)",
+        icon: getElementIcon(element),
         score: 100,
       };
-    }
-    // Growth / Birthplace (Pig)
-    if (b === "Pig") {
-      return {
-        level: "High",
-        description: "Growth Root (Alive)",
-        icon: "🌱",
-        score: 85,
-      };
-    }
-    // Graveyard / Storage (Dragon / Goat)
-    if (["Dragon", "Goat"].includes(b)) {
-      if (s === "Jia")
-        return {
-          level: "Medium",
-          description: "Rooted in Earth",
-          icon: "🪵",
-          score: 65,
-        };
-      if (s === "Yi")
-        return {
-          level: "Low",
-          description: "Graveyard Root (Weak)",
-          icon: "🥀",
-          score: 40,
-        }; // Yi dislikes the grave
-    }
-    // Resource (Rat)
-    if (b === "Rat")
+    } else if (position === 1) {
       return {
         level: "Medium",
-        description: "Resource (Floating)",
-        icon: "💧",
-        score: 55,
-      };
-  }
-
-  // 🔥 FIRE STEMS (Bing / Ding)
-  if (["Bing", "Ding"].includes(s)) {
-    // Main Qi (Season)
-    if (["Snake", "Horse"].includes(b)) {
-      return {
-        level: "High",
-        description: "Rooted (Main Qi)",
-        icon: "🔥",
-        score: 100,
-      };
-    }
-    // Summer Qi (Goat)
-    if (b === "Goat") {
-      return {
-        level: "High",
-        description: "Rooted (Summer Qi)",
-        icon: "🏜️",
-        score: 85,
-      };
-    }
-    // Growth / Storage
-    if (b === "Tiger")
-      return {
-        level: "High",
-        description: "Growth Root",
-        icon: "🔥",
-        score: 90,
-      }; // Bing loves Tiger
-    if (b === "Dog")
-      return {
-        level: "Medium",
-        description: "Storage Root",
-        icon: "🕯️",
-        score: 65,
-      };
-    if (b === "Rabbit")
-      return {
-        level: "Resource",
-        description: "Feeding (Wood)",
-        icon: "🪵",
-        score: 50,
-      };
-  }
-
-  // ⛰️ EARTH STEMS (Wu / Ji)
-  if (["Wu", "Ji"].includes(s)) {
-    // Main Qi (Four Earths)
-    if (["Dragon", "Dog", "Ox", "Goat"].includes(b)) {
-      return {
-        level: "High",
-        description: "Rooted (Main Qi)",
-        icon: "⛰️",
-        score: 95,
-      };
-    }
-    // Fire Roots (Mother produces Child)
-    if (["Snake", "Horse"].includes(b)) {
-      return {
-        level: "High",
-        description: "Fire Root (Resource)",
-        icon: "🔥",
-        score: 85,
-      };
-    }
-  }
-
-  // ⚔️ METAL STEMS (Geng / Xin)
-  if (["Geng", "Xin"].includes(s)) {
-    // Main Qi
-    if (["Monkey", "Rooster"].includes(b)) {
-      return {
-        level: "High",
-        description: "Rooted (Main Qi)",
-        icon: "⚔️",
-        score: 100,
-      };
-    }
-    // Storage Roots (Dog / Ox)
-    if (["Dog", "Ox"].includes(b)) {
-      // Xin loves Ox (Wet Earth nourishes), Geng prefers Dog (Dry Earth forges)
-      if (s === "Xin" && b === "Ox")
-        return {
-          level: "High",
-          description: "Wet Earth (Nourishing)",
-          icon: "💎",
-          score: 85,
-        };
-      if (s === "Geng" && b === "Dog")
-        return {
-          level: "Medium",
-          description: "Dry Earth (Forging)",
-          icon: "🛡️",
-          score: 70,
-        };
-      return {
-        level: "Medium",
-        description: "Storage Root",
-        icon: "🧱",
-        score: 60,
-      };
-    }
-  }
-
-  // 🌊 WATER STEMS (Ren / Gui)
-  if (["Ren", "Gui"].includes(s)) {
-    // Main Qi
-    if (["Pig", "Rat"].includes(b)) {
-      return {
-        level: "High",
-        description: "Rooted (Main Qi)",
-        icon: "🌊",
-        score: 100,
-      };
-    }
-    // Growth (Monkey)
-    if (b === "Monkey") {
-      return {
-        level: "High",
-        description: "Growth Root (Source)",
-        icon: "🐵",
-        score: 90,
-      };
-    }
-    // Storage (Dragon)
-    if (b === "Dragon") {
-      return {
-        level: "Medium",
-        description: "Water Storage",
-        icon: "🛑",
+        description: "Direct Root (Secondary)",
+        icon: getElementIcon(element),
         score: 70,
       };
-    }
-    // Resource (Rooster)
-    if (b === "Rooster")
+    } else {
       return {
-        level: "Resource",
-        description: "Pure Resource",
-        icon: "🪙",
-        score: 55,
+        level: "Low",
+        description: "Direct Root (Tertiary)",
+        icon: getElementIcon(element),
+        score: 50,
       };
+    }
   }
 
-  // Default Fallback
+  // Check for same element but different yin/yang
+  const sameElementStems = Object.keys(stemElement).filter(
+    (key) => stemElement[key] === element && key !== s,
+  );
+
+  for (const sameElementStem of sameElementStems) {
+    if (hidden.includes(sameElementStem)) {
+      const position = hidden.indexOf(sameElementStem);
+
+      if (position === 0) {
+        return {
+          level: "High",
+          description: "Same Element Root",
+          icon: getElementIcon(element),
+          score: 80,
+        };
+      } else if (position === 1) {
+        return {
+          level: "Medium",
+          description: "Same Element Root (Secondary)",
+          icon: getElementIcon(element),
+          score: 60,
+        };
+      } else {
+        return {
+          level: "Low",
+          description: "Same Element Root (Tertiary)",
+          icon: getElementIcon(element),
+          score: 40,
+        };
+      }
+    }
+  }
+
+  // Check for resource root (producing element)
+  const elementProduction: Record<string, string[]> = {
+    Wood: ["Fire"], // Wood produces Fire
+    Fire: ["Earth"], // Fire produces Earth
+    Earth: ["Metal"], // Earth produces Metal
+    Metal: ["Water"], // Metal produces Water
+    Water: ["Wood"], // Water produces Wood
+  };
+
+  const resourceElements = elementProduction[element] || [];
+  for (const resourceElement of resourceElements) {
+    const resourceStems = Object.keys(stemElement).filter(
+      (key) => stemElement[key] === resourceElement,
+    );
+
+    for (const resourceStem of resourceStems) {
+      if (hidden.includes(resourceStem)) {
+        const position = hidden.indexOf(resourceStem);
+
+        if (position === 0) {
+          return {
+            level: "Resource",
+            description: "Strong Resource Root",
+            icon: getElementIcon(resourceElement),
+            score: 70,
+          };
+        } else if (position === 1) {
+          return {
+            level: "Resource",
+            description: "Moderate Resource Root",
+            icon: getElementIcon(resourceElement),
+            score: 50,
+          };
+        } else {
+          return {
+            level: "Low",
+            description: "Weak Resource Root",
+            icon: getElementIcon(resourceElement),
+            score: 30,
+          };
+        }
+      }
+    }
+  }
+
+  // =========================================================
+  // 4. SEASONAL CONSIDERATIONS (Fallback)
+  // =========================================================
+
+  // Seasonal branches (Main Qi)
+  const seasonalBranches: Record<string, string[]> = {
+    Wood: ["Tiger", "Rabbit"],
+    Fire: ["Snake", "Horse"],
+    Earth: ["Dragon", "Dog", "Ox", "Goat"],
+    Metal: ["Monkey", "Rooster"],
+    Water: ["Pig", "Rat"],
+  };
+
+  if (seasonalBranches[element]?.includes(b)) {
+    return {
+      level: "Medium",
+      description: "Seasonal Association",
+      icon: getElementIcon(element),
+      score: 65,
+    };
+  }
+
+  // Check if there's any indirect support
+  const allHiddenElements = hidden.map((st) => stemElement[st]);
+  const elementSupport: Record<string, string[]> = {
+    Wood: ["Water"], // Water supports Wood
+    Fire: ["Wood"], // Wood supports Fire
+    Earth: ["Fire"], // Fire supports Earth
+    Metal: ["Earth"], // Earth supports Metal
+    Water: ["Metal"], // Metal supports Water
+  };
+
+  const hasIndirectSupport = allHiddenElements.some((el) =>
+    elementSupport[element]?.includes(el),
+  );
+
+  if (hasIndirectSupport) {
+    return {
+      level: "Low",
+      description: "Indirect Support",
+      icon: "💨",
+      score: 20,
+    };
+  }
+
   return {
     level: "None",
     description: "Floating (No Root)",
     icon: "🍃",
-    score: 10,
+    score: 5,
   };
+};
+
+// =========================================================
+// 5. OPTIONAL: CACHE MECHANISM FOR PERFORMANCE
+// =========================================================
+
+const rootStrengthCache = new Map<string, RootStrengthResult>();
+
+export const calculateRootStrengthCached = (
+  stem: string,
+  branch: string,
+): RootStrengthResult => {
+  const key = `${stem}-${branch}`;
+
+  if (rootStrengthCache.has(key)) {
+    return rootStrengthCache.get(key)!;
+  }
+
+  const result = calculateRootStrength(stem, branch);
+  rootStrengthCache.set(key, result);
+  return result;
+};
+
+// Helper function for icons
+const getElementIcon = (element: string): string => {
+  const icons: Record<string, string> = {
+    Wood: "🌲",
+    Fire: "🔥",
+    Earth: "⛰️",
+    Metal: "⚔️",
+    Water: "🌊",
+  };
+  return icons[element] || "✨";
 };

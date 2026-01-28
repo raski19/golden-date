@@ -87,6 +87,7 @@ export interface ScoreResult {
   starQuality: string;
   isStarFavorable: boolean;
   isStarAvoid: boolean;
+  isAvoidElement: boolean;
 }
 
 export interface TenGodsResult {
