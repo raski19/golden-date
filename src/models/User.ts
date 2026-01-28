@@ -31,7 +31,6 @@ const UserSchema: Schema = new Schema({
     favorableBranches: [String],
     favorableElements: [String],
     avoidElements: [String],
-    favorableOfficers: [String],
   },
 });
 

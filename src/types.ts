@@ -16,7 +16,6 @@ export interface UserRules {
   favorableBranches: string[];
   favorableElements?: string[];
   avoidElements: string[];
-  favorableOfficers: string[];
 }
 
 export interface IUser {

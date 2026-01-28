@@ -207,7 +207,6 @@ export function generateUserProfile(
 
       badBranches: badBranches,
       favorableBranches: favorableBranches,
-      favorableOfficers: ["Success", "Open", "Stable", "Full"],
     },
   };
 }
