@@ -36,7 +36,7 @@ export const calculateRootStrength = (
     "Geng-Snake": {
       level: "High",
       description: "Growth Root (Long Life)",
-      icon: "🌋",
+      icon: "🌱🌳",
       score: 85,
     },
     "Geng-Dog": {
@@ -84,7 +84,7 @@ export const calculateRootStrength = (
     "Bing-Tiger": {
       level: "High",
       description: "Superior Growth Root",
-      icon: "🔥",
+      icon: "🔥✨",
       score: 95,
     },
 
@@ -146,7 +146,7 @@ export const calculateRootStrength = (
     "Yi-Snake": {
       level: "Low",
       description: "Exhausted by Fire, Cut by Metal",
-      icon: "🪵🔥",
+      icon: "🪵🔥✂️",
       score: 15,
     },
   };
