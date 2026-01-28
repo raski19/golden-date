@@ -26,7 +26,7 @@ export interface UserRules {
   avoidElements: string[];
   favorableOfficers: string[];
   favorableConstellations: string[];
-  avoidConstellations?: string[];
+  avoidConstellations: string[];
 }
 
 export interface IUser {

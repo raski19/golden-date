@@ -17,6 +17,7 @@ mongoose
   .then(() => console.log("MongoDB Connected (Pro Mode)"))
   .catch((err) => console.error(err));
 
+app.use(express.json());
 app.use(express.static("public"));
 
 // Get Users (Includes ActionRules for Frontend Legend)
@@ -87,18 +88,18 @@ app.get(
 );
 
 // Find Dates
-interface FindDatesQuery {
+interface FindDatesBody {
   userId: string;
   action: string;
   days?: string;
   year?: string;
   month?: string;
 }
-app.get(
+app.post(
   "/api/find-dates",
-  async (req: Request<{}, {}, {}, FindDatesQuery>, res: Response) => {
+  async (req: Request<{}, {}, FindDatesBody>, res: Response) => {
     try {
-      const { userId, action, days = "90", year, month } = req.query;
+      const { userId, action, days = "90", year, month } = req.body;
 
       const user = (await User.findById(userId).lean()) as unknown as IUser;
       if (!user) {

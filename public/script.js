@@ -86,58 +86,76 @@ function populateGoalSelect() {
 }
 
 async function findDates() {
-  const userId = document.getElementById("userSelect").value;
-  const action = document.getElementById("goalSelect").value;
+  const goalSelect = document.getElementById("goalSelect");
+  const userSelect = document.getElementById("userSelect");
 
-  if (!action) return alert("Please select a goal first!");
+  const goal = goalSelect.value;
+  const userId = userSelect.value;
 
-  const btn = document.querySelector('button[onclick="findDates()"]');
-  const originalText = btn.innerText;
-  btn.innerText = "Scanning...";
+  if (!goal) {
+    alert("Please select a goal first.");
+    return;
+  }
+
+  // 1. UI Feedback (Loading)
+  const btn = document.querySelector(".btn-search"); // Ensure your button has this class
+  if (btn) btn.innerText = "Searching...";
 
   try {
-    // FIX: Pass currentYear and currentMonth to the API
-    const query = `userId=${userId}&action=${encodeURIComponent(action)}&year=${currentYear}&month=${currentMonth}`;
+    // 2. Fetch Data
+    const response = await fetch("/api/find-dates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: userId,
+        action: goal,
+        year: parseInt(document.getElementById("yearInput").value) || 2026,
+      }),
+    });
 
-    const res = await fetch(`/api/find-dates?${query}`);
-    const results = await res.json();
-    renderSearchResults(results, action);
-  } catch (e) {
-    alert("Error finding dates. Ensure server is running.");
+    if (!response.ok) throw new Error("Server returned " + response.status);
+
+    const data = await response.json();
+
+    // 3. Render
+    showSearchResults(data, goal);
+  } catch (error) {
+    console.error("❌ Search Failed:", error);
+    alert("Search error: " + error.message);
   } finally {
-    btn.innerText = originalText;
+    if (btn) btn.innerText = "Find";
   }
 }
 
-function renderSearchResults(results, action) {
-  const container = document.getElementById("searchResults");
-  const modal = document.getElementById("searchModal");
+function showSearchResults(dates, action) {
+  // 1. Target the Body ID we defined in HTML
+  const container = document.getElementById("searchBody");
 
-  document.getElementById("searchTitle").innerText =
-    `🎯 Best Dates for: ${action}`;
+  if (!container) {
+    console.error("❌ ERROR: <div id='searchBody'> is missing from index.html");
+    return;
+  }
 
-  if (results.length === 0) {
-    container.innerHTML = `<p style="color:#666; text-align:center;">No perfect matches found in the next 90 days.<br>Try checking the User Rules to ensure this action is possible.</p>`;
+  // 2. Build Content
+  if (!dates || dates.length === 0) {
+    container.innerHTML = `
+            <div style="padding:30px; text-align:center; color:#666;">
+                <div style="font-size:2rem; margin-bottom:10px;">🤷‍♂️</div>
+                No top-tier dates found for <strong>${action}</strong>.
+            </div>`;
   } else {
-    container.innerHTML = results
+    container.innerHTML = dates
       .map(
-        (r) => `
-            <div style="border:1px solid #eee; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(r.cssClass)}; background:#fcfcfc;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                    <strong style="font-size:1.1rem; color:#333;">${r.fullDate}</strong>
-                    <span class="badge ${r.cssClass}" style="font-size:0.85rem;">${r.verdict} (${r.score}pts)</span>
+        (d) => `
+            <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:700; color:#2c3e50; font-size:1.1rem;">${d.date}</div>
+                    <div style="font-size:0.9rem; color:#555;">${d.reason}</div>
                 </div>
-                
-                <div style="font-size:0.9rem; color:#555; margin-bottom:8px;">
-                     Officer: <strong>${r.dayInfo.officer}</strong> • Star: <strong>${r.dayInfo.constellation}</strong>
-                </div>
-
-                <div style="background:#e8f4fd; color:#004085; padding:8px; border-radius:4px; font-size:0.9rem; border:1px solid #b8daff;">
-                    ${r.matchDetails.icon} <strong>Strategy:</strong> ${r.matchDetails.desc}
-                </div>
-
-                <div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:5px; border-radius:4px; display:inline-block;">
-                    <strong>🕒 Best Hours:</strong><br> ${r.goodHours.length ? r.goodHours[0] : "Any auspicious hour"}
+                <div style="background:${d.score >= 85 ? "#fff3cd" : "#d1e7dd"}; 
+                            color:${d.score >= 85 ? "#856404" : "#0f5132"}; 
+                            padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                    Score: ${d.score}
                 </div>
             </div>
         `,
@@ -145,7 +163,8 @@ function renderSearchResults(results, action) {
       .join("");
   }
 
-  modal.style.display = "flex";
+  // 3. Open Modal
+  openModalById("searchModal");
 }
 
 // --- CALENDAR LOGIC ---
@@ -840,10 +859,9 @@ function openModalById(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
-  // 1. Set Display Flex
   modal.style.display = "flex";
 
-  // 2. Small timeout to allow CSS transition to catch the display change
+  // Small delay to allow CSS to catch the display change before animating
   setTimeout(() => {
     modal.classList.add("show");
   }, 10);

@@ -300,6 +300,103 @@ export const OFFICERS: Record<string, string> = {
   闭: "Close",
 };
 
+export interface StandardRule {
+  officers: string[];
+  type: "wealth" | "career" | "health";
+  action: string;
+  icon: string;
+  description: string;
+}
+
+export const STANDARD_RULES: StandardRule[] = [
+  // --- WEALTH ---
+  {
+    officers: ["Success"],
+    type: "wealth",
+    action: "Sign Contracts",
+    icon: "📝",
+    description:
+      "The #1 day for closing deals, financial agreements, and binding contracts.",
+  },
+  {
+    officers: ["Open", "Full"],
+    type: "wealth",
+    action: "Networking & Sales",
+    icon: "🥂",
+    description: "Launch projects, host events, or network with crowds.",
+  },
+  {
+    officers: ["Receive"],
+    type: "wealth",
+    action: "Ask for Favors",
+    icon: "🤲",
+    description: "Collect debts, ask for funding, or seek mentorship.",
+  },
+  {
+    officers: ["Full"],
+    type: "wealth",
+    action: "Branding & Visibility",
+    icon: "🌟",
+    description:
+      "Maximize returns, debt collection, and high-visibility marketing.",
+  },
+  // --- CAREER ---
+  {
+    officers: ["Stable"],
+    type: "career",
+    action: "Acquire Assets",
+    icon: "🏦",
+    description:
+      "Buy property, hire key staff, or lock in long-term investments.",
+  },
+  {
+    officers: ["Establish"],
+    type: "career",
+    action: "Start New Role",
+    icon: "🏗️",
+    description: "Begin a new job, lay groundwork, or discuss future strategy.",
+  },
+  {
+    officers: ["Remove"],
+    type: "career",
+    action: "Fix Problems",
+    icon: "🧹",
+    description:
+      "Remove obstacles, fire bad clients, or solve technical issues.",
+  },
+  {
+    officers: ["Balance"],
+    type: "career",
+    action: "Negotiations",
+    icon: "⚖️",
+    description: "Resolve conflicts or negotiate terms with partners.",
+  },
+  // --- HEALTH ---
+  {
+    officers: ["Remove", "Destruction"],
+    type: "health",
+    action: "Health & Reset",
+    icon: "🧘‍♀️",
+    description:
+      "Best day to remove illness, start a detox, have surgery, or break bad habits.",
+  },
+  {
+    officers: ["Balance"],
+    type: "health",
+    action: "Adjustment/Therapy",
+    icon: "🧘",
+    description:
+      "Ideal for alignment (chiropractic), therapy, or balancing diet.",
+  },
+  {
+    officers: ["Stable"],
+    type: "health",
+    action: "Start Long-term Treatment",
+    icon: "💊",
+    description: "Begin a long course of medication or a new fitness regime.",
+  },
+];
+
 export const OFFICER_RECOMMENDATIONS: Record<
   string,
   { action: string; icon: string; desc: string; reality: string }
