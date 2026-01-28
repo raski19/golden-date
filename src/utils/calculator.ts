@@ -179,7 +179,7 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     tags.push("HEALTH");
   } else if (rules.avoidElements.includes(dayElement)) {
     score -= 15;
-    flags.push("Avoid Element");
+    // flags.push("Avoid Element");
     log.push(`⛔ ELEMENT: ${dayElement} is unfavorable for you.`);
   }
 
