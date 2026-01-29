@@ -782,10 +782,29 @@ function showDetails(day) {
   const score = Number(rawScore);
   const pScore = day.analysis.pillarScore || 0;
 
+  // 🔴 CHECK FOR FATAL LOGS
+  const logs = day.analysis.log || [];
+  const fatalLog = logs.find(
+    (l) => l.includes("💀") || l.includes("PERSONAL BREAKER"),
+  );
+
   let recHtml = "";
 
-  if (score < 50 || pScore < 30) {
-    // DANGER MODE
+  // 1. PRIORITY: FATAL BANNER
+  if (fatalLog) {
+    recHtml = `
+            <div style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="font-size:2rem; margin-bottom:10px;">💀</div>
+                <h3 style="margin:0 0 10px 0; font-size:1.2rem; font-weight:800; text-transform:uppercase;">FATAL CLASH DETECTED</h3>
+                <p style="margin:0; font-weight:bold; font-size:1rem;">${fatalLog}</p>
+                <div style="margin-top:10px; font-size:0.9rem; background:rgba(255,255,255,0.5); padding:5px; border-radius:4px;">
+                    ⛔ Do not schedule important activities on this day.
+                </div>
+            </div>
+        `;
+  }
+  // 2. DANGER MODE (Low Score but not fatal)
+  else if (score < 50 || pScore < 30) {
     recHtml = `
             <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -811,8 +830,9 @@ function showDetails(day) {
                     </div>
                 </div>
             </div>`;
-  } else {
-    // SAFE MODE
+  }
+  // 3. SAFE MODE
+  else {
     recHtml = `
             <div style="background:#f0fff4; border-left:4px solid #198754; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <div style="font-size:0.75rem; color:#198754; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
@@ -873,7 +893,6 @@ function showDetails(day) {
     `;
 
   // --- ANALYSIS LOGIC (Pros/Cons) ---
-  const logs = day.analysis.log || [];
   const pros = [];
   const cons = [];
   const neutrals = [];
@@ -923,6 +942,17 @@ function showDetails(day) {
                     ${renderList(cons, "🔻", "text-danger")}
                 </div>
             </div>
+                
+                ${
+                  neutrals.length > 0
+                    ? `
+                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 10px;">
+                    <div style="font-weight:bold; color:#6c757d; margin-bottom:12px; font-size:0.8rem;">ℹ️ GENERAL CONTEXT</div>
+                    ${renderList(neutrals, "🔹", "text-muted")}
+                </div>
+                `
+                    : ""
+                }
         </div>
     `;
 

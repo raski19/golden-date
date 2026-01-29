@@ -23,7 +23,9 @@ export interface IUser {
   name: string;
   baZiProfile: string;
   dayMaster: string; // e.g. "Bing"
-  baZiBranch: string; // e.g. "Horse"
+  baZiBranch: string; // Day Branch (The "Self")
+  monthBranch: string; // Month Branch (Career/Parents)
+  yearBranch: string; // Year Branch (Social/Grandparents)
   description?: string;
   rules: UserRules;
 }

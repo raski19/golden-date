@@ -62,13 +62,9 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   if (officerDef) {
     score += officerDef.baseScore;
     if (officerDef.baseScore > 0) {
-      log.push(
-        `✅ OFFICER: ${officerName} adds positive energy (+${officerDef.baseScore}).`,
-      );
+      log.push(`✅ OFFICER: ${officerName} adds positive energy.`);
     } else if (officerDef.baseScore < 0) {
-      log.push(
-        `⚠️ OFFICER: ${officerName} is generally unstable/restrictive (${officerDef.baseScore}).`,
-      );
+      log.push(`⚠️ OFFICER: ${officerName} is generally unstable/restrictive.`);
     }
   }
 
@@ -106,23 +102,36 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
   const pillarIcon = rootInfo.icon;
   const pillarScore = rootInfo.score;
 
-  // --- 4. CLASHES & BREAKERS ---
+  // =================================================================
+  // 4. CLASH HIERARCHY (Updated)
+  // =================================================================
+
+  // A. GENERAL BREAKERS (The Date Clashing with Itself)
+  // These are bad for everyone, regardless of user chart.
   if (CLASH_PAIRS[yearBranch] === dayBranch) {
-    score -= 50;
+    score -= 20; // Lowered penalty to prioritize Personal Clashes
     flags.push("YEAR BREAKER");
-    log.push(`Year Breaker: ${dayBranch} clashes with Year ${yearBranch}.`);
+    log.push(`⚠️ General Year Breaker: Date is unstable (Year vs Day).`);
   }
-
   if (CLASH_PAIRS[monthBranch] === dayBranch) {
-    score -= 40;
+    score -= 15;
     flags.push("MONTH BREAKER");
-    log.push(`Month Breaker: ${dayBranch} clashes with Month ${monthBranch}.`);
+    log.push(`⚠️ General Month Breaker: Date is unstable (Month vs Day).`);
   }
 
-  // Personal Breaker (Immediate Return)
-  if (dayBranch === rules.breaker) {
+  // B. PERSONAL CLASHES (The Date Clashing with YOU)
+
+  // 1. DAY BRANCH CLASH (Critical / Fatal)
+  // Target: The "Self", Body, and Spouse.
+  if (dayBranch === CLASH_PAIRS[user.baZiBranch]) {
+    // Clash with Day Pillar
+    score = -100; // Immediate Fail
     flags.push("PERSONAL BREAKER");
-    const clash = CLASH_PAIRS[dayBranch];
+    log.push(
+      `💀 PERSONAL BREAKER: ${dayBranch} clashes with your Day Branch (${user.baZiBranch}). Risk of health/injury/relationship conflict.`,
+    );
+
+    // Return early because this day is unusable
     return {
       dayType,
       pillarNote,
@@ -132,36 +141,74 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
       verdict: "DANGEROUS",
       cssClass: "dangerous",
       flags,
-      tags: [],
-      log: [...log, `DANGER: ${dayBranch} clashes with your Day Master.`],
+      tags,
+      log,
       specificActions: [],
-      badHours: clash ? [`${clash} Hour (${BRANCH_HOURS[clash]})`] : [],
+      badHours: [],
       goodHours: [],
       tenGodName,
       actionTitle: guide.title,
       actionTagline: guide.tagline,
-      suitableActions: guide.best,
-      cautionAction: guide.caution,
-      actionKeywords: guide.keywords,
+      suitableActions: [],
+      cautionAction: "Avoid all major activities.",
+      actionKeywords: "",
       officerRec,
-      starQuality: "mixed",
+      starQuality: "Bad",
       isStarFavorable: false,
-      isStarAvoid: false,
-      isAvoidElement: false,
+      isStarAvoid: true,
+      isAvoidElement: true,
     };
   }
 
-  // Personal Bad Branches
-  if (rules.badBranches.includes(dayBranch)) {
+  // 2. YEAR BRANCH CLASH (High Priority)
+  // Target: Social Status, Public Appearance.
+  // Note: Ensure user.yearBranch exists. If not, this check is skipped.
+  if (user.yearBranch && dayBranch === CLASH_PAIRS[user.yearBranch]) {
+    score -= 50;
+    flags.push("Social Clash");
+    log.push(
+      `🎭 Year Clash: ${dayBranch} clashes with your Year (${user.yearBranch}). Avoid public events, networking, or weddings.`,
+    );
+  }
+
+  // 3. MONTH BRANCH CLASH (Context Specific)
+  // Target: Career, Parents, Authority.
+  if (user.monthBranch && dayBranch === CLASH_PAIRS[user.monthBranch]) {
+    score -= 20;
+    flags.push("Career Clash");
+    log.push(
+      `🏢 Month Clash: ${dayBranch} clashes with your Month (${user.monthBranch}). Expect friction at work or with parents.`,
+    );
+    // We add a specific tag so the frontend can show a warning badge if desired
+    tags.push("CAREER CLASH");
+  }
+
+  // 4. OLD "BAD BRANCHES" FALLBACK
+  // If the user has other bad branches defined in rules that are NOT the Day/Year/Month clash
+  // (e.g. Luck Pillar clashes), handle them here.
+  const knownClashes = [
+    CLASH_PAIRS[user.baZiBranch],
+    user.yearBranch ? CLASH_PAIRS[user.yearBranch] : null,
+    user.monthBranch ? CLASH_PAIRS[user.monthBranch] : null,
+  ];
+
+  if (
+    rules.badBranches.includes(dayBranch) &&
+    !knownClashes.includes(dayBranch)
+  ) {
     score -= 30;
     flags.push("Luck Clash");
-    log.push(`Avoid: ${dayBranch} harms your Luck Pillar.`);
+    log.push(
+      `☁️ Luck Pillar Clash: ${dayBranch} is unfavorable for your current cycle.`,
+    );
   }
 
   if (dayBranch === rules.selfPunishment) {
     score -= 30;
     flags.push("Self Punishment");
-    log.push(`Warning: ${dayBranch} triggers self-punishment.`);
+    log.push(
+      `⚠️ Self Punishment: ${dayBranch} triggers self-sabotage/mistakes.`,
+    );
   }
 
   // --- 5. ELEMENTAL ANALYSIS ---

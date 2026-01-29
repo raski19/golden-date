@@ -2,7 +2,6 @@ import { IUser } from "../types";
 import {
   BRANCHES_LIST,
   CLASH_PAIRS,
-  CONSTELLATION_DATA,
   CONTROL_CYCLE,
   ELEMENT_MAP,
   PRODUCTION_CYCLE,
@@ -10,32 +9,6 @@ import {
   REVERSE_PRODUCTION_CYCLE,
   SELF_PUNISHMENT,
 } from "./constants";
-
-// ==========================================
-// CONSTANTS & DATA MAPS
-// ==========================================
-
-const STANDARD_FAVORABLE_STARS: string[] = [
-  "Room",
-  "Wall",
-  "Mound",
-  "Bow",
-  "Carriage",
-  "Stomach",
-  "Star",
-];
-const STANDARD_AVOID_STARS: string[] = [
-  "Pleiades",
-  "Ox",
-  "Willow",
-  "Ghost",
-  "Neck",
-  "Wing",
-  "Beak",
-  "Danger",
-  "Heart",
-  "Void",
-];
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -47,12 +20,26 @@ const getResource = (el: string): string => REVERSE_PRODUCTION_CYCLE[el]; // Mot
 const getWealth = (el: string): string => CONTROL_CYCLE[el]; // Object Controlled (Wealth)
 const getInfluence = (el: string): string => REVERSE_CONTROL_CYCLE[el]; // Controller (Influence)
 
+// Check if a branch supports the Day Master (Same element or produces it)
+function branchSupportsDayMaster(
+  branch: string,
+  dayMaster: string,
+  dayMasterElement: string,
+): boolean {
+  const branchElement = getElement(branch);
+  return (
+    branchElement === dayMasterElement ||
+    branchElement === getResource(dayMasterElement)
+  );
+}
+
 // Get all branches that belong to a list of elements
 function getBranchesForElements(
   elements: string[],
   dayMaster: string,
   isStrong: boolean,
   monthBranch: string,
+  existingBranches: string[] = [],
 ): string[] {
   // Define Seasonality
   const isWinterBorn = ["Pig", "Rat", "Ox"].includes(monthBranch);
@@ -101,27 +88,64 @@ function getBranchesForElements(
       if (branch === "Dog" || branch === "Goat") return false;
     }
 
+    // --- CLASH CHECKING (All Pillars) ---
+    for (const userBranch of existingBranches) {
+      const clashPair = CLASH_PAIRS[userBranch];
+      if (clashPair && clashPair.includes(branch)) {
+        return false; // This branch is unfavorable due to clash
+      }
+    }
+
     return true;
   });
 }
 
 // ==========================================
-// 4. GENERATOR FUNCTION
+// 4. GENERATOR FUNCTION (UPDATED WITH YEAR BRANCH)
 // ==========================================
 
 export function generateUserProfile(
   name: string,
   dayMaster: string, // e.g. "Bing"
   dayBranch: string, // e.g. "Horse"
-  monthBranch: string, // e.g. "Snake" (Used to determine strength)
+  monthBranch: string, // e.g. "Snake"
+  yearBranch: string, // e.g. "Rabbit"
 ): IUser {
+  // Get elements
   const dmElement = getElement(dayMaster);
   const monthElement = getElement(monthBranch);
+  const yearElement = getElement(yearBranch);
+  const dayBranchElement = getElement(dayBranch);
 
-  // Determine Strength (Simplified Logic)
-  // If Month is same element (Companion) or produces DM (Resource) -> STRONG
-  const isStrong =
-    monthElement === dmElement || monthElement === getResource(dmElement);
+  // ==========================================
+  // ENHANCED STRENGTH CALCULATION (Year + Month + Day)
+  // ==========================================
+  // Count how many pillars support the Day Master
+  let supportCount = 0;
+  const totalPillars = 3; // Year, Month, Day (we don't have hour)
+
+  // Check Year pillar support
+  if (yearElement === dmElement || yearElement === getResource(dmElement)) {
+    supportCount++;
+  }
+
+  // Check Month pillar support
+  if (monthElement === dmElement || monthElement === getResource(dmElement)) {
+    supportCount++;
+  }
+
+  // Check Day Branch support (different from Day Master!)
+  if (
+    dayBranchElement === dmElement ||
+    dayBranchElement === getResource(dmElement)
+  ) {
+    supportCount++;
+  }
+
+  // Determine strength: Strong if majority of pillars support
+  // You can adjust this threshold as needed
+  const isStrong = supportCount >= Math.ceil(totalPillars / 2); // At least 2 out of 3
+
   const profileName = `${isStrong ? "Strong" : "Weak"} ${dayMaster} ${dmElement}`;
 
   // Calculate Favorable Elements
@@ -172,29 +196,39 @@ export function generateUserProfile(
   const favorableElements = [
     ...new Set([...wealthEl, ...careerEl, ...healthEl]),
   ];
+
+  // Include ALL branches for clash checking
+  const allUserBranches = [yearBranch, monthBranch, dayBranch];
+
   const favorableBranches = getBranchesForElements(
     favorableElements,
     dayMaster,
     isStrong,
     monthBranch,
+    allUserBranches, // Pass all branches for clash checking
   );
+
   const badBranches = getBranchesForElements(
     avoidEl,
     dayMaster,
     isStrong,
     monthBranch,
+    allUserBranches, // Also check clashes for bad branches
   );
 
-  // Construct Description
+  // Construct Description with strength details
+  const supportDescription = `${supportCount}/${totalPillars} pillars support`;
   const desc = isStrong
-    ? `The Creator. Needs execution (${output}) and results (${wealth}).`
-    : `The Strategist. Needs support (${resource}) and connection (${companion}).`;
+    ? `The Creator (${supportDescription}). Needs execution (${output}) and results (${wealth}).`
+    : `The Strategist (${supportDescription}). Needs support (${resource}) and connection (${companion}).`;
 
   return {
     name: name,
     baZiProfile: profileName,
     dayMaster: dayMaster,
     baZiBranch: dayBranch,
+    monthBranch: monthBranch,
+    yearBranch: yearBranch,
     description: desc,
     rules: {
       breaker: CLASH_PAIRS[dayBranch] || "Unknown",
@@ -215,15 +249,14 @@ export function generateUserProfile(
 // 5. EXAMPLE USAGE
 // ==========================================
 
-// Example Usage
-// name, dayMaster, dayBranch, monthBranch
-const zoran = generateUserProfile("Zoran", "Bing", "Horse", "Horse");
-console.log(JSON.stringify(zoran, null, 2));
+// Example Usage with all four parameters
+// prettier-ignore
+const user1 = generateUserProfile("Zoran", "Bing", "Horse", "Horse", "Rabbit");
+// prettier-ignore
+const user2 = generateUserProfile("Natalija", "Bing", "Monkey", "Dragon", "Rabbit");
+// prettier-ignore
+const user3 = generateUserProfile("Miroslav", "Xin", "Rooster", "Snake", "Dragon");
 
-/* Expected Output for Zoran (Strong Fire):
-   - Wealth: Metal
-   - Career: Earth (Output), Water (Influence)
-   - Health: Water, Earth
-   - Favorable Branches: Monkey, Rooster (Metal), Ox, Dragon (Wet Earth), Pig, Rat (Water)
-   - Bad Branches: Snake, Horse (Fire), Tiger, Rabbit (Wood), Goat, Dog (Dry Earth - Filtered out)
-*/
+console.log(JSON.stringify(user1, null, 2));
+console.log(JSON.stringify(user2, null, 2));
+console.log(JSON.stringify(user3, null, 2));
