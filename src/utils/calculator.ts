@@ -21,8 +21,13 @@ import {
   CONSTELLATION_DATA,
 } from "./constants";
 import { calculateRootStrengthCached } from "./rootStrength";
+import { getCurrentLuckPillar } from "./calculateLuckPillar";
 
-export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
+export const calculateScore = (
+  user: IUser,
+  dayData: DayInfo,
+  year: number,
+): ScoreResult => {
   let score = 50; // Start Neutral
   let log: string[] = [];
   let flags: string[] = [];
@@ -183,24 +188,34 @@ export const calculateScore = (user: IUser, dayData: DayInfo): ScoreResult => {
     tags.push("CAREER CLASH");
   }
 
-  // 4. OLD "BAD BRANCHES" FALLBACK
-  // If the user has other bad branches defined in rules that are NOT the Day/Year/Month clash
-  // (e.g. Luck Pillar clashes), handle them here.
-  const knownClashes = [
-    CLASH_PAIRS[user.baZiBranch],
-    user.yearBranch ? CLASH_PAIRS[user.yearBranch] : null,
-    user.monthBranch ? CLASH_PAIRS[user.monthBranch] : null,
-  ];
+  // 4. LUCK BRANCH CLASH
+  const currentLuck = getCurrentLuckPillar(user, year); // Pass current calendar year
+  // const currentLuck = { branch: user.luckBranch };
 
+  if (currentLuck) {
+    const luckBranch = currentLuck.branch;
+    const clashWithLuck = CLASH_PAIRS[luckBranch];
+
+    if (dayBranch === clashWithLuck) {
+      score -= 30; // Significant penalty
+      flags.push("Luck Clash");
+      log.push(
+        `☁️ Luck Pillar Clash: ${dayBranch} clashes with your current Luck Pillar (${luckBranch}). Expect external/environmental changes.`,
+      );
+
+      // Optional: Add to badHours if you want to block that hour too
+      // badHours.push(`${dayBranch} Hour`);
+    }
+  }
+
+  // (Optional) KEEP THE OLD MANUAL CHECK AS FALLBACK
+  // Only if it's NOT the dynamic clash we just found
   if (
     rules.badBranches.includes(dayBranch) &&
-    !knownClashes.includes(dayBranch)
+    (!currentLuck || CLASH_PAIRS[currentLuck.branch] !== dayBranch)
   ) {
-    score -= 30;
-    flags.push("Luck Clash");
-    log.push(
-      `☁️ Luck Pillar Clash: ${dayBranch} is unfavorable for your current cycle.`,
-    );
+    score -= 20; // Lower penalty for manual entry
+    log.push(`⚠️ Avoid: ${dayBranch} is in your manual avoid list.`);
   }
 
   if (dayBranch === rules.selfPunishment) {

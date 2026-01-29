@@ -101,28 +101,34 @@ function getBranchesForElements(
 }
 
 // ==========================================
-// 4. GENERATOR FUNCTION (UPDATED WITH YEAR BRANCH)
+// UPDATED GENERATOR FUNCTION WITH LUCK PILLAR
 // ==========================================
 
 export function generateUserProfile(
   name: string,
   dayMaster: string, // e.g. "Bing"
+  monthStem: string, // e.g. "Bing"
+  yearStem: string, // e.g. "Bing"
   dayBranch: string, // e.g. "Horse"
   monthBranch: string, // e.g. "Snake"
   yearBranch: string, // e.g. "Rabbit"
+  luckBranch: string, // e.g. "Tiger"
+  birthYear: number,
+  gender: "male" | "female",
 ): IUser {
   // Get elements
   const dmElement = getElement(dayMaster);
   const monthElement = getElement(monthBranch);
   const yearElement = getElement(yearBranch);
   const dayBranchElement = getElement(dayBranch);
+  const luckElement = getElement(luckBranch);
 
   // ==========================================
-  // ENHANCED STRENGTH CALCULATION (Year + Month + Day)
+  // ENHANCED STRENGTH CALCULATION (Year + Month + Day + Luck)
   // ==========================================
   // Count how many pillars support the Day Master
   let supportCount = 0;
-  const totalPillars = 3; // Year, Month, Day (we don't have hour)
+  const totalPillars = 4; // Updated: Now includes Luck Pillar
 
   // Check Year pillar support
   if (yearElement === dmElement || yearElement === getResource(dmElement)) {
@@ -142,9 +148,13 @@ export function generateUserProfile(
     supportCount++;
   }
 
+  // Check Luck Pillar support
+  if (luckElement === dmElement || luckElement === getResource(dmElement)) {
+    supportCount++;
+  }
+
   // Determine strength: Strong if majority of pillars support
-  // You can adjust this threshold as needed
-  const isStrong = supportCount >= Math.ceil(totalPillars / 2); // At least 2 out of 3
+  const isStrong = supportCount >= Math.ceil(totalPillars / 2); // At least 2 out of 4
 
   const profileName = `${isStrong ? "Strong" : "Weak"} ${dayMaster} ${dmElement}`;
 
@@ -155,11 +165,11 @@ export function generateUserProfile(
     avoidEl: string[];
 
   // Define logic variables
+  const companion = dmElement;
   const output = getOutput(dmElement);
   const wealth = getWealth(dmElement);
   const influence = getInfluence(dmElement);
   const resource = getResource(dmElement);
-  const companion = dmElement;
 
   if (isStrong) {
     // === STRONG CHART ===
@@ -197,8 +207,8 @@ export function generateUserProfile(
     ...new Set([...wealthEl, ...careerEl, ...healthEl]),
   ];
 
-  // Include ALL branches for clash checking
-  const allUserBranches = [yearBranch, monthBranch, dayBranch];
+  // Include ALL branches for clash checking (now with Luck Pillar)
+  const allUserBranches = [yearBranch, monthBranch, dayBranch, luckBranch]; // Updated
 
   const favorableBranches = getBranchesForElements(
     favorableElements,
@@ -226,9 +236,14 @@ export function generateUserProfile(
     name: name,
     baZiProfile: profileName,
     dayMaster: dayMaster,
+    monthStem: monthStem,
+    yearStem: yearStem,
     baZiBranch: dayBranch,
     monthBranch: monthBranch,
     yearBranch: yearBranch,
+    luckBranch: luckBranch, // NEW: Added to return object
+    birthYear: birthYear,
+    gender: gender,
     description: desc,
     rules: {
       breaker: CLASH_PAIRS[dayBranch] || "Unknown",
@@ -246,17 +261,59 @@ export function generateUserProfile(
 }
 
 // ==========================================
-// 5. EXAMPLE USAGE
+// EXAMPLE USAGE
 // ==========================================
 
-// Example Usage with all four parameters
-// prettier-ignore
-const user1 = generateUserProfile("Zoran", "Bing", "Horse", "Horse", "Rabbit");
-// prettier-ignore
-const user2 = generateUserProfile("Natalija", "Bing", "Monkey", "Dragon", "Rabbit");
-// prettier-ignore
-const user3 = generateUserProfile("Miroslav", "Xin", "Rooster", "Snake", "Dragon");
-
-console.log(JSON.stringify(user1, null, 2));
-console.log(JSON.stringify(user2, null, 2));
-console.log(JSON.stringify(user3, null, 2));
+// // Example 1: Zoran with manual Luck Branch calculation
+// const zoran = generateUserProfile(
+//   "Zoran",
+//   "Bing", // Day Master
+//   "Bing", // Month Stem
+//   "Ding", // Year Stem
+//   "Horse", // Day Branch
+//   "Horse", // Month Branch
+//   "Rabbit", // Year Branch
+//   "Tiger", // Luck Branch
+//   1987,
+//   "male",
+// );
+// console.log("Zoran's Profile:");
+// console.log(`Luck Pillar Branch: ${zoran.luckBranch}`);
+// console.log(`Strength: ${zoran.baZiProfile}`);
+// console.log(JSON.stringify(zoran, null, 2));
+//
+// // Example 2: Natalija with manual Luck Branch calculation
+// const natalija = generateUserProfile(
+//   "Natalija",
+//   "Bing", // Day Master
+//   "Jia", // Month Stem
+//   "Ding", // Year Stem
+//   "Monkey", // Day Branch
+//   "Dragon", // Month Branch
+//   "Rabbit", // Year Branch
+//   "Monkey", // Luck Branch
+//   1987,
+//   "female",
+// );
+// console.log("\nNatalija's Profile:");
+// console.log(`Strength: ${natalija.baZiProfile}`);
+// console.log(`Luck Pillar Branch: ${natalija.luckBranch}`);
+// console.log(JSON.stringify(natalija, null, 2));
+//
+// // Example 3: Miroslav with manual Luck Branch calculation
+// const miroslav = generateUserProfile(
+//   "Miroslav",
+//   "Xin", // Day Master
+//   "Gui", // Month Stem
+//   "Bing", // Year Stem
+//   "Rooster", // Day Branch
+//   "Snake", // Month Branch
+//   "Dragon", // Year Branch
+//   "Dog", // Luck Branch
+//   1976,
+//   "male",
+// );
+// console.log("\nMiroslav's Profile:");
+// console.log(`Strength: ${miroslav.baZiProfile}`);
+// console.log(`Luck Pillar Branch: ${miroslav.luckBranch}`);
+// console.log(JSON.stringify(miroslav, null, 2));

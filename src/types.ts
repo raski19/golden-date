@@ -9,12 +9,11 @@ export interface StandardRule {
 export interface UserRules {
   breaker: string;
   selfPunishment: string;
+  favorableBranches: string[];
   badBranches: string[];
   wealthElements: string[];
   careerElements: string[];
   healthElements: string[];
-  favorableBranches: string[];
-  favorableElements?: string[];
   avoidElements: string[];
 }
 
@@ -23,9 +22,14 @@ export interface IUser {
   name: string;
   baZiProfile: string;
   dayMaster: string; // e.g. "Bing"
+  yearStem: string;
+  monthStem: string;
   baZiBranch: string; // Day Branch (The "Self")
   monthBranch: string; // Month Branch (Career/Parents)
   yearBranch: string; // Year Branch (Social/Grandparents)
+  birthYear: number;
+  luckBranch: string;
+  gender: "male" | "female";
   description?: string;
   rules: UserRules;
 }

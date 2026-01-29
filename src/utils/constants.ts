@@ -319,6 +319,14 @@ export const BRANCH_START_TIMES: Record<string, number> = {
   Rat: 23,
 };
 
+// The 10 Stems in order (Critical for index calculation)
+// prettier-ignore
+export const STEM_ORDER: string[] = ["Jia", "Yi", "Bing", "Ding", "Wu", "Ji", "Geng", "Xin", "Ren", "Gui"];
+
+// The 12 Branches in order
+// prettier-ignore
+export const BRANCH_ORDER: string[] = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+
 export const STEMS: Record<string, string> = {
   甲: "Jia (Wood)",
   乙: "Yi (Wood)",

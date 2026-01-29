@@ -63,7 +63,7 @@ app.get(
       const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
       const dayInfo = getDayInfo(dateStr);
-      const analysis = calculateScore(user, dayInfo);
+      const analysis = calculateScore(user, dayInfo, y);
 
       const cleanStem = dayInfo.stem.split(" ")[0] || "";
       const tenGods = calculateTenGods(
@@ -172,7 +172,7 @@ app.post(
 
         // --- ⚡ FILTER 3: SCORE CHECK (Deep Analysis) ---
         // Only calculate score if basic conditions are met
-        const analysis = calculateScore(user, dayInfo);
+        const analysis = calculateScore(user, dayInfo, y);
 
         // We accept "Good" (60+) or "Excellent" (80+) days
         if (analysis.score >= 60) {
