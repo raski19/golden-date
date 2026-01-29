@@ -171,10 +171,28 @@ function changeMonth(delta) {
   loadCalendar();
 }
 
-// --- GOAL SEEKER LOGIC (NEW) ---
-function handleUserChange() {
-  loadCalendar(); // Reload grid for new user
-  populateGoalSelect(); // Reload specific goals for new user
+async function handleUserChange() {
+  const overlay = document.getElementById("loadingOverlay");
+
+  // 1. Show Loading
+  if (overlay) {
+    overlay.style.display = "flex";
+    // Optional: Add a slight fade-in transition logic here if desired
+  }
+
+  // Use a small timeout to let the UI update before the heavy lifting starts
+  // (This ensures the blur renders instantly)
+  setTimeout(async () => {
+    try {
+      await loadCalendar(); // Wait for grid to render
+      populateGoalSelect(); // Reload goals
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      // 2. Hide Loading
+      if (overlay) overlay.style.display = "none";
+    }
+  }, 10);
 }
 
 function populateGoalSelect() {

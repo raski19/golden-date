@@ -562,6 +562,8 @@ button:hover { background: #0056b3; }
 .banner-content h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
 .banner-content p { margin: 0; font-size: 0.9rem; }
 
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 /* --- MOBILE RESPONSIVENESS (< 768px) --- */
 @media (max-width: 768px) {
 
