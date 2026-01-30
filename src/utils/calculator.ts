@@ -511,14 +511,14 @@ export const calculateScore = (
     score -= 10;
     flags.push("Robbing Sha (Y)");
     log.push(
-      "💸 Robbing Sha: Theft, fraud, bad investments, or people taking credit for your work at the office.",
+      "💸 Robbing Sha: Theft, fraud, bad investments, or people taking credit for your work at the office. Don't trust 'too good to be true' offers today.",
     );
   }
   if (stars.deathGod) {
     score -= 10;
     flags.push("Death God");
     log.push(
-      "⚖️ Death God: Prone to negligence or legal loops. Check details.",
+      "⚖️ Death God: Prone to negligence or legal loops. Good day for isolation and strategic thinking, the world won't bother you.",
     );
   }
   if (stars.solitaryStar) {
