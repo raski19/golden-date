@@ -89,6 +89,27 @@
 
     <div id="calendarGrid" class="calendar-wrapper"></div>
 
+    <div class="container" style="margin-top:40px; border-top:2px dashed #eee; padding-top:20px;">
+        <h3>🤝 Team Synergy Planner</h3>
+        <p style="color:#666; margin-bottom:15px;">Find safe dates where <strong>everyone</strong> on the team is supported.</p>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #e0e0e0; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+
+            <label style="font-weight:bold; display:block; margin-bottom:10px;">Select Team Members:</label>
+            <div id="teamCheckboxes" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-bottom:20px;">
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-search" onclick="calculateTeamSynergy()" style="background:#6f42c1; border-color:#6f42c1;">
+                    Find Team Dates
+                </button>
+            </div>
+        </div>
+
+        <div id="teamResults" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px; margin-top:20px;">
+        </div>
+    </div>
+
     <!-- MODALS -->
     <div id="detailsModal" class="modal">
         <div class="modal-content">
@@ -115,6 +136,12 @@
                 <span class="close" onclick="closeModal('searchModal')">&times;</span>
             </div>
             <div id="searchBody" class="modal-body"></div>
+        </div>
+    </div>
+    <div id="teamModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <span class="close-modal" onclick="closeModal('teamModal')">&times;</span>
+            <div id="teamModalBody"></div>
         </div>
     </div>
     <!-- MODALS END -->

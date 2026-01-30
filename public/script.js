@@ -131,6 +131,7 @@ fetch("/api/users")
     // Initialize Calendar & Goal Dropdown
     handleUserChange();
     populateGoalSelect();
+    renderTeamCheckboxes(users);
   });
 
 // --- NAVIGATION ---
@@ -1030,6 +1031,195 @@ function showDetails(day) {
   openModalById("detailsModal");
 }
 
+// --- TEAM SYNERGY LOGIC ---
+
+// 1. Render Checkboxes (Call this in your initial fetch("/api/users") block)
+function renderTeamCheckboxes(users) {
+  const container = document.getElementById("teamCheckboxes");
+  if (!container) return;
+
+  container.innerHTML = users
+    .map(
+      (u) => `
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #dee2e6;">
+            <input type="checkbox" value="${u._id}" class="team-cb">
+            <span style="font-size:0.9rem;">${u.name}</span>
+        </label>
+    `,
+    )
+    .join("");
+}
+
+// 2. Calculate Synergy
+async function calculateTeamSynergy() {
+  // Get Selected IDs
+  const checkboxes = document.querySelectorAll(".team-cb:checked");
+  const userIds = Array.from(checkboxes).map((cb) => cb.value);
+
+  if (userIds.length < 2) {
+    alert("Please select at least 2 team members.");
+    return;
+  }
+
+  const btn = document.querySelector(
+    "button[onclick='calculateTeamSynergy()']",
+  );
+  const originalText = btn.innerText;
+  btn.innerText = "Calculating...";
+  btn.disabled = true;
+
+  try {
+    const year = document.getElementById("yearInput").value;
+    const month = document.getElementById("monthSelect").value;
+
+    const res = await fetch("/api/team-synergy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userIds, year, month }),
+    });
+
+    const data = await res.json();
+    renderTeamResults(data);
+  } catch (e) {
+    alert("Error: " + e.message);
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
+}
+
+// 3. Render Results Cards
+function renderTeamResults(results) {
+  const container = document.getElementById("teamResults");
+
+  if (results.length === 0) {
+    container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#666;">No conflict-free dates found for this combination. 📉</div>`;
+    return;
+  }
+
+  container.innerHTML = results
+    .slice(0, 8)
+    .map((r) => {
+      // Show top 8
+      const avg = r.teamMetrics.avgScore;
+      // Visual Logic
+      let borderClass =
+        avg >= 80
+          ? "border-left:5px solid #28a745"
+          : "border-left:5px solid #0d6efd";
+
+      return `
+        <div onclick='openTeamModal(${JSON.stringify(r)})' style="background:#fff; border:1px solid #e0e0e0; ${borderClass}; border-radius:8px; padding:15px; cursor:pointer; transition:transform 0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:bold; font-size:1.1rem; color:#333;">${r.dateStr}</div>
+                    <div style="font-size:0.85rem; color:#666;">${r.dayInfo.officer} • ${r.dayInfo.constellation}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="background:#e8f4fd; color:#0d6efd; font-weight:bold; padding:4px 8px; border-radius:6px; font-size:0.9rem;">
+                        ${avg}% Avg
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:4px; margin-top:10px;">
+                ${r.userBreakdown
+                  .map(
+                    (u) => `
+                    <div title="${u.name}: ${u.score}" style="flex:1; height:4px; background:${getColorForScore(u.score)}; border-radius:2px;"></div>
+                `,
+                  )
+                  .join("")}
+            </div>
+            <div style="margin-top:5px; font-size:0.75rem; color:#888; text-align:center;">
+                Lowest Score: <strong>${r.teamMetrics.minScore}</strong>
+            </div>
+        </div>
+        `;
+    })
+    .join("");
+}
+
+// 4. Team Modal (The "Click" Action)
+function openTeamModal(dayData) {
+  // 1. Target the Shared Modal Elements (Same as Calendar Grid)
+  const titleEl = document.getElementById("detailsTitle");
+  const bodyEl = document.getElementById("detailsBody");
+
+  // 2. Set Title
+  titleEl.innerText = `${dayData.fullDate} (Team View)`;
+
+  // 3. Sort Users (Best Scores First)
+  const sortedUsers = dayData.userBreakdown.sort((a, b) => b.score - a.score);
+
+  // 4. Extract Header Data
+  const yb = dayData.dayInfo.yellowBlackBelt || {
+    name: "?",
+    desc: "",
+    type: "Black",
+  };
+  const ybClass = yb.type === "Yellow" ? "spirit-yellow" : "spirit-black";
+  const ns = dayData.dayInfo.nineStar || "";
+
+  // 5. Build HTML (Reusing Calendar Grid Styles)
+  bodyEl.innerHTML = `
+        <div style="padding:0 10px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:15px;">
+             <div>
+                <div style="display:flex; gap:6px; margin-bottom:5px;">
+                    <span class="spirit-badge ${ybClass}" title="${yb.name}: ${yb.desc}">${yb.name}</span>
+                    <span style="font-size:0.75rem; background:#f1f3f5; padding:2px 6px; border-radius:4px; color:#555;">${ns.split(" ")[0]} Star</span>
+                </div>
+                <div style="font-size:1.2rem; font-weight:bold; color:#333;">${dayData.dayInfo.officer} Day</div>
+                <div style="color:#666; font-size:0.9rem;">${dayData.dayInfo.constellation} Star • ${dayData.dayInfo.element} Element</div>
+             </div>
+             <div style="text-align:right;">
+                <div style="font-size:0.8rem; text-transform:uppercase; color:#888; font-weight:600;">Team Score</div>
+                <div style="font-size:1.8rem; font-weight:800; color:#0d6efd;">${dayData.teamMetrics.avgScore}</div>
+             </div>
+        </div>
+
+        <h5 style="color:#333; font-weight:700; margin-bottom:15px;">👥 Team Impact Breakdown</h5>
+        <div class="grid-dashboard">
+            ${sortedUsers
+              .map((u) => {
+                const color = getColorForScore(u.score);
+                const isBad = u.score < 50;
+                // Add note if available (e.g. "Nobleman")
+                const noteHtml =
+                  u.notes.length > 0
+                    ? `<div style="font-size:0.75rem; color:#666; margin-top:2px;">✨ ${u.notes[0]}</div>`
+                    : "";
+
+                return `
+                <div style="background:${isBad ? "#fff5f5" : "#fff"}; border:1px solid ${isBad ? "#f5c6cb" : "#e9ecef"}; border-left:4px solid ${color}; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:bold; color:#333;">${u.name}</div>
+                        <div style="font-size:0.8rem; color:${color}; font-weight:600;">${u.verdict}</div>
+                        ${noteHtml}
+                    </div>
+                    <div style="font-size:1.2rem; font-weight:bold; color:${color};">
+                        ${u.score}
+                    </div>
+                </div>`;
+              })
+              .join("")}
+        </div>
+
+        <div style="background:#e8f4fd; margin-top:20px; padding:15px; border-radius:8px; border:1px solid #b8daff; font-size:0.9rem; color:#004085; display:flex; gap:10px;">
+            <div style="font-size:1.2rem;">💡</div>
+            <div>
+                <strong>Strategy:</strong> 
+                This date avoids "Personal Breakers" for everyone. 
+                The lowest individual score is <strong>${dayData.teamMetrics.minScore}</strong>, making it safe for group activities.
+            </div>
+        </div>
+    `;
+
+  // 6. Open the Shared Modal
+  openModalById("detailsModal");
+}
+
 // --- UTILS & CLOSERS ---
 
 // Open Modal Helper (Handles Animation)
@@ -1056,6 +1246,13 @@ function closeModal(modalId) {
   setTimeout(() => {
     modal.style.display = "none";
   }, 200);
+}
+
+function getColorForScore(score) {
+  if (score >= 80) return "#28a745"; // Green
+  if (score >= 60) return "#0d6efd"; // Blue
+  if (score >= 40) return "#fd7e14"; // Orange
+  return "#dc3545"; // Red
 }
 
 function getColorBg(cssClass) {

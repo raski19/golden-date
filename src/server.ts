@@ -217,6 +217,117 @@ app.post(
   },
 );
 
+// 1. ADD TEAM SYNERGY ENDPOINT
+// src/server.ts
+
+app.post("/api/team-synergy", async (req, res) => {
+  try {
+    const { userIds } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ error: "No users selected" });
+    }
+
+    // A. Fetch All Users
+    const users = await User.find({ _id: { $in: userIds } });
+    if (users.length === 0)
+      return res.status(404).json({ error: "Users not found" });
+
+    const results = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // B. Generate next 90 days
+    for (let i = 0; i < 90; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+
+      // Format Date for Calculations
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      // ✨ ADDED: Friendly Date format for the Modal Title (e.g., "Fri, Jan 30")
+      const fullDate = currentDate.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+
+      const dayInfo = getDayInfo(dateStr);
+
+      // C. Calculate Score for Each User
+      const userScores = users.map((user) => {
+        const scoreResult = calculateScore(
+          user.toObject() as Omit<IUser, "_id">,
+          dayInfo,
+          year,
+        );
+        return {
+          name: user.name,
+          score: scoreResult.score,
+          verdict: scoreResult.verdict,
+          flags: scoreResult.flags,
+          // Keep breaker notes for the team modal details
+          notes: scoreResult.log.filter(
+            (l) =>
+              l.includes("Breaker") ||
+              l.includes("Clash") ||
+              l.includes("Nobleman"),
+          ),
+        };
+      });
+
+      // D. Veto Logic
+      const isFatal = userScores.some(
+        (u) => u.verdict === "DANGEROUS" || u.score === 0,
+      );
+
+      if (!isFatal) {
+        const totalScore = userScores.reduce((sum, u) => sum + u.score, 0);
+        const avgScore = Math.round(totalScore / users.length);
+        const minScore = Math.min(...userScores.map((u) => u.score));
+
+        // Filter: Optional threshold (e.g., must be > 40 average)
+        if (avgScore >= 40) {
+          results.push({
+            dateStr: dateStr,
+            fullDate: fullDate, // ✨ Needed for Modal Title
+            dateNum: currentDate.getDate(),
+            dayInfo: {
+              officer: dayInfo.officer,
+              constellation: dayInfo.constellation,
+              element: dayInfo.element,
+              // ✨ Needed for Modal Header Badge
+              yellowBlackBelt: dayInfo.yellowBlackBelt,
+              nineStar: dayInfo.nineStar,
+            },
+            teamMetrics: {
+              avgScore,
+              minScore,
+            },
+            userBreakdown: userScores,
+          });
+        }
+      }
+    }
+
+    // F. Sort by Safety (MinScore) then Average
+    results.sort((a, b) => {
+      if (b.teamMetrics.minScore !== a.teamMetrics.minScore) {
+        return b.teamMetrics.minScore - a.teamMetrics.minScore;
+      }
+      return b.teamMetrics.avgScore - a.teamMetrics.avgScore;
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error("Team Synergy Error:", error);
+    res.status(500).json({ error: "Calculation failed" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
