@@ -936,13 +936,15 @@ function showDetails(day) {
     }
   });
 
-  const renderList = (items, icon, colorClass) => {
+  const renderList = (items, colorClass) => {
     if (items.length === 0)
       return `<div style="font-size:0.85rem; color:#aaa; font-style:italic;">None</div>`;
     return items
       .map(
         (text) =>
-          `<div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem;"><span style="margin-right:8px;">${icon}</span><span class="${colorClass}">${text}</span></div>`,
+          `<div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem;">
+                <span class="${colorClass}">${text}</span>
+            </div>`,
       )
       .join("");
   };
@@ -953,11 +955,11 @@ function showDetails(day) {
             <div class="grid-dashboard">
                 <div style="background: #f0fff4; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#155724; margin-bottom:12px; font-size:0.8rem;">✨ BOOSTS & LUCK</div>
-                    ${renderList(pros, "🟢", "text-success")}
+                    ${renderList(pros, "text-success")}
                 </div>
                 <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#721c24; margin-bottom:12px; font-size:0.8rem;">⚠️ RISKS & CLASHES</div>
-                    ${renderList(cons, "🔻", "text-danger")}
+                    ${renderList(cons, "text-danger")}
                 </div>
             </div>
                 
@@ -966,7 +968,7 @@ function showDetails(day) {
                     ? `
                 <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 10px;">
                     <div style="font-weight:bold; color:#6c757d; margin-bottom:12px; font-size:0.8rem;">ℹ️ GENERAL CONTEXT</div>
-                    ${renderList(neutrals, "🔹", "text-muted")}
+                    ${renderList(neutrals, "text-muted")}
                 </div>
                 `
                     : ""

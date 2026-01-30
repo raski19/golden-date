@@ -215,7 +215,7 @@ export const calculateScore = (
     (!currentLuck || CLASH_PAIRS[currentLuck.branch] !== dayBranch)
   ) {
     score -= 20; // Lower penalty for manual entry
-    log.push(`⚠️ Avoid: ${dayBranch} is in your manual avoid list.`);
+    log.push(`⚠️ Avoid: ${dayBranch} is in light conflict with your chart.`);
   }
 
   if (dayBranch === rules.selfPunishment) {
@@ -226,7 +226,10 @@ export const calculateScore = (
     );
   }
 
-  // --- 5. ELEMENTAL ANALYSIS ---
+  // =================================================================
+  // 5. ELEMENTAL ANALYSIS
+  // =================================================================
+
   const dayElement = dayData.element;
 
   // A. TAGGING (Check ALL independently so filters work)
@@ -262,6 +265,7 @@ export const calculateScore = (
   // =================================================================
   // 6. CONSTELLATION CHECK (Runtime Logic)
   // =================================================================
+
   const starName = dayData.constellation;
 
   // Initialize defaults
@@ -329,7 +333,10 @@ export const calculateScore = (
     }
   }
 
-  // --- 7. HARMONIES & BRANCH POWER ---
+  // =================================================================
+  // 7. HARMONIES & BRANCH POWER
+  // =================================================================
+
   if (user.baZiBranch) {
     if (SIX_HARMONY[user.baZiBranch] === dayBranch) {
       score += 20;
@@ -352,45 +359,63 @@ export const calculateScore = (
     log.push(`Great Branch: ${dayBranch} provides ${role}.`);
   }
 
-  // --- 8. ACTION RULES ---
-  if (score > 40) {
+  // =================================================================
+  // 8. ACTIONS (SMARTER FILTER)
+  // =================================================================
+
+  // Define "Unstable Officers" where constructive actions usually fail
+  const unstableOfficers = ["Destruction", "Danger", "Closed", "Extinction"];
+  const isUnstableDay =
+    unstableOfficers.includes(dayData.officer) ||
+    flags.some((f) => f.includes("BREAKER"));
+
+  // Only check for specific actions if the day is STABLE and decent (Score > 50)
+  // If it's a "Destruction" day, we skip this entire block so you don't get mixed signals.
+  if (score > 50 && !isUnstableDay) {
     const dayOfficer = officerName;
     const stemElem = dayData.element;
-    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown";
+    const branchElem = ELEMENT_MAP[dayBranch] || "";
     let bonusApplied = false;
 
     STANDARD_RULES.forEach((rule) => {
+      // 1. Check if the Day Officer allows this action
       if (!rule.officers.includes(dayOfficer)) return;
 
+      // 2. Check if the User's Elements match this action
       let targetElements: string[] = [];
       if (rule.type === "wealth") targetElements = rules.wealthElements;
       else if (rule.type === "career") targetElements = rules.careerElements;
       else if (rule.type === "health") targetElements = rules.healthElements;
 
-      // 3. Check Element Match
-      const elementMatch =
+      if (
         targetElements.includes(stemElem) ||
-        targetElements.includes(branchElem);
-
-      // 4. If Both Match -> Add to Specific Actions
-      if (elementMatch) {
+        targetElements.includes(branchElem)
+      ) {
         specificActions.push({
           action: rule.action,
           icon: rule.icon,
           desc: rule.description,
         });
 
-        // Apply Bonus (Once per day)
+        // Add score bonus only once per day
         if (!bonusApplied) {
           score += 15;
           bonusApplied = true;
-          log.push(`🎯 MATCH: Perfect day for ${rule.action} (${rule.type}).`);
+          log.push(`🎯 MATCH: Perfect day for ${rule.action}.`);
         }
       }
     });
+  } else if (isUnstableDay) {
+    // Optional: Add a log explaining why no actions are suggested despite good elements
+    log.push(
+      "⚠️ Elements are favorable, but the Day Energy is too unstable for major actions.",
+    );
   }
 
-  // --- 9. NINE STAR CHECKS (Period 9 Optimized) ---
+  // =================================================================
+  // 9. NINE STAR CHECKS (Period 9 Optimized)
+  // =================================================================
+
   const nineStar = dayData.nineStar;
 
   if (nineStar.includes("9 Purple")) {
@@ -422,7 +447,10 @@ export const calculateScore = (
     log.push(`⚔️ Conflict/Robbery: Risk of disputes.`);
   }
 
+  // =================================================================
   // --- 10. SAN SHA & GOAT BLADE ---
+  // =================================================================
+
   // Month Sha
   const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
   if (monthBadBranches.includes(dayBranch)) {
@@ -444,7 +472,10 @@ export const calculateScore = (
     );
   }
 
+  // =================================================================
   // --- 11. SHEN SHA ---
+  // =================================================================
+
   const stars = calculateShenSha(user, dayBranch);
   if (stars.nobleman) {
     score += 25;
@@ -469,7 +500,10 @@ export const calculateScore = (
     tags.push("CAREER");
   }
 
+  // =================================================================
   // --- 12. HARD CAPS & VERDICT ---
+  // =================================================================
+
   if (pillarScore <= 20) {
     if (score > 75) {
       score = 75;
