@@ -500,6 +500,33 @@ export const calculateScore = (
     tags.push("CAREER");
   }
 
+  if (stars.robbingShaDay) {
+    score -= 10;
+    flags.push("Robbing Sha (P)");
+    log.push(
+      "💸 Robbing Sha: Impulse buying, losing your own wallet, overspending on hobbies, or your spouse spending your money.",
+    );
+  }
+  if (stars.robbingShaYear) {
+    score -= 10;
+    flags.push("Robbing Sha (Y)");
+    log.push(
+      "💸 Robbing Sha: Theft, fraud, bad investments, or people taking credit for your work at the office.",
+    );
+  }
+  if (stars.deathGod) {
+    score -= 10;
+    flags.push("Death God");
+    log.push(
+      "⚖️ Death God: Prone to negligence or legal loops. Check details.",
+    );
+  }
+  if (stars.solitaryStar) {
+    score -= 5;
+    flags.push("Solitary");
+    log.push("🥀 Solitary Star: Inner isolation. Better for solo work.");
+  }
+
   // =================================================================
   // --- 12. HARD CAPS & VERDICT ---
   // =================================================================

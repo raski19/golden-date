@@ -304,6 +304,61 @@ export const ACADEMIC_STAR: Record<string, string> = {
   Gui: "Rabbit",
 };
 
+// ROBBING SHA (Jie Sha) - Based on Year/Day Branch (Trinity Group)
+// "The Wealth Leak"
+// Monkey/Rat/Dragon -> Snake
+// Tiger/Horse/Dog -> Pig
+// Snake/Rooster/Ox -> Tiger
+// Pig/Rabbit/Goat -> Monkey
+export const ROBBING_SHA: Record<string, string> = {
+  Monkey: "Snake",
+  Rat: "Snake",
+  Dragon: "Snake",
+  Tiger: "Pig",
+  Horse: "Pig",
+  Dog: "Pig",
+  Snake: "Tiger",
+  Rooster: "Tiger",
+  Ox: "Tiger",
+  Pig: "Monkey",
+  Rabbit: "Monkey",
+  Goat: "Monkey",
+};
+
+// SOLITARY STAR (Gu Chen) - Based on Year Branch
+// "The Loner"
+export const SOLITARY_STAR: Record<string, string> = {
+  Pig: "Tiger",
+  Rat: "Tiger",
+  Ox: "Tiger", // Winter -> Tiger
+  Tiger: "Snake",
+  Rabbit: "Snake",
+  Dragon: "Snake", // Spring -> Snake
+  Snake: "Monkey",
+  Horse: "Monkey",
+  Goat: "Monkey", // Summer -> Monkey
+  Monkey: "Pig",
+  Rooster: "Pig",
+  Dog: "Pig", // Autumn -> Pig
+};
+
+// DEATH GOD (Wang Shen) - The "Legal/Focus Trap"
+// Calculation: Derived from Year Branch (Trinity)
+export const DEATH_GOD: Record<string, string> = {
+  Monkey: "Pig",
+  Rat: "Pig",
+  Dragon: "Pig",
+  Tiger: "Snake",
+  Horse: "Snake",
+  Dog: "Snake",
+  Snake: "Monkey",
+  Rooster: "Monkey",
+  Ox: "Monkey",
+  Pig: "Tiger",
+  Rabbit: "Tiger",
+  Goat: "Tiger",
+};
+
 export const BRANCH_START_TIMES: Record<string, number> = {
   Ox: 1,
   Tiger: 3,

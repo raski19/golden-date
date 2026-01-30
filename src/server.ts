@@ -313,7 +313,7 @@ app.post("/api/team-synergy", async (req, res) => {
       }
     }
 
-    // F. Sort by Safety (MinScore) then Average
+    // F. Sort by "Safest" (Highest Minimum Score), then Average
     results.sort((a, b) => {
       if (b.teamMetrics.minScore !== a.teamMetrics.minScore) {
         return b.teamMetrics.minScore - a.teamMetrics.minScore;
@@ -325,6 +325,159 @@ app.post("/api/team-synergy", async (req, res) => {
   } catch (error) {
     console.error("Team Synergy Error:", error);
     res.status(500).json({ error: "Calculation failed" });
+  }
+});
+
+app.post("/api/momentum", async (req: Request, res: Response) => {
+  try {
+    const { userId, duration = 2 } = req.body;
+    const durationNum = parseInt(duration, 10);
+
+    // Validate duration parameter
+    if (durationNum !== 2 && durationNum !== 3) {
+      return res.status(400).json({
+        error: "Duration must be 2 or 3 days",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const chains = [];
+    const daysToCheck = 180;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailyScores = [];
+
+    // 1. GENERATE SCORES FOR 90 DAYS
+    for (let i = 0; i < daysToCheck; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      const fullDate = d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      const dayInfo = getDayInfo(dateStr);
+
+      const scoreData = calculateScore(
+        user.toObject() as Omit<IUser, "_id">,
+        dayInfo,
+        year,
+      );
+
+      dailyScores.push({
+        date: d,
+        fullDate,
+        dayInfo,
+        score: scoreData.score,
+        verdict: scoreData.verdict,
+        flags: scoreData.flags || [],
+        officer: dayInfo.officer,
+      });
+    }
+
+    // 🔴 DEFINING THE GROUPS
+    // A chain is valid ONLY if ALL days belong to one of these groups.
+    const OFFICER_GROUPS = {
+      LAUNCH: ["Establish", "Initiate", "Open"],
+      HARVEST: ["Success", "Receive", "Full"],
+      FOUNDATION: ["Stable", "Balance"],
+      CLEANSING: ["Remove", "Destruction"],
+    };
+
+    // 2. FIND STREAKS
+    for (let i = 0; i <= dailyScores.length - durationNum; i++) {
+      const potentialChain = dailyScores.slice(i, i + durationNum);
+
+      // A. Check Consecutive Dates (No gaps)
+      let isConsecutive = true;
+      for (let j = 1; j < potentialChain.length; j++) {
+        const prevDate = new Date(potentialChain[j - 1].date);
+        const currDate = new Date(potentialChain[j].date);
+        prevDate.setHours(0, 0, 0, 0);
+        currDate.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil(
+          Math.abs(currDate.getTime() - prevDate.getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+        if (diffDays !== 1) {
+          isConsecutive = false;
+          break;
+        }
+      }
+      if (!isConsecutive) continue;
+
+      // B. Check Safety (Score & Breakers)
+      // Note: We check this BEFORE theme to fail fast
+      const isSafeChain = potentialChain.every(
+        (d) =>
+          d.score >= 40 &&
+          d.verdict !== "DANGEROUS" &&
+          !(Array.isArray(d.flags) && d.flags.includes("PERSONAL BREAKER")),
+      );
+
+      if (isSafeChain) {
+        // C. 🔴 STRICT THEME CHECK
+        // Iterate through our defined groups. If the chain matches a group entirely, we keep it.
+        let detectedTheme = null;
+
+        for (const [key, allowedOfficers] of Object.entries(OFFICER_GROUPS)) {
+          const isMatch = potentialChain.every((d) =>
+            allowedOfficers.includes(d.officer),
+          );
+          if (isMatch) {
+            detectedTheme = key; // Returns "LAUNCH", "HARVEST", etc.
+            break;
+          }
+        }
+
+        // Only proceed if a valid theme was found
+        if (detectedTheme) {
+          const avg = Math.round(
+            potentialChain.reduce((sum, d) => sum + d.score, 0) / durationNum,
+          );
+
+          if (avg >= 60) {
+            chains.push({
+              startDate: potentialChain[0].fullDate,
+              endDate: potentialChain[potentialChain.length - 1].fullDate,
+              startDateObj: potentialChain[0].date,
+              theme: detectedTheme, // Use the strictly detected theme
+              avgScore: avg,
+              duration: potentialChain.length,
+              scores: potentialChain.map((d) => d.score),
+              days: potentialChain,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. SORT LOGIC
+    chains.sort((a, b) => a.startDateObj.getTime() - b.startDateObj.getTime());
+
+    // 4. RETURN
+    res.json({
+      summary: {
+        totalDaysAnalyzed: daysToCheck,
+        totalChainsFound: chains.length,
+        durationRequested: duration,
+      },
+      chains: chains.slice(0, 50),
+    });
+  } catch (error) {
+    console.error("Momentum Error:", error);
+    res.status(500).json({ error: "Momentum calculation failed" });
   }
 });
 

@@ -89,6 +89,7 @@
 
     <div id="calendarGrid" class="calendar-wrapper"></div>
 
+    <!-- TEAM SYNERGY -->
     <div class="container" style="margin-top:40px; border-top:2px dashed #eee; padding-top:20px;">
         <h3>🤝 Team Synergy Planner</h3>
         <p style="color:#666; margin-bottom:15px;">Find safe dates where <strong>everyone</strong> on the team is supported.</p>
@@ -107,6 +108,37 @@
         </div>
 
         <div id="teamResults" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px; margin-top:20px;">
+        </div>
+    </div>
+
+    <!-- MOMENTUM -->
+    <div class="container" style="margin-top:40px; border-top:2px dashed #eee; padding-top:20px;">
+        <h3>🌊 Project Momentum Builder</h3>
+
+        <p style="color:#666; margin-bottom:15px;">
+            Find a <strong>winning streak</strong> of consecutive days to
+            <strong>Launch</strong> ventures,
+            <strong>Harvest</strong> returns,
+            <strong>Build</strong> foundations, or
+            <strong>Cleanse</strong> obstacles without interruption.
+        </p>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #e0e0e0; display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+
+            <div>
+                <label style="font-weight:bold; display:block; margin-bottom:5px;">Duration:</label>
+                <select id="momentumDuration" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <option value="2">2-Day Sprint</option>
+                    <option value="3">3-Day Marathon</option>
+                </select>
+            </div>
+
+            <button class="btn-search" onclick="findMomentum()" style="background:#0dcaf0; border-color:#0dcaf0; color:#000; height:38px; align-self:flex-end;">
+                Find Streaks
+            </button>
+        </div>
+
+        <div id="momentumResults" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
         </div>
     </div>
 

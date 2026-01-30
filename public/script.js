@@ -1220,6 +1220,137 @@ function openTeamModal(dayData) {
   openModalById("detailsModal");
 }
 
+// --- MOMENTUM LOGIC ---
+
+async function findMomentum() {
+  const userId = document.getElementById("userSelect").value;
+  const duration = document.getElementById("momentumDuration").value;
+  const btn = document.querySelector("button[onclick='findMomentum()']");
+
+  if (!userId) return;
+
+  btn.innerText = "Scanning...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/momentum", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, duration }),
+    });
+
+    const data = await res.json();
+    renderMomentumResults(data);
+  } catch (e) {
+    alert("Error: " + e.message);
+  } finally {
+    btn.innerText = "Find Streaks";
+    btn.disabled = false;
+  }
+}
+
+function renderMomentumResults(data) {
+  const container = document.getElementById("momentumResults");
+
+  if (data.chains.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">No strong streaks found.</div>`;
+    return;
+  }
+
+  let lastMonth = "";
+  let html = "";
+
+  data.chains.forEach((chain) => {
+    const d = new Date(chain.days[0].date);
+    const currentMonth = d.toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
+
+    // Month Header
+    if (currentMonth !== lastMonth) {
+      html += `<h4 style="margin: 25px 0 10px 0; color:#0d6efd; border-bottom:2px solid #e0e0e0; padding-bottom:5px;">${currentMonth}</h4>`;
+      lastMonth = currentMonth;
+    }
+
+    // UI Configuration for Momentum Themes
+    const MOMENTUM_THEMES = {
+      LAUNCH: {
+        label: "Launch Sequence",
+        icon: "🚀",
+        color: "#0d6efd", // Blue
+        desc: "Best for starting new projects.",
+      },
+      HARVEST: {
+        label: "Harvest Sequence",
+        icon: "💰",
+        color: "#198754", // Green
+        desc: "Best for sales and collection.",
+      },
+      FOUNDATION: {
+        label: "Foundation Sequence",
+        icon: "🧱",
+        color: "#6610f2", // Purple
+        desc: "Best for planning and internal work.",
+      },
+      CLEANSING: {
+        label: "Cleansing Sequence",
+        icon: "🧹",
+        color: "#dc3545", // Red
+        desc: "Best for removal and detox.",
+      },
+    };
+
+    // 🎨 GET UI DETAILS FROM CONFIG
+    // Fallback to GENERAL if key not found
+    const ui = MOMENTUM_THEMES[chain.theme] || MOMENTUM_THEMES["GENERAL"];
+
+    html += `
+        <div style="background:#fff; border:1px solid #e0e0e0; border-left: 5px solid ${ui.color}; border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
+                <div>
+                    <h5 style="margin:0; color:#333; font-size:1.1rem;">${ui.icon} ${ui.label}</h5>
+                    <span style="font-size:0.85rem; color:#666;">Starts ${chain.startDate}</span>
+                </div>
+                <div style="background:${ui.color}20; color:${ui.color}; font-weight:bold; padding:5px 10px; border-radius:20px;">
+                    ${chain.avgScore}% Power
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0;">
+                ${chain.days
+                  .map((day, index) => {
+                    const isLast = index === chain.days.length - 1;
+                    const color = getColorForScore(day.score);
+
+                    return `
+                    <div style="display:flex; gap:15px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; width:20px;">
+                            <div style="width:12px; height:12px; background:${color}; border-radius:50%; margin-top:6px;"></div>
+                            ${!isLast ? `<div style="width:2px; flex:1; background:#e0e0e0; min-height:30px;"></div>` : ``}
+                        </div>
+                        <div style="padding-bottom:15px; flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:#333;">${day.fullDate}</strong>
+                                <span style="font-weight:bold; color:${color};">${day.score}</span>
+                            </div>
+                            <div style="font-size:0.9rem; color:#555;">
+                                ${day.dayInfo.officer} Officer • ${day.dayInfo.element}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                  })
+                  .join("")}
+            </div>
+        </div>
+        `;
+  });
+
+  container.innerHTML = html;
+}
+
 // --- UTILS & CLOSERS ---
 
 // Open Modal Helper (Handles Animation)
