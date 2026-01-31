@@ -9,6 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "lunar-javascript": "^1.7.7",
     "mongoose": "^9.1.5"
