@@ -341,6 +341,11 @@ function renderBanner(analysis) {
 }
 
 function renderGrid(days) {
+  const today = new Date();
+  const isCurrentMonth =
+    today.getFullYear() === currentYear &&
+    today.getMonth() === currentMonth - 1;
+
   const grid = document.getElementById("calendarGrid");
   grid.innerHTML = "";
 
@@ -355,6 +360,13 @@ function renderGrid(days) {
     const card = document.createElement("div");
     const tags = day.analysis.tags || [];
     card.dataset.tags = tags.join(",");
+
+    // Mark today's card
+    const isToday = isCurrentMonth && day.day === today.getDate();
+    if (isToday) {
+      card.classList.add("today");
+      card.dataset.today = "true";
+    }
 
     const type = day.analysis.dayType || "";
     let typeStyle = "color:#999; font-size:0.7rem; font-weight:normal;";
@@ -593,7 +605,22 @@ function renderGrid(days) {
     card.onclick = () => showDetails(day);
     grid.appendChild(card);
   });
+
   applyFilter();
+
+  // Scroll to today
+  if (isCurrentMonth) {
+    requestAnimationFrame(() => {
+      const todayEl = grid.querySelector('[data-today="true"]');
+      if (todayEl) {
+        todayEl.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
+    });
+  }
 }
 
 // --- FILTERING ---
