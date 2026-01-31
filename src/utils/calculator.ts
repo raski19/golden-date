@@ -518,7 +518,7 @@ export const calculateScore = (
     score -= 10;
     flags.push("Death God");
     log.push(
-      "⚖️ Death God: Prone to negligence or legal loops. Good day for isolation and strategic thinking, the world won't bother you.",
+      "⚖️ Death God: Prone to negligence or legal loops. Check fine print. Good day for isolation and strategic thinking, the world won't bother you.",
     );
   }
   if (stars.solitaryStar) {
