@@ -173,13 +173,8 @@ function changeMonth(delta) {
 }
 
 async function handleUserChange() {
-  const overlay = document.getElementById("loadingOverlay");
-
-  // 1. Show Loading
-  if (overlay) {
-    overlay.style.display = "flex";
-    // Optional: Add a slight fade-in transition logic here if desired
-  }
+  // Show Loading
+  loadingOverlay("flex");
 
   // Use a small timeout to let the UI update before the heavy lifting starts
   // (This ensures the blur renders instantly)
@@ -190,8 +185,8 @@ async function handleUserChange() {
     } catch (error) {
       console.error("Error loading profile:", error);
     } finally {
-      // 2. Hide Loading
-      if (overlay) overlay.style.display = "none";
+      // Hide Loading
+      loadingOverlay("none");
     }
   }, 10);
 }
@@ -298,6 +293,9 @@ function showSearchResults(dates, action) {
 
 // --- CALENDAR LOGIC ---
 async function loadCalendar() {
+  // Show Loading
+  loadingOverlay("flex");
+
   const userId = document.getElementById("userSelect").value;
   if (!userId) return;
 
@@ -311,6 +309,9 @@ async function loadCalendar() {
 
   renderBanner(analysis);
   renderGrid(days);
+
+  // Hide Loading
+  loadingOverlay("none");
 }
 
 function renderBanner(analysis) {
@@ -1379,6 +1380,16 @@ function renderMomentumResults(data) {
 }
 
 // --- UTILS & CLOSERS ---
+
+function loadingOverlay(display) {
+  const overlay = document.getElementById("loadingOverlay");
+
+  // 1. Show Loading
+  if (overlay) {
+    overlay.style.display = display;
+    // Optional: Add a slight fade-in transition logic here if desired
+  }
+}
 
 // Open Modal Helper (Handles Animation)
 function openModalById(modalId) {
