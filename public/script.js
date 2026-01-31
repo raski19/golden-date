@@ -610,6 +610,11 @@ function renderGrid(days) {
 
   applyFilter();
 
+  // Check if the toggles are ON, and re-apply the visual effects immediately
+  if (document.getElementById("architectToggle")?.checked) {
+    toggleArchitectMode();
+  }
+
   // Scroll to today
   if (isCurrentMonth) {
     requestAnimationFrame(() => {
