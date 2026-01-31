@@ -94,6 +94,7 @@ export interface ScoreResult {
   isStarFavorable: boolean;
   isStarAvoid: boolean;
   isAvoidElement: boolean;
+  isVoidDay: boolean;
 }
 
 export interface TenGodsResult {

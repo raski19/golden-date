@@ -22,6 +22,7 @@ import {
 } from "./constants";
 import { calculateRootStrengthCached } from "./rootStrength";
 import { getCurrentLuckPillar } from "./calculateLuckPillar";
+import { getVoidStatus } from "./shenSha";
 
 export const calculateScore = (
   user: IUser,
@@ -108,7 +109,7 @@ export const calculateScore = (
   const pillarScore = rootInfo.score;
 
   // =================================================================
-  // 4. CLASH HIERARCHY (Updated)
+  // CLASH HIERARCHY (Updated)
   // =================================================================
 
   // A. GENERAL BREAKERS (The Date Clashing with Itself)
@@ -125,57 +126,31 @@ export const calculateScore = (
   }
 
   // B. PERSONAL CLASHES (The Date Clashing with YOU)
-
   // 1. DAY BRANCH CLASH (Critical / Fatal)
   // Target: The "Self", Body, and Spouse.
   if (dayBranch === CLASH_PAIRS[user.baZiBranch]) {
     // Clash with Day Pillar
-    score = -100; // Immediate Fail
+    score = -50; // Immediate Fail
     flags.push("PERSONAL BREAKER");
     log.push(
       `💀 PERSONAL BREAKER: ${dayBranch} clashes with your Day Branch (${user.baZiBranch}). Risk of health/injury/relationship conflict.`,
     );
-
-    // Return early because this day is unusable
-    return {
-      dayType,
-      pillarNote,
-      pillarIcon,
-      pillarScore,
-      score: 0,
-      verdict: "DANGEROUS",
-      cssClass: "dangerous",
-      flags,
-      tags,
-      log,
-      specificActions: [],
-      badHours: [],
-      goodHours: [],
-      tenGodName,
-      actionTitle: guide.title,
-      actionTagline: guide.tagline,
-      suitableActions: [],
-      cautionAction: "Avoid all major activities.",
-      actionKeywords: "",
-      officerRec,
-      starQuality: "Bad",
-      isStarFavorable: false,
-      isStarAvoid: true,
-      isAvoidElement: true,
-    };
+    log.push(
+      "⚔️ TROJAN HORSE TIP: Use this aggressive energy to break a bad habit (smoking, sugar) or end a toxic relationship.",
+    );
   }
-
   // 2. YEAR BRANCH CLASH (High Priority)
   // Target: Social Status, Public Appearance.
-  // Note: Ensure user.yearBranch exists. If not, this check is skipped.
   if (user.yearBranch && dayBranch === CLASH_PAIRS[user.yearBranch]) {
-    score -= 50;
+    score -= 30;
     flags.push("Social Clash");
     log.push(
       `🎭 Year Clash: ${dayBranch} clashes with your Year (${user.yearBranch}). Avoid public events, networking, or weddings.`,
     );
+    log.push(
+      "⚔️ TROJAN HORSE TIP: Use this to disrupt a stalemate negotiation or challenge the status quo.",
+    );
   }
-
   // 3. MONTH BRANCH CLASH (Context Specific)
   // Target: Career, Parents, Authority.
   if (user.monthBranch && dayBranch === CLASH_PAIRS[user.monthBranch]) {
@@ -187,7 +162,6 @@ export const calculateScore = (
     // We add a specific tag so the frontend can show a warning badge if desired
     tags.push("CAREER CLASH");
   }
-
   // 4. LUCK BRANCH CLASH
   const currentLuck = getCurrentLuckPillar(user, year); // Pass current calendar year
   // const currentLuck = { branch: user.luckBranch };
@@ -227,7 +201,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // 5. ELEMENTAL ANALYSIS
+  // ELEMENTAL ANALYSIS
   // =================================================================
 
   const dayElement = dayData.element;
@@ -244,26 +218,20 @@ export const calculateScore = (
     log.push(`⛔ ELEMENT: ${dayElement} is unfavorable for you.`);
   } else {
     // Determine the primary benefit for the Log
-    // (We use a flag to ensure we only add the score bonus once)
-    let bonusApplied = false;
-
     if (rules.wealthElements.includes(dayElement)) {
       score += 15;
       log.push(`💰 ELEMENT: ${dayElement} supports your Wealth.`);
-      bonusApplied = true;
     } else if (rules.careerElements.includes(dayElement)) {
       score += 15;
       log.push(`🚀 ELEMENT: ${dayElement} supports your Career.`);
-      bonusApplied = true;
     } else if (rules.healthElements.includes(dayElement)) {
       score += 10;
       log.push(`🧘 ELEMENT: ${dayElement} supports your Health.`);
-      bonusApplied = true;
     }
   }
 
   // =================================================================
-  // 6. CONSTELLATION CHECK (Runtime Logic)
+  // CONSTELLATION CHECK (Runtime Logic)
   // =================================================================
 
   const starName = dayData.constellation;
@@ -334,7 +302,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // 7. HARMONIES & BRANCH POWER
+  // HARMONIES & BRANCH POWER
   // =================================================================
 
   if (user.baZiBranch) {
@@ -360,7 +328,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // 8. ACTIONS (SMARTER FILTER)
+  // ACTIONS (SMARTER FILTER)
   // =================================================================
 
   // Define "Unstable Officers" where constructive actions usually fail
@@ -413,7 +381,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // 9. NINE STAR CHECKS (Period 9 Optimized)
+  // NINE STAR CHECKS (Period 9 Optimized)
   // =================================================================
 
   const nineStar = dayData.nineStar;
@@ -448,7 +416,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // --- 10. SAN SHA & GOAT BLADE ---
+  // --- SAN SHA & GOAT BLADE ---
   // =================================================================
 
   // Month Sha
@@ -473,7 +441,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // --- 11. SHEN SHA ---
+  // --- SHEN SHA ---
   // =================================================================
 
   const stars = calculateShenSha(user, dayBranch);
@@ -528,7 +496,36 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // --- 12. HARD CAPS & VERDICT ---
+  // --- VOID DAYS ---
+  // =================================================================
+
+  // 1. Check for VOID (Kong Wang)
+  // We check the USER'S Day Pillar (user.dayMaster, user.baZiBranch)
+  const contextBranches = [yearBranch, monthBranch];
+  const userVoidBranches = getVoidStatus(
+    user.dayMaster,
+    user.baZiBranch,
+    dayBranch,
+    contextBranches,
+  );
+  const isVoidDay =
+    userVoidBranches.isVoid && userVoidBranches.type === "True Void";
+
+  if (isVoidDay) {
+    // Standard interpretation: Bad for material success
+    // Architect interpretation: Good for spiritual/deep work
+    flags.push("VOID");
+
+    // We do NOT deduct points if the goal is "Planning" or "Deep Work"
+    // But generally, we add a nuanced log
+    log.push("🌌 Void Day (Kong Wang): Material results are slippery today.");
+    log.push(
+      "💡 VOID TIP: Excellent for coding, meditation, and strategy. The world can't see you.",
+    );
+  }
+
+  // =================================================================
+  // --- HARD CAPS & VERDICT ---
   // =================================================================
 
   if (pillarScore <= 20) {
@@ -620,6 +617,7 @@ export const calculateScore = (
     isStarFavorable,
     isStarAvoid,
     isAvoidElement,
+    isVoidDay,
   };
 };
 

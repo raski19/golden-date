@@ -8,7 +8,7 @@ export const YANG_STEMS: string[] = ["Jia", "Bing", "Wu", "Geng", "Ren"];
 export const YIN_STEMS: string[] = ["Yi", "Ding", "Ji", "Xin", "Gui"];
 
 // Self-Punishment (刑) - Element amplifies itself negatively
-export const SELF_PUNISHMENT = ["Dragon", "Horse", "Rooster", "Pig"];
+export const SELF_PUNISHMENT: string[] = ["Dragon", "Horse", "Rooster", "Pig"];
 
 // Element Map (Stems & Branches)
 export const ELEMENT_MAP: Record<string, string> = {
@@ -198,6 +198,21 @@ export const CHINESE_NUMBERS: Record<string, string> = {
   七: "7",
   八: "8",
   九: "9",
+};
+
+export const COMBO_PAIRS: Record<string, string> = {
+  Rat: "Ox",
+  Ox: "Rat",
+  Tiger: "Pig",
+  Pig: "Tiger",
+  Rabbit: "Dog",
+  Dog: "Rabbit",
+  Dragon: "Rooster",
+  Rooster: "Dragon",
+  Snake: "Monkey",
+  Monkey: "Snake",
+  Horse: "Goat",
+  Goat: "Horse",
 };
 
 export const CLASH_PAIRS: Record<string, string> = {
@@ -409,6 +424,19 @@ export const BRANCHES: Record<string, string> = {
   戌: "Dog",
   亥: "Pig",
 };
+
+export const STEMS_LIST: string[] = [
+  "Jia",
+  "Yi",
+  "Bing",
+  "Ding",
+  "Wu",
+  "Ji",
+  "Geng",
+  "Xin",
+  "Ren",
+  "Gui",
+];
 
 export const BRANCHES_LIST: string[] = [
   "Rat",

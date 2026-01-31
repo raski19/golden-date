@@ -521,8 +521,9 @@ function renderGrid(days) {
         )
           return `<span class="badge" style="${worseBadgesStyle}">🗡️ ${f} </span>`;
 
-        // Hide "Bad Star" / "Good Star" from badges since we show them in the footer text now
-        if (f === "Bad Star" || f === "Good Star") return "";
+        // Hide unnecessary badges
+        if (f === "Good Star" || f === "Bad Star") return "";
+
         return `<span class="badge"> ${f} </span>`;
       })
       .join("");
@@ -776,7 +777,7 @@ function showLegend() {
                         ${rule.icon} ${rule.action}
                     </div>
                     <div style="font-size:0.85rem; color:#444; margin-bottom:4px;">
-                        "${rule.desc}"
+                        "${rule.description}"
                     </div>
                     <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
                         <span style="font-size:0.75rem; color:#555; background:#f1f3f5; padding:2px 8px; border-radius:4px; border:1px solid #e9ecef;">
@@ -1057,6 +1058,35 @@ function showDetails(day) {
     `;
 
   openModalById("detailsModal");
+}
+
+function toggleArchitectMode() {
+  const isModeActive = document.getElementById("architectToggle").checked;
+  const cards = document.querySelectorAll(".day-card");
+
+  cards.forEach((card) => {
+    const badges = card.querySelector(".footer-badges").innerText;
+
+    if (badges.includes("VOID") || badges.includes("Death God")) {
+      if (isModeActive) {
+        // Highlight as GOOD (Purple)
+        card.style.background = "#f3e5f5"; // Light Purple
+        card.style.borderColor = "#9c27b0";
+        card.style.opacity = "1";
+      } else {
+        // Revert to normal (often these are low score days, so maybe grey/red)
+        card.style.background = "";
+        card.style.borderColor = "";
+      }
+    } else {
+      // If mode is active, fade out the "Normal" days to focus on Deep Work
+      if (isModeActive) {
+        card.style.opacity = "0.4";
+      } else {
+        card.style.opacity = "1";
+      }
+    }
+  });
 }
 
 // --- TEAM SYNERGY LOGIC ---

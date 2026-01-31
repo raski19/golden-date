@@ -25,7 +25,7 @@ app.use(express.static("public"));
 
 // Get Users
 app.get("/api/users", async (req: Request, res: Response) => {
-  const users = await User.find({}, "name baZiProfile");
+  const users = await User.find({}, "name baZiProfile rules");
   res.json(users);
 });
 
