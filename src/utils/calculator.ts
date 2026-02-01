@@ -375,9 +375,7 @@ export const calculateScore = (
     });
   } else if (isUnstableDay) {
     // Optional: Add a log explaining why no actions are suggested despite good elements
-    log.push(
-      "⚠️ Elements are favorable, but the Day Energy is too unstable for major actions.",
-    );
+    log.push("⚠️ Day Energy is too unstable for major actions.");
   }
 
   // =================================================================
