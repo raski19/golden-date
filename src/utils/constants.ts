@@ -1156,73 +1156,84 @@ export const STAR_DEFINITIONS: Record<string, string> = {
 };
 
 export const YELLOW_BLACK_BELT: YellowBlackBelt[] = [
+  // 1. Qing Long (Green Dragon)
   {
     name: "Green Dragon",
     type: "Yellow",
     icon: "🐉",
     desc: "Supreme Auspicious. Great for everything.",
   },
+  // 2. Ming Tang (Bright Hall)
   {
     name: "Bright Hall",
     type: "Yellow",
     icon: "✨",
     desc: "Noble help, success, and clarity.",
   },
-  {
-    name: "Golden Lock",
-    type: "Yellow",
-    icon: "🔒",
-    desc: "Accumulating wealth, savings, stability.",
-  },
-  {
-    name: "Precious Light",
-    type: "Yellow",
-    icon: "💎",
-    desc: "Charisma, status, and recognition.",
-  }, // (Heaven Virtue)
-  {
-    name: "Jade Hall",
-    type: "Yellow",
-    icon: "🏛️",
-    desc: "Career advancement, study, academic success.",
-  },
-  {
-    name: "Life Governor",
-    type: "Yellow",
-    icon: "📜",
-    desc: "Longevity, health, resolving problems.",
-  }, // (Heaven Officer)
-
+  // 3. Tian Xing (Heavenly Punishment)
   {
     name: "Heavenly Punishment",
     type: "Black",
     icon: "⚖️",
     desc: "Legal issues, conflict, punishment.",
   },
+  // 4. Zhu Que (Red Phoenix)
   {
     name: "Red Phoenix",
     type: "Black",
     icon: "🐦",
     desc: "Arguments, gossip, and noise.",
   },
+  // 5. Jin Kui (Golden Lock)
+  {
+    name: "Golden Lock",
+    type: "Yellow",
+    icon: "🔒",
+    desc: "Accumulating wealth, savings, stability.",
+  },
+  // 6. Tian De (Precious Light / Heaven Virtue)
+  {
+    name: "Precious Light",
+    type: "Yellow",
+    icon: "💎",
+    desc: "Charisma, status, and recognition.",
+  },
+  // 7. Bai Hu (White Tiger)
   {
     name: "White Tiger",
     type: "Black",
     icon: "🐯",
     desc: "Injury, blood, accidents, travel risks.",
   },
+  // 8. Yu Tang (Jade Hall)
+  {
+    name: "Jade Hall",
+    type: "Yellow",
+    icon: "🏛️",
+    desc: "Career advancement, study, academic success.",
+  },
+  // 9. Tian Lao (Heavenly Jail)
   {
     name: "Heavenly Jail",
     type: "Black",
     icon: "⛓️",
     desc: "Trapped, delays, feeling stuck.",
   },
+  // 10. Xuan Wu (Black Tortoise)
   {
     name: "Black Tortoise",
     type: "Black",
     icon: "🐢",
     desc: "Theft, loss, hidden danger, deception.",
-  }, // (Gen Wu)
+  },
+  // 11. Si Ming (Life Governor)
+  {
+    name: "Life Governor",
+    type: "Yellow",
+    icon: "📜",
+    desc: "Longevity, health, resolving problems.",
+  },
+  // 12. Gou Chen (Grappling Hook)
   {
     name: "Grappling Hook",
     type: "Black",

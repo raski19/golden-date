@@ -115,32 +115,32 @@ export function getYellowBlackBelt(monthBranch: string, dayBranch: string) {
 
   let startOffset = 0;
 
-  // Dong Gong Starting Offsets for "Green Dragon"
+  // Dong Gong Starting Offsets
   switch (monthBranch) {
     case "Tiger":
     case "Monkey":
-      startOffset = 0;
-      break; // Starts on Rat
+      startOffset = 0; // Starts on Rat
+      break;
     case "Rabbit":
     case "Rooster":
-      startOffset = 2;
-      break; // Starts on Tiger
+      startOffset = 2; // Starts on Tiger
+      break;
     case "Dragon":
     case "Dog":
-      startOffset = 4;
-      break; // Starts on Dragon
+      startOffset = 4; // Starts on Dragon
+      break;
     case "Snake":
     case "Pig":
-      startOffset = 6;
-      break; // Starts on Horse
+      startOffset = 6; // Starts on Horse
+      break;
     case "Rat":
     case "Horse":
-      startOffset = 8;
-      break; // Starts on Monkey
+      startOffset = 8; // Starts on Monkey
+      break;
     case "Ox":
     case "Goat":
-      startOffset = 10;
-      break; // Starts on Dog
+      startOffset = 10; // Starts on Dog
+      break;
   }
 
   // Find index of the day
