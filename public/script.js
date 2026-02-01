@@ -1756,21 +1756,27 @@ function handleSwipe(startX, startY, endX, endY) {
   if (Math.abs(diffX) > Math.abs(diffY)) {
     // Check if movement was significant enough
     if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffY) < verticalLimit) {
-      // Only trigger if modal is open
-      if (modalContainer.style.display === "flex") {
+      // Ensure your computed style or inline style actually matches "flex"
+      const modal = document.getElementById("detailsModal");
+      const isVisible =
+        modal &&
+        (modal.style.display === "flex" ||
+          getComputedStyle(modal).display === "flex");
+
+      if (isVisible) {
         if (diffX > 0) {
           // SWIPE RIGHT -> Go to Previous Day
           const btn = document.getElementById("btnPrevDay");
           if (btn && !btn.disabled) {
             btn.click();
-            animateSwipe("right"); // Optional visual feedback
+            animateSwipe("right");
           }
         } else {
           // SWIPE LEFT -> Go to Next Day
           const btn = document.getElementById("btnNextDay");
           if (btn && !btn.disabled) {
             btn.click();
-            animateSwipe("left"); // Optional visual feedback
+            animateSwipe("left");
           }
         }
       }
