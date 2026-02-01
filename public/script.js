@@ -909,7 +909,6 @@ function showDetails(day) {
   const goodHours = day.analysis.goodHours || [];
   const yb = day.info.yellowBlackBelt;
   const starDesc = day.info.constellationDesc || "No specific data.";
-  const nineStarDesc = day.info.nineStarDesc || "No specific data.";
 
   // --- SAFETY FILTER ---
   const officerName = (day.info.officer || "General").trim();
@@ -991,6 +990,18 @@ function showDetails(day) {
                 </div>
             </div>`;
   }
+
+  // --- DAY INFO ---
+  const dayInfo = `<div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
+    <div>
+      <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
+      <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
+    </div>
+    <div>
+      <strong>Officer:</strong> ${day.info.officer}<br>
+      <strong>Element:</strong> ${day.info.element}
+    </div>
+  </div>`;
 
   // --- ARCHETYPE CARD ---
   const tenGod = day.analysis.tenGodName || "Day Energy";
@@ -1103,6 +1114,19 @@ function showDetails(day) {
     `;
 
   // --- HOURLY GRID ---
+  const energyDeepDive = `<div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
+            <h4 style="margin:0 0 10px 0; color:#856404; font-size:1rem;">🔮 Energy Deep Dive</h4>
+            <div style="margin-bottom:10px;">
+                <div style="font-weight:bold; color:#555;">${yb.icon} ${yb.name} Spirit</div>
+                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${yb.desc}"</div>
+            </div>
+            <div>
+                <div style="font-weight:bold; color:#555;">★ ${day.info.constellation} Star</div>
+                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${starDesc}"</div>
+            </div>
+        </div>`;
+
+  // --- HOURLY GRID ---
   const formatHourLine = (line, type) => {
     const icon = type === "good" ? "🌟" : "🚫";
     return `<li style="display:flex; align-items:start; margin-bottom:6px; font-size:0.9rem;"><span style="margin-right:8px;">${icon}</span><span style="color:#444;">${line}</span></li>`;
@@ -1123,6 +1147,54 @@ function showDetails(day) {
             </div>
         </div>
     `;
+
+  // 9 STARS
+  // 1. Get 9 Star Data
+  const nineStarName = day.info.nineStar || "Unknown";
+  const nineStarDesc = day.info.nineStarDesc || "No specific data.";
+
+  // 2. Helper: Get 9 Star Color for the badge
+  // The name usually contains the color (e.g. "Five Yellow", "Nine Purple")
+  let starColor = "#666"; // default
+  let starBg = "#eee";
+  if (nineStarName.includes("White")) {
+    starColor = "#444";
+    starBg = "#f8f9fa";
+  } else if (nineStarName.includes("Black")) {
+    starColor = "#000";
+    starBg = "#e2e3e5";
+  } else if (nineStarName.includes("Green")) {
+    starColor = "#198754";
+    starBg = "#d1e7dd";
+  } else if (nineStarName.includes("Yellow")) {
+    starColor = "#b45309";
+    starBg = "#ffecd1";
+  } // Darker yellow for text
+  else if (nineStarName.includes("Red")) {
+    starColor = "#dc3545";
+    starBg = "#f8d7da";
+  } else if (nineStarName.includes("Purple")) {
+    starColor = "#6f42c1";
+    starBg = "#e0cffc";
+  }
+
+  // 3. Create the HTML Section
+  const cosmicSection = `
+  <div style="margin-top:20px; padding-top:15px;">
+      <h5 style="color:#444; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eee">🌌 Cosmic Atmosphere</h5>
+          
+      <div style="background:${starBg}; padding:10px; border-radius:6px; border-left:4px solid ${starColor};">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-weight:bold; color:${starColor};">
+                  🧭 9 Star Qi: ${nineStarName}
+              </div>
+          </div>
+          <div style="font-size:0.85rem; color:#555; margin-top:4px; font-style:italic;">
+              "${nineStarDesc}"
+          </div>
+      </div>
+  </div>
+`;
 
   // EMOTIONAL WEATHER  WIDGET
   // 1. Get the Ten God (Stem)
@@ -1220,30 +1292,12 @@ function showDetails(day) {
   // Inject & Open
   bodyEl.innerHTML = `
         ${recHtml}
-        <div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
-            <div>
-                <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
-                <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
-            </div>
-            <div>
-                <strong>Officer:</strong> ${day.info.officer}<br>
-                <strong>Element:</strong> ${day.info.element}
-            </div>
-        </div>
+        ${dayInfo}
         ${officersAdvice}
         ${analysisGrid}
-        <div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
-            <h4 style="margin:0 0 10px 0; color:#856404; font-size:1rem;">🔮 Energy Deep Dive</h4>
-            <div style="margin-bottom:10px;">
-                <div style="font-weight:bold; color:#555;">${yb.icon} ${yb.name} Spirit</div>
-                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${yb.desc}"</div>
-            </div>
-            <div>
-                <div style="font-weight:bold; color:#555;">★ ${day.info.constellation} Star</div>
-                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${starDesc}"</div>
-            </div>
-        </div>
+        ${energyDeepDive}
         ${hourlyGrid}
+        ${cosmicSection}
         ${weatherWidget}
     `;
 
