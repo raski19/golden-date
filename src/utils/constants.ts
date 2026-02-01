@@ -1261,7 +1261,6 @@ export const NINE_STARS: Record<string, string> = {
   "8": "8 White (Asset/Slow)", // Updated from "Wealth"
   "9": "9 Purple (King/Wealth)", // Updated from "Celebration"
 };
-
 export const NINE_STAR_DEFINITIONS: Record<string, string> = {
   "1 White (Noble)":
     "Future Wealth & Noble People. Excellent for networking, reputation, and wisdom.",

@@ -4,6 +4,7 @@ let currentYear = currentDate.getFullYear();
 let currentMonth = currentDate.getMonth() + 1;
 let currentFilter = "all";
 let allUsersData = [];
+let currentUser;
 
 // TODO: Fetch this from Backend
 const CLIENT_RULES = [
@@ -112,6 +113,95 @@ const SEARCH_GOALS = [
   { value: "Adjustment/Therapy", label: "🧘 Adjustment / Therapy" },
   { value: "Start Long-term Treatment", label: "💊 Start Medication" },
 ];
+const RELATIONSHIP_WEATHER = {
+  Friend: {
+    weather: "☀️ Sunny & Social",
+    mood: "Confident, Brotherly, Competitive.",
+    advice:
+      "Great for group activities. Watch out for stubbornness. You may unconsciously compare yourself to others today.",
+  },
+  "Rob Wealth": {
+    weather: "🌪️ Gusty Winds",
+    mood: "Impulsive, Life of the Party.",
+    advice:
+      "You are charismatic but prone to overspending. Don't let friends pressure you. Fun today, regrets tomorrow if boundaries blur.",
+  },
+  "Eating God": {
+    weather: "🌤️ Mild & Pleasant",
+    mood: "Relaxed, Sensual, Creative.",
+    advice: "You feel gentle and romantic. Perfect date night energy.",
+  },
+  "Hurting Officer": {
+    weather: "⚡ Thunderstorms",
+    mood: "Critical, Loud, Expressive.",
+    advice:
+      "Your tongue is sharp today. Be careful not to hurt your partner's feelings with 'brutal honesty'. You are right — but being right may cost intimacy.",
+  },
+  "Direct Wealth": {
+    weather: "🧱 Stable High Pressure",
+    mood: "Stoic, Practical, Hardworking.",
+    advice:
+      "You are focused on results, not feelings. You might seem cold to others. You show love through responsibility, not words.",
+  },
+  "Indirect Wealth": {
+    weather: "🎲 Variable Clouds",
+    mood: "Strategic, Risk-Taking, Playful.",
+    advice:
+      "You want excitement. Good for planning a surprise, bad for boring chores. You may lose interest quickly once excitement fades.",
+  },
+  "Direct Officer": {
+    weather: "⚖️ Clear & Cold",
+    mood: "Disciplined, Rigid, Polite.",
+    advice:
+      "You value order. You will get annoyed if your partner is messy or late. You expect others to ‘just know’ the rules.",
+  },
+  "7 Killings": {
+    weather: "🔥 Heatwave / Hail",
+    mood: "Aggressive, Impatient, Bold.",
+    advice:
+      "Short fuse warning! Burn this energy at the gym, not in an argument. Channel intensity into protection, not domination.",
+  },
+  "Direct Resource": {
+    weather: "🛋️ Calm / Foggy",
+    mood: "Lazy, Comfortable, Introspective.",
+    advice:
+      "You need me-time. You might be passive-aggressive if forced to socialize. You want support but may not ask for it.",
+  },
+  "Indirect Resource": {
+    weather: "🔮 Mystic Mist",
+    mood: "Intuitive, Suspicious, Quirky.",
+    advice:
+      "You feel misunderstood. Good for deep talks, bad for superficial small talk. You may read between lines that aren’t there.",
+  },
+};
+const CLASH_PAIRS = {
+  Rat: "Horse",
+  Horse: "Rat",
+  Ox: "Goat",
+  Goat: "Ox",
+  Tiger: "Monkey",
+  Monkey: "Tiger",
+  Rabbit: "Rooster",
+  Rooster: "Rabbit",
+  Dragon: "Dog",
+  Dog: "Dragon",
+  Snake: "Pig",
+  Pig: "Snake",
+};
+const COMBO_PAIRS = {
+  Rat: "Ox",
+  Ox: "Rat",
+  Tiger: "Pig",
+  Pig: "Tiger",
+  Rabbit: "Dog",
+  Dog: "Rabbit",
+  Dragon: "Rooster",
+  Rooster: "Dragon",
+  Snake: "Monkey",
+  Monkey: "Snake",
+  Horse: "Goat",
+  Goat: "Horse",
+};
 
 // --- INITIALIZATION ---
 // Fetch users immediately when the script loads
@@ -304,6 +394,7 @@ async function loadCalendar() {
   );
   const data = await res.json();
 
+  currentUser = data.user;
   const days = data.days;
   const analysis = data.monthAnalysis;
 
@@ -1033,7 +1124,100 @@ function showDetails(day) {
         </div>
     `;
 
-  // 4. Inject & Open
+  // EMOTIONAL WEATHER  WIDGET
+  // 1. Get the Ten God (Stem)
+  const stemGod = day.analysis.tenGodName || "Friend";
+  const cleanGodName = stemGod.split("(")[0].trim(); // Remove shortcuts like "(HO)"
+  const data =
+    RELATIONSHIP_WEATHER[cleanGodName] || RELATIONSHIP_WEATHER["Friend"];
+
+  // 2. SPOUSE PALACE CHECK (New Feature)
+  // We need the Current User's Day Branch (Spouse Palace)
+  const userSpouseBranch = currentUser ? currentUser.baZiBranch : null;
+  const dayBranch = day.info.dayBranch;
+
+  let spouseStatusHtml = "";
+
+  if (userSpouseBranch) {
+    // Check Clash
+    if (CLASH_PAIRS[userSpouseBranch] === dayBranch) {
+      spouseStatusHtml = `
+            <div style="margin-top:10px; padding:8px; background:#fff5f5; border-left:4px solid #dc3545; border-radius:4px;">
+                <strong style="color:#dc3545;">⚠️ Spouse Clash (${userSpouseBranch} ⚔️ ${dayBranch})</strong>
+                <p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">
+                    The energy hits your relationship sector directly. 
+                    Small disagreements can escalate quickly today. 
+                    <strong>Strategy:</strong> Give each other space.
+                </p>
+            </div>
+          `;
+    }
+    // Check Combination
+    else if (COMBO_PAIRS[userSpouseBranch] === dayBranch) {
+      spouseStatusHtml = `
+            <div style="margin-top:10px; padding:8px; background:#f3e5f5; border-left:4px solid #9c27b0; border-radius:4px;">
+                <strong style="color:#9c27b0;">💞 Spouse Harmony (${userSpouseBranch} ❤️ ${dayBranch})</strong>
+                <p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">
+                    Harmony activates your relationship sector. 
+                    You feel naturally connected and "sticky" .
+                    <strong>Strategy:</strong> Plan a date night or deep conversation.
+                </p>
+            </div>
+          `;
+    }
+  }
+
+  // 3. Determine Color Theme (Emotional Temperature)
+  let bgTheme = "#f8f9fa"; // Default Grey
+  let borderTheme = "#6c757d";
+
+  // Red: Conflict/High Energy
+  if (["Hurting Officer", "7 Killings"].includes(cleanGodName)) {
+    bgTheme = "#f8d7da";
+    borderTheme = "#dc3545";
+  }
+  // Green: Pleasant/Social
+  else if (["Friend", "Eating God"].includes(cleanGodName)) {
+    bgTheme = "#d4edda";
+    borderTheme = "#28a745";
+  }
+  // Blue: Stable/Cold
+  else if (["Direct Officer", "Direct Wealth"].includes(cleanGodName)) {
+    bgTheme = "#cff4fc";
+    borderTheme = "#0dcaf0";
+  }
+  // Purple: Introspective
+  else if (["Direct Resource", "Indirect Resource"].includes(cleanGodName)) {
+    bgTheme = "#e2e3e5";
+    borderTheme = "#6f42c1";
+  }
+  // Orange: Active/Risky
+  else if (["Rob Wealth", "Indirect Wealth"].includes(cleanGodName)) {
+    bgTheme = "#fff3cd";
+    borderTheme = "#ffc107";
+  }
+
+  // 4. Build the HTML Widget
+  const weatherWidget = `
+    <div style="margin-top: 15px; background: ${bgTheme}; border-left: 5px solid ${borderTheme}; padding: 15px; border-radius: 4px;">
+        <h5 style="margin: 0 0 10px 0; color: ${borderTheme}; display: flex; align-items: center; gap: 8px;">
+            ${data.weather} <span style="font-size:0.8rem; color:#666; font-weight:normal;">(${cleanGodName})</span>
+        </h5>
+        
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+            <div>
+                <strong>🧠 Mood:</strong> ${data.mood}
+            </div>
+            <div>
+                <strong>❤️ Advice:</strong> <i>${data.advice}</i>
+            </div>
+        </div>
+
+        ${spouseStatusHtml}
+    </div>
+  `;
+
+  // Inject & Open
   bodyEl.innerHTML = `
         ${recHtml}
         <div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
@@ -1060,6 +1244,7 @@ function showDetails(day) {
             </div>
         </div>
         ${hourlyGrid}
+        ${weatherWidget}
     `;
 
   openModalById("detailsModal");

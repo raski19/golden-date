@@ -84,6 +84,7 @@ app.get(
     }
 
     res.json({
+      user,
       monthAnalysis: monthAnalysis,
       days: monthlyData,
     });
