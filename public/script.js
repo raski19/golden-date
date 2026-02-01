@@ -1711,6 +1711,88 @@ function renderMomentumResults(data) {
   container.innerHTML = html;
 }
 
+// ==========================================
+// MOBILE SWIPE NAVIGATION
+// ==========================================
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+const modalContainer = document.getElementById("detailsModal");
+
+if (modalContainer) {
+  // 1. Capture the start of the touch
+  modalContainer.addEventListener(
+    "touchstart",
+    (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    },
+    { passive: true },
+  ); // 'passive' improves scrolling performance
+
+  // 2. Capture the end and calculate direction
+  modalContainer.addEventListener(
+    "touchend",
+    (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const touchEndY = e.changedTouches[0].screenY;
+
+      handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+    },
+    { passive: true },
+  );
+}
+
+function handleSwipe(startX, startY, endX, endY) {
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+
+  // Thresholds
+  const minSwipeDistance = 50; // Minimum px to count as a swipe
+  const verticalLimit = 100; // Max vertical deviation allowed (prevents scrolling from triggering swipe)
+
+  // Check if the swipe is primarily horizontal
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    // Check if movement was significant enough
+    if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffY) < verticalLimit) {
+      // Only trigger if modal is open
+      if (modalContainer.style.display === "flex") {
+        if (diffX > 0) {
+          // SWIPE RIGHT -> Go to Previous Day
+          const btn = document.getElementById("btnPrevDay");
+          if (btn && !btn.disabled) {
+            btn.click();
+            animateSwipe("right"); // Optional visual feedback
+          }
+        } else {
+          // SWIPE LEFT -> Go to Next Day
+          const btn = document.getElementById("btnNextDay");
+          if (btn && !btn.disabled) {
+            btn.click();
+            animateSwipe("left"); // Optional visual feedback
+          }
+        }
+      }
+    }
+  }
+}
+// Add a subtle slide animation to the modal body
+function animateSwipe(direction) {
+  const bodyEl = document.getElementById("detailsBody");
+  if (bodyEl) {
+    // Quick subtle animation
+    const start = direction === "left" ? "10px" : "-10px";
+    bodyEl.style.transform = `translateX(${start})`;
+    bodyEl.style.opacity = "0.8";
+
+    setTimeout(() => {
+      bodyEl.style.transform = "translateX(0)";
+      bodyEl.style.opacity = "1";
+    }, 150);
+  }
+}
+
 // --- UTILS & CLOSERS ---
 
 function loadingOverlay(display) {
