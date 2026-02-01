@@ -5,6 +5,7 @@ let currentMonth = currentDate.getMonth() + 1;
 let currentFilter = "all";
 let allUsersData = [];
 let currentUser;
+let currentMonthDays = [];
 
 // TODO: Fetch this from Backend
 const CLIENT_RULES = [
@@ -433,6 +434,7 @@ function renderBanner(analysis) {
 }
 
 function renderGrid(days) {
+  currentMonthDays = days;
   const today = new Date();
   const isCurrentMonth =
     today.getFullYear() === currentYear &&
@@ -896,14 +898,47 @@ function showLegend() {
 
 // --- DETAILS MODAL ---
 function showDetails(day) {
-  // 1. Target DETAILS Modal Elements
   const titleEl = document.getElementById("detailsTitle");
   const bodyEl = document.getElementById("detailsBody");
 
-  // 2. Set Title
-  titleEl.innerText = `${day.fullDate} (${day.analysis.verdict})`;
+  let currentIndex = currentMonthDays.findIndex(
+    (d) => d.fullDate === day.fullDate,
+  );
+  if (currentIndex === -1) {
+    console.error("Critical: Day not found in global array.");
+    currentIndex = 0;
+  }
 
-  // 3. Prepare Data
+  const prevDay = currentMonthDays[currentIndex - 1];
+  const nextDay = currentMonthDays[currentIndex + 1];
+
+  // Button Styles
+  const btnStyle = `
+        cursor: pointer; border: none; background: transparent; 
+        font-size: 1.2rem; color: #555; padding: 0 10px;
+        transition: color 0.2s; outline: none;
+    `;
+  const disabledStyle = `opacity: 0.2; cursor: default;`;
+
+  // Set Title
+  titleEl.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="btnPrevDay" style="${btnStyle} ${!prevDay ? disabledStyle : ""}" ${!prevDay ? "disabled" : ""}> 
+                &#9664; 
+            </button>
+            <div style="text-align: center; line-height: 1.1;">
+                <div style="font-size: 1.1rem; font-weight: bold;">${day.fullDate} (${day.analysis.verdict})</div>
+                <div style="font-size: 0.8rem; font-weight: normal; color: #666;">
+                    ${day.info.stem} ${day.info.dayBranch} Day
+                </div>
+            </div>
+            <button id="btnNextDay" style="${btnStyle} ${!nextDay ? disabledStyle : ""}" ${!nextDay ? "disabled" : ""}> 
+                &#9654; 
+            </button>
+        </div>
+    `;
+
+  // Prepare Data
   const tenGods = day.tenGods || {};
   const badHours = day.analysis.badHours || [];
   const goodHours = day.analysis.goodHours || [];
@@ -1300,6 +1335,29 @@ function showDetails(day) {
         ${cosmicSection}
         ${weatherWidget}
     `;
+
+  // Attach click events to the prev/next buttons
+  // We attach these AFTER innerHTML is set
+  const btnPrev = document.getElementById("btnPrevDay");
+  const btnNext = document.getElementById("btnNextDay");
+
+  if (prevDay && btnPrev) {
+    btnPrev.onclick = (e) => {
+      e.stopPropagation();
+      showDetails(prevDay);
+    };
+    btnPrev.onmouseover = () => (btnPrev.style.color = "#000");
+    btnPrev.onmouseout = () => (btnPrev.style.color = "#555");
+  }
+
+  if (nextDay && btnNext) {
+    btnNext.onclick = (e) => {
+      e.stopPropagation();
+      showDetails(nextDay);
+    };
+    btnNext.onmouseover = () => (btnNext.style.color = "#000");
+    btnNext.onmouseout = () => (btnNext.style.color = "#555");
+  }
 
   openModalById("detailsModal");
 }
@@ -1710,3 +1768,20 @@ window.onclick = function (event) {
     closeModal(event.target.id);
   }
 };
+document.addEventListener("keydown", (e) => {
+  // Only work if modal is open
+  const modal = document.getElementById("detailsModal");
+  if (modal.style.display === "flex") {
+    if (e.key === "ArrowLeft") {
+      const btn = document.getElementById("btnPrevDay");
+      if (btn && !btn.disabled) btn.click();
+    }
+    if (e.key === "ArrowRight") {
+      const btn = document.getElementById("btnNextDay");
+      if (btn && !btn.disabled) btn.click();
+    }
+    if (e.key === "Escape") {
+      closeModal("detailsModal");
+    }
+  }
+});
