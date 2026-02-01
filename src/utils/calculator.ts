@@ -133,7 +133,7 @@ export const calculateScore = (
     score = -50; // Immediate Fail
     flags.push("PERSONAL BREAKER");
     log.push(
-      `💀 PERSONAL BREAKER: ${dayBranch} clashes with your Day Branch (${user.baZiBranch}). Risk of health/injury/relationship conflict.`,
+      `💀 PERSONAL BREAKER: ${dayBranch} clashes with your Day Branch (${user.baZiBranch}). Risk of health / injury / relationship conflict.`,
     );
     log.push(
       "⚔️ TROJAN HORSE TIP: Use this aggressive energy to break a bad habit (smoking, sugar) or end a toxic relationship.",
@@ -174,7 +174,7 @@ export const calculateScore = (
       score -= 30; // Significant penalty
       flags.push("Luck Clash");
       log.push(
-        `☁️ Luck Pillar Clash: ${dayBranch} clashes with your current Luck Pillar (${luckBranch}). Expect external/environmental changes.`,
+        `☁️ Luck Pillar Clash: ${dayBranch} clashes with your current Luck Pillar (${luckBranch}). Expect external / environmental changes.`,
       );
 
       // Optional: Add to badHours if you want to block that hour too
