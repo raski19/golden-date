@@ -1,4 +1,6 @@
-import { config } from "./config";
+import dotenv from "dotenv";
+dotenv.config();
+// import { config } from "./config";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import User from "./models/User";
@@ -10,8 +12,12 @@ import { calculateTenGods } from "./utils/tenGods";
 
 const app = express();
 
-const PORT = config.port || 3333;
-const MONGO_URI = config.mongoUri || "mongodb://127.0.0.1:27017/goldenDateDB";
+// const PORT = config.port || 3333;
+// const MONGO_URI = config.mongoUri || "mongodb://127.0.0.1:27017/goldenDateDB";
+
+const PORT = process.env.APP_PORT || 3333;
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/goldenDateDB";
 
 mongoose
   .connect(MONGO_URI)
