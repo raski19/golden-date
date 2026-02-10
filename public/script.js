@@ -1161,24 +1161,77 @@ function showDetails(day) {
             </div>
         </div>`;
 
-  // --- HOURLY GRID ---
-  const formatHourLine = (line, type) => {
-    const icon = type === "good" ? "🌟" : "🚫";
-    return `<li style="display:flex; align-items:start; margin-bottom:6px; font-size:0.9rem;"><span style="margin-right:8px;">${icon}</span><span style="color:#444;">${line}</span></li>`;
+  // --- PERSONALIZED HOURLY GRID ---
+  const hoursData = day.analysis.hours || [];
+
+  const formatHourRow = (h) => {
+    // 1. Identify Conflicts
+    const positives = ["Nobleman", "Academic", "Horse"];
+    const negatives = ["Clash", "DayBreaker"];
+
+    const hasPositive = h.tags.some(t => positives.includes(t));
+    const hasNegative = h.tags.some(t => negatives.includes(t));
+
+    // 2. Determine State
+    let rowState = "neutral";
+    if (hasPositive && hasNegative) rowState = "mixed";
+    else if (hasPositive) rowState = "good";
+    else if (hasNegative) rowState = "bad";
+
+    // 3. Generate Badges (Visual Tags)
+    const badgesHtml = h.tags.map(tag => {
+      if(tag === "Nobleman") return `<span style="background:#d1e7dd; color:#0f5132; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">🌟 Nobleman</span>`;
+      if(tag === "Academic") return `<span style="background:#cff4fc; color:#055160; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">📚 Academic</span>`;
+      if(tag === "Horse") return `<span style="background:#fff3cd; color:#856404; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">🐎 Travel</span>`;
+      // Negative Tags
+      if(tag === "Clash") return `<span style="background:#f8d7da; color:#842029; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">💥 Personal Clash</span>`;
+      if(tag === "DayBreaker") return `<span style="background:#e2e3e5; color:#383d41; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">⚡ Day Breaker</span>`;
+      return "";
+    }).join("");
+
+    // 4. Row Styling based on State
+    let rowBg = "transparent";
+    let borderStyle = "1px solid #f0f0f0"; // Default border
+
+    if (rowState === "good") {
+      rowBg = "linear-gradient(to right, #f0fff4, transparent)"; // Greenish
+    }
+    else if (rowState === "bad") {
+      rowBg = "linear-gradient(to right, #fff5f5, transparent)"; // Reddish
+    }
+    else if (rowState === "mixed") {
+      // AMBER / WARNING STATE
+      rowBg = "linear-gradient(to right, #fff3cd, transparent)";
+      borderStyle = "1px solid #ffeeba"; // Gold border to highlight complexity
+    }
+
+    // 5. Render
+    return `
+        <div style="display:flex; align-items:center; padding:8px 0; border-bottom:${borderStyle}; background:${rowBg};">
+            <div style="width:100px; font-size:0.9rem; font-weight:bold; color:#555;">${h.time}</div>
+            <div style="width:80px; font-size:0.9rem; color:#666;">${h.branch}</div>
+            <div style="flex-grow:1; display:flex; flex-wrap:wrap; align-items:center;">
+                ${badgesHtml}
+                ${rowState === "mixed" ? `<span style="font-size:0.7rem; color:#856404; margin-left:8px; font-style:italic;">(Turbulent Opportunity)</span>` : ""}
+            </div>
+        </div>
+    `;
   };
 
   const hourlyGrid = `
         <div style="margin-top:20px;">
-            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700;">⏰ Hourly Timing</h5>
-            <div class="grid-dashboard">
-                <div style="background: linear-gradient(to bottom right, #fff, #f0fff4); border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#155724; margin-bottom:10px; font-size:0.9rem;">🌅 Golden Hours</div>
-                    ${goodHours.length > 0 ? `<ul style="list-style:none; padding:0; margin:0;">${goodHours.map((h) => formatHourLine(h, "good")).join("")}</ul>` : `<div style="font-size:0.85rem; color:#888;">No specific auspicious hours.</div>`}
-                </div>
-                <div style="background: linear-gradient(to bottom right, #fff, #fff5f5); border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
-                    <div style="font-weight:bold; color:#721c24; margin-bottom:10px; font-size:0.9rem;">⚠️ Bad Hours</div>
-                    ${badHours.length > 0 ? `<ul style="list-style:none; padding:0; margin:0;">${badHours.map((h) => formatHourLine(h, "bad")).join("")}</ul>` : `<div style="font-size:0.85rem; color:#888;">No major clashes.</div>`}
-                </div>
+            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                ⏰ Strategic Timing
+                <span style="font-size:0.7rem; font-weight:normal; color:#888;">(Personalized)</span>
+            </h5>
+            <div class="grid-dashboard" style="display:block; max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px;">
+                ${hoursData.length > 0
+    ? hoursData.map(h => formatHourRow(h)).join("")
+    : `<div style="text-align:center; padding:20px; color:#999;">No hourly data available.</div>`
+  }
+            </div>
+            <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">
+                💡 <strong>Tip:</strong> Use "Nobleman" hours for asking favors. Use "Clash" hours for rest.
             </div>
         </div>
     `;

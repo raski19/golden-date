@@ -1,24 +1,11 @@
 import { IUser, DayInfo, MonthAnalysis, ScoreResult } from "../types";
 import { calculateShenSha } from "./shenSha";
 import {
-  CLASH_PAIRS,
-  SIX_HARMONY,
-  THREE_HARMONY,
-  ELEMENT_MAP,
-  BRANCH_HOURS,
-  STEM_NOBLEMAN,
-  BRANCH_START_TIMES,
-  SAN_SHA_RULES,
-  GOAT_BLADE_RULES,
-  YANG_STEMS,
-  ELEMENT_RELATIONSHIPS,
-  STEM_INFO,
-  TEN_GODS,
-  TEN_GOD_ACTIONS,
-  OFFICER_RECOMMENDATIONS,
-  OFFICER_DATA,
-  STANDARD_RULES,
-  CONSTELLATION_DATA,
+  CLASH_PAIRS, SIX_HARMONY, THREE_HARMONY, ELEMENT_MAP, BRANCH_HOURS,
+  STEM_NOBLEMAN, BRANCH_START_TIMES, SAN_SHA_RULES, GOAT_BLADE_RULES,
+  YANG_STEMS, ELEMENT_RELATIONSHIPS, STEM_INFO, TEN_GODS, TEN_GOD_ACTIONS,
+  OFFICER_RECOMMENDATIONS, OFFICER_DATA, STANDARD_RULES, CONSTELLATION_DATA,
+  ACADEMIC_STAR, TRAVELING_HORSE, BRANCHES_LIST,
 } from "./constants";
 import { calculateRootStrengthCached } from "./rootStrength";
 import { getCurrentLuckPillar } from "./calculateLuckPillar";
@@ -332,7 +319,12 @@ export const calculateScore = (
   // =================================================================
 
   // Define "Unstable Officers" where constructive actions usually fail
-  const unstableOfficers = ["Destruction", "Danger", "Closed", "Extinction"];
+  const unstableOfficers = [
+    "Destruction", // (Po) - Energy clashes. Things break. Good for demolition, bad for building.
+    "Danger",      // (Wei) - Energy is precarious. High risk of accidents or failure.
+    "Close",       // (Bi) - Energy is stagnant/blocked. Nothing moves forward.
+    "Remove"       // (Chu) - Energy is depleting. Good for cleaning/divorce, bad for starting.
+  ];
   const isUnstableDay =
     unstableOfficers.includes(dayData.officer) ||
     flags.some((f) => f.includes("BREAKER"));
@@ -522,6 +514,62 @@ export const calculateScore = (
     );
   }
 
+// =================================================================
+  // HOURLY BREAKDOWN (Now with Personalization)
+  // =================================================================
+
+  // 1. Get Personal Hour Criteria
+  const userNobleBranches = STEM_NOBLEMAN[user.dayMaster] || [];
+  const userAcademicBranch = ACADEMIC_STAR[user.dayMaster];
+  const userHorseBranch = TRAVELING_HORSE[user.yearBranch]; // Ensure yearBranch is valid!
+  const userClashBranch = CLASH_PAIRS[user.baZiBranch]; // Clashes User's Day (Spouse/Health)
+
+  const hours = BRANCHES_LIST.map((branch, index) => {
+    // Standard Time Mapping (Rat = 23:00-01:00, etc.)
+    // Note: Index 0 is Rat. In 24h format, Rat is 23:00-01:00.
+    // Simple display mapping:
+    const start = index === 0 ? 23 : (index * 2) - 1;
+    const end = index === 0 ? 1 : (index * 2) + 1;
+    const timeLabel = `${String(start).padStart(2, '0')}:00 - ${String(end).padStart(2, '0')}:00`;
+
+    const rating = "Neutral"; // Default (You can keep your existing logic for Good/Bad here)
+
+    // NEW: Personal Tags
+    const tags: string[] = [];
+
+    // A. Nobleman (Help / Rescue)
+    if (userNobleBranches.includes(branch)) {
+      tags.push("Nobleman");
+    }
+
+    // B. Academic (Deep Work / Strategy)
+    if (userAcademicBranch === branch) {
+      tags.push("Academic");
+    }
+
+    // C. Traveling Horse (Movement / Sales / Remote Work)
+    if (userHorseBranch === branch) {
+      tags.push("Horse");
+    }
+
+    // D. Personal Breaker (Clash) - DANGER
+    if (userClashBranch === branch) {
+      tags.push("Clash");
+    }
+
+    // E. General Day Clash (Day Breaker) - DANGER
+    if (CLASH_PAIRS[dayBranch] === branch) {
+      tags.push("DayBreaker");
+    }
+
+    return {
+      branch,
+      time: timeLabel,
+      rating,
+      tags
+    };
+  });
+
   // =================================================================
   // --- HARD CAPS & VERDICT ---
   // =================================================================
@@ -602,6 +650,7 @@ export const calculateScore = (
     tags: [...new Set(tags)],
     log,
     specificActions,
+    hours,
     badHours,
     goodHours,
     tenGodName,

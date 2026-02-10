@@ -80,6 +80,12 @@ export interface ScoreResult {
   flags: string[];
   tags: string[];
   specificActions: { action: string; icon: string; desc: string }[];
+  hours: {
+    branch: string;
+    time: string;
+    rating: string;
+    tags: string[];
+  }[];
   badHours: string[];
   goodHours: string[];
   dayType: string;
