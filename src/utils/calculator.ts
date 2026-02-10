@@ -608,12 +608,6 @@ export const calculateScore = (
     cssClass = "dangerous";
   }
 
-  // Bad Hours (Clash)
-  const dayClash = CLASH_PAIRS[dayBranch];
-  const badHours = dayClash
-    ? [`${dayClash} Hour (${BRANCH_HOURS[dayClash]})`]
-    : [];
-
   // Golden Hours
   const hourMap: Record<string, { label: string[]; time: number }> = {};
   const userBadBranches = rules.badBranches || [];
@@ -651,8 +645,6 @@ export const calculateScore = (
     log,
     specificActions,
     hours,
-    badHours,
-    goodHours,
     tenGodName,
     actionTitle: guide.title,
     actionTagline: guide.tagline,

@@ -86,8 +86,6 @@ export interface ScoreResult {
     rating: string;
     tags: string[];
   }[];
-  badHours: string[];
-  goodHours: string[];
   dayType: string;
   tenGodName: string;
   actionTitle: string;

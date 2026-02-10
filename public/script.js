@@ -938,93 +938,105 @@ function showDetails(day) {
         </div>
     `;
 
-  // Prepare Data
-  const tenGods = day.tenGods || {};
-  const badHours = day.analysis.badHours || [];
-  const goodHours = day.analysis.goodHours || [];
-  const yb = day.info.yellowBlackBelt;
-  const starDesc = day.info.constellationDesc || "No specific data.";
+  const logs = day.analysis.log || [];
+  const score = day.analysis.score || 0;
+  const officer = day.info.officer;
 
-  // --- SAFETY FILTER ---
-  const officerName = (day.info.officer || "General").trim();
-  const rec = day.analysis.officerRec || {
-    action: "Proceed",
-    icon: "⚠️",
-    desc: "Caution",
-    reality: "Unstable",
+// 1. Determine "Traffic Light" Status (The Math)
+  let status = {
+    color: "#198754", bg: "#d1e7dd", icon: "✅",
+    verdict: "EXCELLENT",
+    advice: "Go for it! The energy supports growth."
   };
 
-  // Robust Score Check
-  const rawScore =
-    day.score !== undefined ? day.score : day.analysis?.score || 0;
-  const score = Number(rawScore);
-  const pScore = day.analysis.pillarScore || 0;
+  if (score < 40) {
+    status = {
+      color: "#dc3545", bg: "#f8d7da", icon: "🛑",
+      verdict: "DANGEROUS",
+      advice: "Stop. Do not launch major projects today."
+    };
+  } else if (score < 60) {
+    status = {
+      color: "#fd7e14", bg: "#ffecd1", icon: "⚠️",
+      verdict: "CAUTION",
+      advice: "Proceed with care. Good for routine, bad for risks."
+    };
+  } else if (score < 75) {
+    status = {
+      color: "#0dcaf0", bg: "#cff4fc", icon: "ℹ️",
+      verdict: "AVERAGE",
+      advice: "Stable energy. Good for planning and maintenance."
+    };
+  }
 
-  // 🔴 CHECK FOR FATAL LOGS
-  const logs = day.analysis.log || [];
-  const fatalLog = logs.find(
-    (l) => l.includes("💀") || l.includes("PERSONAL BREAKER"),
-  );
+// 2. Map Specific Actions (The Nature)
+// This is the "Translator" part that users love.
+  const bestForMap = {
+    "Establish": "Proposing Marriage or Starting a Job",
+    "Remove": "Cleaning, Decluttering, or Medical Procedures",
+    "Full": "Signing Contracts & Collecting Debts",
+    "Balance": "Negotiations & Construction",
+    "Stable": "Long-term Planning & Weddings",
+    "Initiate": "Starting a Course or Routine",
+    "Destruction": "Demolition or Punishment",
+    "Danger": "Religious Worship or Bed Rest",
+    "Success": "Everything! (Especially Business)",
+    "Harvest": "Asking for a Raise or Closing Deals",
+    "Open": "Grand Openings & Housewarming",
+    "Close": "Reviewing Strategy (Do nothing external)"
+  };
 
-  let recHtml = "";
+  const worstForMap = {
+    "Establish": "Funerals or Burials",
+    "Remove": "Opening a Business",
+    "Full": "Legal Disputes (You will lose)",
+    "Balance": "Gambling or Lawsuits",
+    "Stable": "Moving House (Stagnation)",
+    "Initiate": "Travel or Lawsuits",
+    "Destruction": "Weddings or Signing Papers",
+    "Danger": "Extreme Sports or Height Work",
+    "Success": "Litigation (Competitors are strong)",
+    "Harvest": "Medical Surgery",
+    "Open": "Burial or Digging Earth",
+    "Close": "Medical Treatment (Eye/Acupuncture)"
+  };
 
-  // 1. PRIORITY: FATAL BANNER
-  if (fatalLog) {
-    recHtml = `
-            <div style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <div style="font-size:2rem; margin-bottom:10px;">💀</div>
-                <h3 style="margin:0 0 10px 0; font-size:1.2rem; font-weight:800; text-transform:uppercase;">FATAL CLASH DETECTED</h3>
-                <p style="margin:0; font-weight:bold; font-size:1rem;">${fatalLog}</p>
-                <div style="margin-top:10px; font-size:0.9rem; background:rgba(255,255,255,0.5); padding:5px; border-radius:4px;">
-                    ⛔ Do not schedule important activities on this day.
-                </div>
+// 3. Build the Final "Hero Card" HTML
+  const executiveSummaryHtml = `
+<div style="background: ${status.bg}; border-left: 6px solid ${status.color}; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <div style="font-weight:900; color:${status.color}; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase;">
+            ${status.icon} ${status.verdict} DAY
+        </div>
+        <div style="font-weight:bold; font-size:1.2rem; color:#333;">${score} pts</div>
+    </div>
+
+    <div style="font-size:0.95rem; color:#444; margin-bottom:15px; font-style:italic;">
+        "${status.advice}"
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
+        <div>
+            <div style="font-size:0.7rem; color:#198754; font-weight:bold; text-transform:uppercase;">✅ Best For</div>
+            <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
+                ${bestForMap[officer] || "Routine Work"}
             </div>
-        `;
-  }
-  // 2. DANGER MODE (Low Score but not fatal)
-  else if (score < 50 || pScore < 30) {
-    recHtml = `
-            <div style="background:#fff5f5; border-left:4px solid #dc3545; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div style="font-size:0.75rem; color:#dc3545; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">
-                        ⚠️ WARNING: UNSTABLE DAY
-                    </div>
-                    <div style="font-size:0.7rem; background:#dc3545; color:white; padding:2px 8px; border-radius:10px; font-weight:bold;">
-                        Support: ${pScore}%
-                    </div>
-                </div>
-                <div style="display:flex; align-items:flex-start; gap:12px;">
-                    <div style="font-size:1.8rem; line-height:1;">🛑</div>
-                    <div>
-                        <div style="font-weight:700; color:#8e2020; font-size:1rem; margin-bottom:4px;">
-                            Do Not "${rec.action}"
-                        </div>
-                        <div style="font-size:0.9rem; color:#a71d2a; line-height:1.4;">
-                            While "${officerName}" days are usually for <strong>${rec.desc}</strong>, this specific day lacks support.
-                        </div>
-                        <div style="margin-top:8px; font-size:0.85rem; font-style:italic; color:#c53030;">
-                            <strong>Reality Check:</strong> ${rec.reality}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-  }
-  // 3. SAFE MODE
-  else {
-    recHtml = `
-            <div style="background:#f0fff4; border-left:4px solid #198754; padding:15px; border-radius:6px; margin-bottom:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <div style="font-size:0.75rem; color:#198754; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
-                    🎯 Recommended Action
-                </div>
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="font-size:1.8rem;">${rec.icon}</div>
-                    <div>
-                        <div style="font-weight:700; color:#2c3e50; font-size:1rem;">${rec.action}</div>
-                        <div style="font-size:0.9rem; color:#555;">${rec.desc}</div>
-                    </div>
-                </div>
-            </div>`;
-  }
+        </div>
+        <div>
+            <div style="font-size:0.7rem; color:#dc3545; font-weight:bold; text-transform:uppercase;">⛔ Avoid</div>
+            <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
+                ${worstForMap[officer] || "High Risk Activities"}
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+  // Prepare Data
+  const tenGods = day.tenGods || {};
+  const yb = day.info.yellowBlackBelt;
+  const starDesc = day.info.constellationDesc || "No specific data.";
 
   // --- DAY INFO ---
   const dayInfo = `<div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
@@ -1379,7 +1391,7 @@ function showDetails(day) {
 
   // Inject & Open
   bodyEl.innerHTML = `
-        ${recHtml}
+        ${executiveSummaryHtml}
         ${dayInfo}
         ${officersAdvice}
         ${analysisGrid}
