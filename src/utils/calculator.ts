@@ -624,13 +624,13 @@ export const calculateScore = (
   if (SIX_HARMONY[dayBranch]) addHour(SIX_HARMONY[dayBranch], "✨ Harmony");
   (THREE_HARMONY[dayBranch] || []).forEach((b) => addHour(b, "🤝 Teamwork"));
 
-  const goodHours = Object.keys(hourMap)
-    .map((b) => ({ branch: b, ...hourMap[b] }))
-    .sort((a, b) => a.time - b.time)
-    .map(
-      (h) =>
-        `<strong>${h.branch}</strong> (${BRANCH_HOURS[h.branch]}) - ${h.label.join(" / ")}`,
-    );
+  // const goodHours = Object.keys(hourMap)
+  //   .map((b) => ({ branch: b, ...hourMap[b] }))
+  //   .sort((a, b) => a.time - b.time)
+  //   .map(
+  //     (h) =>
+  //       `<strong>${h.branch}</strong> (${BRANCH_HOURS[h.branch]}) - ${h.label.join(" / ")}`,
+  //   );
 
   return {
     dayType,

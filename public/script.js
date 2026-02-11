@@ -972,33 +972,33 @@ function showDetails(day) {
 // 2. Map Specific Actions (The Nature)
 // This is the "Translator" part that users love.
   const bestForMap = {
-    "Establish": "Proposing Marriage or Starting a Job",
+    "Establish": "Proposing Marriage, Starting a Job, or Medical Diagnosis",
     "Remove": "Cleaning, Decluttering, or Medical Procedures",
-    "Full": "Signing Contracts & Collecting Debts",
-    "Balance": "Negotiations & Construction",
-    "Stable": "Long-term Planning & Weddings",
-    "Initiate": "Starting a Course or Routine",
-    "Destruction": "Demolition or Punishment",
-    "Danger": "Religious Worship or Bed Rest",
-    "Success": "Everything! (Especially Business)",
-    "Harvest": "Asking for a Raise or Closing Deals",
-    "Open": "Grand Openings & Housewarming",
-    "Close": "Reviewing Strategy (Do nothing external)"
+    "Full": "Collecting Debts, Parties, or Official Launches",
+    "Balance": "Negotiations, Marriage, or Travel",
+    "Stable": "Long-term Planning, Weddings, or Construction",
+    "Initiate": "Groundbreaking, Starting a Job, or Renovation",
+    "Destruction": "Demolition, Dieting, or Ending Bad Habits",
+    "Danger": "Risk assessment, Religious activities, or Dismantling",
+    "Success": "Everything! (Especially Business, Marriage, & Contracts)",
+    "Receive": "Asking for a Raise, Starting a Course, or Proposals",
+    "Open": "Grand Openings, Housewarming, or Signing Agreements",
+    "Close": "Stock taking, Planning, or Self-reflection"
   };
 
   const worstForMap = {
-    "Establish": "Funerals or Burials",
-    "Remove": "Opening a Business",
-    "Full": "Legal Disputes (You will lose)",
-    "Balance": "Gambling or Lawsuits",
-    "Stable": "Moving House (Stagnation)",
-    "Initiate": "Travel or Lawsuits",
-    "Destruction": "Weddings or Signing Papers",
+    "Establish": "Funerals or Signing Agreements",
+    "Remove": "Opening a Business or Marriage",
+    "Full": "Legal Disputes or Signing Contracts (Stifles growth)",
+    "Balance": "Lawsuits (Levelling the scales)",
+    "Stable": "Moving House or Quick Projects",
+    "Initiate": "Moving House or Travel",
+    "Destruction": "Weddings, Signing Papers, or Travel",
     "Danger": "Extreme Sports or Height Work",
-    "Success": "Litigation (Competitors are strong)",
-    "Harvest": "Medical Surgery",
-    "Open": "Burial or Digging Earth",
-    "Close": "Medical Treatment (Eye/Acupuncture)"
+    "Success": "Litigation (Risk of competitors winning)",
+    "Receive": "Medical Treatment or Visiting the Sick",
+    "Open": "Burial, Groundbreaking, or Surgery",
+    "Close": "Medical Procedures or Important Meetings"
   };
 
 // 3. Build the Final "Hero Card" HTML
@@ -1031,6 +1031,47 @@ function showDetails(day) {
         </div>
     </div>
 </div>
+`;
+
+  const tenGodName = day.tenGods?.stemGod || "F"; // This is PERSONAL to the user
+  const officerName = day.info.officer;
+  const strategy = getPersonalizedActions(officerName, tenGodName);
+
+// 2. Build the HTML
+  const strategyHtml = `
+  <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+      
+      <div style="background: linear-gradient(to right, #f8f9fa, #ffffff); padding: 12px 15px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; color:#888; font-weight:700; letter-spacing:0.5px;">Your Strategy</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#333;">
+                  ${strategy.title}
+              </div>
+          </div>
+          <div style="text-align:right;">
+             <span style="font-size:0.8rem; background:#e9ecef; padding:4px 8px; border-radius:4px; color:#555;">
+                Context: ${strategy.context}
+             </span>
+          </div>
+      </div>
+
+      <div style="padding: 20px;">
+          
+          <div style="font-size:1rem; line-height:1.5; color:#444; margin-bottom:15px; border-left:4px solid #0d6efd; padding-left:12px;">
+              ${strategy.advice}
+          </div>
+
+          <div style="display:flex; gap:8px;">
+             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">
+                #${strategy.god}
+             </span>
+             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">
+                #${strategy.officer}
+             </span>
+          </div>
+
+      </div>
+  </div>
 `;
 
   // Prepare Data
@@ -1392,6 +1433,7 @@ function showDetails(day) {
   // Inject & Open
   bodyEl.innerHTML = `
         ${executiveSummaryHtml}
+        ${strategyHtml}
         ${dayInfo}
         ${officersAdvice}
         ${analysisGrid}
@@ -1425,6 +1467,57 @@ function showDetails(day) {
   }
 
   openModalById("detailsModal");
+}
+
+function getPersonalizedActions(officer, tenGodName) {
+  // 1. CLEAN INPUTS
+  const god = tenGodName || "F";
+  const off = officer || "Stable";
+
+  // 2. DEFINE THE "TEN GOD" STRATEGY (The "How")
+  const godStrategies = {
+    "F":  { style: "connect", icon: "🤝", verb: "network with" },
+    "RW": { style: "compete", icon: "🔥", verb: "rally the team for" },
+    "EG": { style: "create", icon: "🎨", verb: "brainstorm" },
+    "HO": { style: "perform", icon: "🎤", verb: "showcase" },
+    "DW": { style: "manage", icon: "📊", verb: "execute" },
+    "IW": { style: "opportunist", icon: "🎲", verb: "seize" },
+    "DO": { style: "discipline", icon: "⚖️", verb: "standardize" },
+    "7K": { style: "conquer", icon: "⚔️", verb: "aggressively tackle" },
+    "DR": { style: "analyze", icon: "📚", verb: "research" },
+    "IR": { style: "intuitive", icon: "🔮", verb: "strategize" }
+  };
+
+  // 3. DEFINE THE "OFFICER" CONTEXT (The "What")
+  const officerContext = {
+    "Establish":   { mood: "New Beginnings", tasks: "new projects, proposals, or job starts" },
+    "Remove":      { mood: "Decluttering",   tasks: "cleaning, medical procedures, or firing bad clients" },
+    "Full":        { mood: "Abundance",      tasks: "signing contracts, collecting debts, or assets" },
+    "Balance":     { mood: "Alignment",      tasks: "negotiations, travel, or meetings" },
+    "Stable":      { mood: "Persistence",    tasks: "operations planning, status quo or routine day" },
+    "Initiate":    { mood: "Start-up",       tasks: "starting construction, groundbreaking, or commencing a new job" },
+    "Destruction": { mood: "Breakthrough",   tasks: "demolition, breaking bad habits, or pivoting" },
+    "Danger":      { mood: "Risk Mgmt",      tasks: "risk assessment, delivering ultimatums, or managing crisis" },
+    "Success":     { mood: "Achievement",    tasks: "launches, pitches, or commercial deals" },
+    "Receive":     { mood: "Rewards",        tasks: "closing deals, asking for raises, or storing value" },
+    "Open":        { mood: "Expansion",      tasks: "grand openings, networking, or housewarming" },
+    "Close":       { mood: "Stagnation",     tasks: "internal review, filing, or whiteboarding" }
+  };
+
+  const myGod = godStrategies[god] || godStrategies["F"];
+  const myOff = officerContext[off] || officerContext["Stable"];
+
+  // 4. SYNTHESIZE THE SENTENCE
+  // e.g. "Use your [Aggression] (7K) to [Break Bad Habits] (Destruction)"
+  const synthesis = `Use your <strong>${myGod.style}</strong> energy to <strong>${myGod.verb}</strong> your <strong>${myOff.tasks}</strong>.`;
+
+  return {
+    title: `${myGod.icon} ${myGod.style} Mode`,
+    context: `${myOff.mood} Day`,
+    advice: synthesis,
+    god: god,
+    officer: off
+  };
 }
 
 function toggleArchitectMode() {
