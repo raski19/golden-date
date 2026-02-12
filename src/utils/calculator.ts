@@ -1,11 +1,26 @@
 import { IUser, DayInfo, MonthAnalysis, ScoreResult } from "../types";
 import { calculateShenSha } from "./shenSha";
 import {
-  CLASH_PAIRS, SIX_HARMONY, THREE_HARMONY, ELEMENT_MAP, BRANCH_HOURS,
-  STEM_NOBLEMAN, BRANCH_START_TIMES, SAN_SHA_RULES, GOAT_BLADE_RULES,
-  YANG_STEMS, ELEMENT_RELATIONSHIPS, STEM_INFO, TEN_GODS, TEN_GOD_ACTIONS,
-  OFFICER_RECOMMENDATIONS, OFFICER_DATA, STANDARD_RULES, CONSTELLATION_DATA,
-  ACADEMIC_STAR, TRAVELING_HORSE, BRANCHES_LIST,
+  CLASH_PAIRS,
+  SIX_HARMONY,
+  THREE_HARMONY,
+  ELEMENT_MAP,
+  STEM_NOBLEMAN,
+  SAN_SHA_RULES,
+  GOAT_BLADE_RULES,
+  YANG_STEMS,
+  ELEMENT_RELATIONSHIPS,
+  STEM_INFO,
+  TEN_GODS,
+  TEN_GOD_ACTIONS,
+  OFFICER_RECOMMENDATIONS,
+  OFFICER_DATA,
+  STANDARD_RULES,
+  CONSTELLATION_DATA,
+  ACADEMIC_STAR,
+  TRAVELING_HORSE,
+  PEACH_BLOSSOM,
+  BRANCHES_LIST,
 } from "./constants";
 import { calculateRootStrengthCached } from "./rootStrength";
 import { getCurrentLuckPillar } from "./calculateLuckPillar";
@@ -64,6 +79,8 @@ export const calculateScore = (
   // --- 2. CALCULATE DAY TYPE (Ten God Category) ---
   const userDmClean = user.dayMaster.split(" ")[0]; // "Bing"
   const dayStemClean = dayData.stem.split(" ")[0]; // "Jia"
+  const userYearClean = (user.yearBranch || "").split(" ")[0];
+  const userDayClean = (user.baZiBranch || "").split(" ")[0];
   const dmElement = ELEMENT_MAP[userDmClean]; // "Fire"
   const dayStemElement = ELEMENT_MAP[dayStemClean]; // "Wood"
   let dayType = "Unknown";
@@ -321,9 +338,9 @@ export const calculateScore = (
   // Define "Unstable Officers" where constructive actions usually fail
   const unstableOfficers = [
     "Destruction", // (Po) - Energy clashes. Things break. Good for demolition, bad for building.
-    "Danger",      // (Wei) - Energy is precarious. High risk of accidents or failure.
-    "Close",       // (Bi) - Energy is stagnant/blocked. Nothing moves forward.
-    "Remove"       // (Chu) - Energy is depleting. Good for cleaning/divorce, bad for starting.
+    "Danger", // (Wei) - Energy is precarious. High risk of accidents or failure.
+    "Close", // (Bi) - Energy is stagnant/blocked. Nothing moves forward.
+    "Remove", // (Chu) - Energy is depleting. Good for cleaning/divorce, bad for starting.
   ];
   const isUnstableDay =
     unstableOfficers.includes(dayData.officer) ||
@@ -514,59 +531,63 @@ export const calculateScore = (
     );
   }
 
-// =================================================================
-  // HOURLY BREAKDOWN (Now with Personalization)
+  // =================================================================
+  // 7. HOURLY BREAKDOWN
   // =================================================================
 
-  // 1. Get Personal Hour Criteria
-  const userNobleBranches = STEM_NOBLEMAN[user.dayMaster] || [];
-  const userAcademicBranch = ACADEMIC_STAR[user.dayMaster];
-  const userHorseBranch = TRAVELING_HORSE[user.yearBranch]; // Ensure yearBranch is valid!
-  const userClashBranch = CLASH_PAIRS[user.baZiBranch]; // Clashes User's Day (Spouse/Health)
+  // 1. DEFINE PERSONAL STARS
+  const userNobleBranches = STEM_NOBLEMAN[userDmClean] || [];
+  const userAcademicBranch = ACADEMIC_STAR[userDmClean];
+  const userHorseBranch = TRAVELING_HORSE[userYearClean];
+  const userClashBranch = CLASH_PAIRS[userDayClean];
 
+  // Peach Blossom (Check both Year for Social & Day for Romance)
+  const userPeachYear = PEACH_BLOSSOM[userYearClean];
+  const userPeachDay = PEACH_BLOSSOM[userDayClean];
+
+  // 2. DEFINE GENERAL DAY STARS
+  const dayNobleBranches = STEM_NOBLEMAN[dayStemClean] || [];
+  const dayHarmonyBranch = SIX_HARMONY[dayData.dayBranch];
+  const dayTeamBranches = THREE_HARMONY[dayData.dayBranch] || [];
+  const dayClashBranch = CLASH_PAIRS[dayData.dayBranch]; // Day Breaker
+
+  // 3. GENERATE LOOP
   const hours = BRANCHES_LIST.map((branch, index) => {
-    // Standard Time Mapping (Rat = 23:00-01:00, etc.)
-    // Note: Index 0 is Rat. In 24h format, Rat is 23:00-01:00.
-    // Simple display mapping:
-    const start = index === 0 ? 23 : (index * 2) - 1;
-    const end = index === 0 ? 1 : (index * 2) + 1;
-    const timeLabel = `${String(start).padStart(2, '0')}:00 - ${String(end).padStart(2, '0')}:00`;
+    // Time Label
+    const start = index === 0 ? 23 : index * 2 - 1;
+    const end = index === 0 ? 1 : index * 2 + 1;
+    const timeLabel = `${String(start).padStart(2, "0")}:00 - ${String(end).padStart(2, "0")}:00`;
 
-    const rating = "Neutral"; // Default (You can keep your existing logic for Good/Bad here)
-
-    // NEW: Personal Tags
     const tags: string[] = [];
 
-    // A. Nobleman (Help / Rescue)
-    if (userNobleBranches.includes(branch)) {
-      tags.push("Nobleman");
+    // --- PERSONAL TAGS ---
+    if (userNobleBranches.includes(branch)) tags.push("User Nobleman");
+    if (userAcademicBranch === branch) tags.push("Academic");
+    if (userHorseBranch === branch) tags.push("Travel Star");
+    if (userClashBranch === branch) tags.push("Personal Clash");
+
+    // Peach Blossom Logic (Split)
+    // Year Branch = Social / Public / Networking
+    if (userPeachYear === branch) {
+      tags.push("Social Peach");
+    }
+    // Day Branch = Romance / Intimacy / Spouse
+    if (userPeachDay === branch) {
+      tags.push("Romance Peach");
     }
 
-    // B. Academic (Deep Work / Strategy)
-    if (userAcademicBranch === branch) {
-      tags.push("Academic");
-    }
+    // --- GENERAL TAGS ---
+    if (dayNobleBranches.includes(branch)) tags.push("Day Nobleman");
+    if (dayHarmonyBranch === branch) tags.push("Harmony");
+    if (dayTeamBranches.includes(branch)) tags.push("Teamwork");
 
-    // C. Traveling Horse (Movement / Sales / Remote Work)
-    if (userHorseBranch === branch) {
-      tags.push("Horse");
-    }
-
-    // D. Personal Breaker (Clash) - DANGER
-    if (userClashBranch === branch) {
-      tags.push("Clash");
-    }
-
-    // E. General Day Clash (Day Breaker) - DANGER
-    if (CLASH_PAIRS[dayBranch] === branch) {
-      tags.push("DayBreaker");
-    }
+    // --- RISKS ---
+    if (dayClashBranch === branch) tags.push("Day Breaker");
 
     return {
       branch,
       time: timeLabel,
-      rating,
-      tags
+      tags,
     };
   });
 
@@ -607,30 +628,6 @@ export const calculateScore = (
     verdictText = "DANGEROUS";
     cssClass = "dangerous";
   }
-
-  // Golden Hours
-  const hourMap: Record<string, { label: string[]; time: number }> = {};
-  const userBadBranches = rules.badBranches || [];
-  const addHour = (branch: string, label: string) => {
-    if (userBadBranches.includes(branch) || !BRANCH_HOURS[branch]) return;
-    if (!hourMap[branch]) {
-      hourMap[branch] = { label: [label], time: BRANCH_START_TIMES[branch] };
-    } else if (!hourMap[branch].label.includes(label)) {
-      hourMap[branch].label.push(label);
-    }
-  };
-
-  (STEM_NOBLEMAN[dayStemClean] || []).forEach((b) => addHour(b, "🌟 Nobleman"));
-  if (SIX_HARMONY[dayBranch]) addHour(SIX_HARMONY[dayBranch], "✨ Harmony");
-  (THREE_HARMONY[dayBranch] || []).forEach((b) => addHour(b, "🤝 Teamwork"));
-
-  // const goodHours = Object.keys(hourMap)
-  //   .map((b) => ({ branch: b, ...hourMap[b] }))
-  //   .sort((a, b) => a.time - b.time)
-  //   .map(
-  //     (h) =>
-  //       `<strong>${h.branch}</strong> (${BRANCH_HOURS[h.branch]}) - ${h.label.join(" / ")}`,
-  //   );
 
   return {
     dayType,

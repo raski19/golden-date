@@ -68,7 +68,16 @@ export interface OfficerRecommendation {
   desc: string;
   reality: string;
 }
-
+export interface HourInfo {
+  branch: string;
+  time: string;
+  tags: string[];
+}
+export interface SpecificActions {
+  action: string;
+  icon: string;
+  desc: string;
+}
 export interface ScoreResult {
   pillarNote: string;
   pillarIcon: string;
@@ -79,13 +88,8 @@ export interface ScoreResult {
   log: string[];
   flags: string[];
   tags: string[];
-  specificActions: { action: string; icon: string; desc: string }[];
-  hours: {
-    branch: string;
-    time: string;
-    rating: string;
-    tags: string[];
-  }[];
+  specificActions: SpecificActions[];
+  hours: HourInfo[];
   dayType: string;
   tenGodName: string;
   actionTitle: string;

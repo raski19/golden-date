@@ -946,102 +946,110 @@ function showDetails(day) {
   const score = day.analysis.score || 0;
   const officer = day.info.officer;
 
-// 1. Determine "Traffic Light" Status (The Math)
+  // 1. Determine "Traffic Light" Status (The Math)
   let status = {
-    color: "#198754", bg: "#d1e7dd", icon: "✅",
+    color: "#198754",
+    bg: "#d1e7dd",
+    icon: "✅",
     verdict: "EXCELLENT",
-    advice: "Go for it! The energy supports growth."
+    advice: "Go for it! The energy supports growth.",
   };
 
   if (score < 40) {
     status = {
-      color: "#dc3545", bg: "#f8d7da", icon: "🛑",
+      color: "#dc3545",
+      bg: "#f8d7da",
+      icon: "🛑",
       verdict: "DANGEROUS",
-      advice: "Stop. Do not launch major projects today."
+      advice: "Stop. Do not launch major projects today.",
     };
   } else if (score < 60) {
     status = {
-      color: "#fd7e14", bg: "#ffecd1", icon: "⚠️",
+      color: "#fd7e14",
+      bg: "#ffecd1",
+      icon: "⚠️",
       verdict: "CAUTION",
-      advice: "Proceed with care. Good for routine, bad for risks."
+      advice: "Proceed with care. Good for routine, bad for risks.",
     };
   } else if (score < 75) {
     status = {
-      color: "#0dcaf0", bg: "#cff4fc", icon: "ℹ️",
+      color: "#0dcaf0",
+      bg: "#cff4fc",
+      icon: "ℹ️",
       verdict: "AVERAGE",
-      advice: "Stable energy. Good for planning and maintenance."
+      advice: "Stable energy. Good for planning and maintenance.",
     };
   }
 
-// 2. Map Specific Actions (The Nature)
-// This is the "Translator" part that users love.
+  // 2. Map Specific Actions (The Nature)
+  // This is the "Translator" part that users love.
   const bestForMap = {
-    "Establish": "Proposing Marriage, Starting a Job, or Medical Diagnosis",
-    "Remove": "Cleaning, Decluttering, or Medical Procedures",
-    "Full": "Collecting Debts, Parties, or Official Launches",
-    "Balance": "Negotiations, Marriage, or Travel",
-    "Stable": "Long-term Planning, Weddings, or Construction",
-    "Initiate": "Groundbreaking, Starting a Job, or Renovation",
-    "Destruction": "Demolition, Dieting, or Ending Bad Habits",
-    "Danger": "Risk assessment, Religious activities, or Dismantling",
-    "Success": "Everything! (Especially Business, Marriage, & Contracts)",
-    "Receive": "Asking for a Raise, Starting a Course, or Proposals",
-    "Open": "Grand Openings, Housewarming, or Signing Agreements",
-    "Close": "Stock taking, Planning, or Self-reflection"
+    Establish: "Proposing Marriage, Starting a Job, or Medical Diagnosis",
+    Remove: "Cleaning, Decluttering, or Medical Procedures",
+    Full: "Collecting Debts, Parties, or Official Launches",
+    Balance: "Negotiations, Marriage, or Travel",
+    Stable: "Long-term Planning, Weddings, or Construction",
+    Initiate: "Groundbreaking, Starting a Job, or Renovation",
+    Destruction: "Demolition, Dieting, or Ending Bad Habits",
+    Danger: "Risk assessment, Religious activities, or Dismantling",
+    Success: "Everything! (Especially Business, Marriage, & Contracts)",
+    Receive: "Asking for a Raise, Starting a Course, or Proposals",
+    Open: "Grand Openings, Housewarming, or Signing Agreements",
+    Close: "Stock taking, Planning, or Self-reflection",
   };
 
   const worstForMap = {
-    "Establish": "Funerals or Signing Agreements",
-    "Remove": "Opening a Business or Marriage",
-    "Full": "Legal Disputes or Signing Contracts (Stifles growth)",
-    "Balance": "Lawsuits (Levelling the scales)",
-    "Stable": "Moving House or Quick Projects",
-    "Initiate": "Moving House or Travel",
-    "Destruction": "Weddings, Signing Papers, or Travel",
-    "Danger": "Extreme Sports or Height Work",
-    "Success": "Litigation (Risk of competitors winning)",
-    "Receive": "Medical Treatment or Visiting the Sick",
-    "Open": "Burial, Groundbreaking, or Surgery",
-    "Close": "Medical Procedures or Important Meetings"
+    Establish: "Funerals or Signing Agreements",
+    Remove: "Opening a Business or Marriage",
+    Full: "Legal Disputes or Signing Contracts (Stifles growth)",
+    Balance: "Lawsuits (Levelling the scales)",
+    Stable: "Moving House or Quick Projects",
+    Initiate: "Moving House or Travel",
+    Destruction: "Weddings, Signing Papers, or Travel",
+    Danger: "Extreme Sports or Height Work",
+    Success: "Litigation (Risk of competitors winning)",
+    Receive: "Medical Treatment or Visiting the Sick",
+    Open: "Burial, Groundbreaking, or Surgery",
+    Close: "Medical Procedures or Important Meetings",
   };
 
-// 3. Build the Final "Hero Card" HTML
+  // 3. Build the Final "Hero Card" HTML
   const executiveSummaryHtml = `
-<div style="background: ${status.bg}; border-left: 6px solid ${status.color}; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-        <div style="font-weight:900; color:${status.color}; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase;">
-            ${status.icon} ${status.verdict} DAY
-        </div>
-        <div style="font-weight:bold; font-size:1.2rem; color:#333;">${score} pts</div>
-    </div>
-
-    <div style="font-size:0.95rem; color:#444; margin-bottom:15px; font-style:italic;">
-        "${status.advice}"
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
-        <div>
-            <div style="font-size:0.7rem; color:#198754; font-weight:bold; text-transform:uppercase;">✅ Best For</div>
-            <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
-                ${bestForMap[officer] || "Routine Work"}
-            </div>
-        </div>
-        <div>
-            <div style="font-size:0.7rem; color:#dc3545; font-weight:bold; text-transform:uppercase;">⛔ Avoid</div>
-            <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
-                ${worstForMap[officer] || "High Risk Activities"}
-            </div>
-        </div>
-    </div>
-</div>
-`;
+  <div style="background: ${status.bg}; border-left: 6px solid ${status.color}; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+      
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="font-weight:900; color:${status.color}; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase;">
+              ${status.icon} ${status.verdict} DAY
+          </div>
+          <div style="font-weight:bold; font-size:1.2rem; color:#333;">${score} pts</div>
+      </div>
+  
+      <div style="font-size:0.95rem; color:#444; margin-bottom:15px; font-style:italic;">
+          "${status.advice}"
+      </div>
+  
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
+          <div>
+              <div style="font-size:0.7rem; color:#198754; font-weight:bold; text-transform:uppercase;">✅ Best For</div>
+              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
+                  ${bestForMap[officer] || "Routine Work"}
+              </div>
+          </div>
+          <div>
+              <div style="font-size:0.7rem; color:#dc3545; font-weight:bold; text-transform:uppercase;">⛔ Avoid</div>
+              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
+                  ${worstForMap[officer] || "High Risk Activities"}
+              </div>
+          </div>
+      </div>
+  </div>
+  `;
 
   const tenGodName = day.tenGods?.stemGod || "F"; // This is PERSONAL to the user
   const officerName = day.info.officer;
   const strategy = getPersonalizedActions(officerName, tenGodName);
 
-// 2. Build the HTML
+  // 2. Build the HTML
   const strategyHtml = `
   <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
       
@@ -1076,7 +1084,7 @@ function showDetails(day) {
 
       </div>
   </div>
-`;
+  `;
 
   // Prepare Data
   const tenGods = day.tenGods || {};
@@ -1220,14 +1228,18 @@ function showDetails(day) {
 
   // --- PERSONALIZED HOURLY GRID ---
   const hoursData = day.analysis.hours || [];
+  // If data is missing (legacy cache), fallback to empty to prevent crash
+  if (!hoursData.length) {
+    console.warn("No hourly data found for this date");
+  }
 
   const formatHourRow = (h) => {
     // 1. Identify Conflicts
     const positives = ["Nobleman", "Academic", "Horse"];
-    const negatives = ["Clash", "DayBreaker"];
+    const negatives = ["Clash", "Day Breaker"];
 
-    const hasPositive = h.tags.some(t => positives.includes(t));
-    const hasNegative = h.tags.some(t => negatives.includes(t));
+    const hasPositive = h.tags.some((t) => positives.includes(t));
+    const hasNegative = h.tags.some((t) => negatives.includes(t));
 
     // 2. Determine State
     let rowState = "neutral";
@@ -1236,15 +1248,38 @@ function showDetails(day) {
     else if (hasNegative) rowState = "bad";
 
     // 3. Generate Badges (Visual Tags)
-    const badgesHtml = h.tags.map(tag => {
-      if(tag === "Nobleman") return `<span style="background:#d1e7dd; color:#0f5132; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">🌟 Nobleman</span>`;
-      if(tag === "Academic") return `<span style="background:#cff4fc; color:#055160; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">📚 Academic</span>`;
-      if(tag === "Horse") return `<span style="background:#fff3cd; color:#856404; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">🐎 Travel</span>`;
-      // Negative Tags
-      if(tag === "Clash") return `<span style="background:#f8d7da; color:#842029; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">💥 Personal Clash</span>`;
-      if(tag === "DayBreaker") return `<span style="background:#e2e3e5; color:#383d41; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">⚡ Day Breaker</span>`;
-      return "";
-    }).join("");
+    const badgesHtml = h.tags
+      .map((tag) => {
+        // --- PERSONAL (High Value) ---
+        if (tag === "User Nobleman")
+          return `<span style="background:#d1e7dd; color:#0f5132; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800; border:1px solid #a3cfbb;">🌟 YOUR Nobleman</span>`;
+        if (tag === "Academic")
+          return `<span style="background:#cff4fc; color:#055160; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600;">📚 Academic</span>`;
+        if (tag === "Travel Star")
+          return `<span style="background:#e0f2f1; color:#00695c; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #b2dfdb;">🐴 Travel Star</span>`;
+        if (tag === "Social Peach")
+          return `<span style="background:#f3e5f5; color:#7b1fa2; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #e1bee7;">🥂 Social Peach</span>`;
+        if (tag === "Romance Peach")
+          return `<span style="background:#fce4ec; color:#c2185b; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #f48fb1;">💘 Romance Peach</span>`;
+
+        if (tag === "Personal Clash")
+          return `<span style="background:#f8d7da; color:#842029; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800; border:1px solid #f1aeb5;">💥 YOUR Clash</span>`;
+
+        // --- GENERAL (Medium Value) ---
+        if (tag === "Day Nobleman")
+          return `<span style="background:#e8f5e9; color:#2e7d32; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ General Noble</span>`;
+        if (tag === "Harmony")
+          return `<span style="background:#fff3e0; color:#ef6c00; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">🤝 Harmony</span>`;
+        if (tag === "Teamwork")
+          return `<span style="background:#fff8e1; color:#f57f17; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">👥 Teamwork</span>`;
+
+        // --- RISKS ---
+        if (tag === "Day Breaker")
+          return `<span style="background:#e2e3e5; color:#666; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; border:1px dashed #ccc;">⚡ Day Breaker</span>`;
+
+        return "";
+      })
+      .join("");
 
     // 4. Row Styling based on State
     let rowBg = "transparent";
@@ -1252,11 +1287,9 @@ function showDetails(day) {
 
     if (rowState === "good") {
       rowBg = "linear-gradient(to right, #f0fff4, transparent)"; // Greenish
-    }
-    else if (rowState === "bad") {
+    } else if (rowState === "bad") {
       rowBg = "linear-gradient(to right, #fff5f5, transparent)"; // Reddish
-    }
-    else if (rowState === "mixed") {
+    } else if (rowState === "mixed") {
       // AMBER / WARNING STATE
       rowBg = "linear-gradient(to right, #fff3cd, transparent)";
       borderStyle = "1px solid #ffeeba"; // Gold border to highlight complexity
@@ -1282,10 +1315,11 @@ function showDetails(day) {
                 <span style="font-size:0.7rem; font-weight:normal; color:#888;">(Personalized)</span>
             </h5>
             <div class="grid-dashboard" style="display:block; max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px;">
-                ${hoursData.length > 0
-    ? hoursData.map(h => formatHourRow(h)).join("")
-    : `<div style="text-align:center; padding:20px; color:#999;">No hourly data available.</div>`
-  }
+                ${
+                  hoursData.length > 0
+                    ? hoursData.map((h) => formatHourRow(h)).join("")
+                    : `<div style="text-align:center; padding:20px; color:#999;">No hourly data available.</div>`
+                }
             </div>
             <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">
                 💡 <strong>Tip:</strong> Use "Nobleman" hours for asking favors. Use "Clash" hours for rest.
@@ -1480,32 +1514,65 @@ function getPersonalizedActions(officer, tenGodName) {
 
   // 2. DEFINE THE "TEN GOD" STRATEGY (The "How")
   const godStrategies = {
-    "F":  { style: "connect", icon: "🤝", verb: "network with" },
-    "RW": { style: "compete", icon: "🔥", verb: "rally the team for" },
-    "EG": { style: "create", icon: "🎨", verb: "brainstorm" },
-    "HO": { style: "perform", icon: "🎤", verb: "showcase" },
-    "DW": { style: "manage", icon: "📊", verb: "execute" },
-    "IW": { style: "opportunist", icon: "🎲", verb: "seize" },
-    "DO": { style: "discipline", icon: "⚖️", verb: "standardize" },
-    "7K": { style: "conquer", icon: "⚔️", verb: "aggressively tackle" },
-    "DR": { style: "analyze", icon: "📚", verb: "research" },
-    "IR": { style: "intuitive", icon: "🔮", verb: "strategize" }
+    F: { style: "Connect", icon: "🤝", verb: "network with" },
+    RW: { style: "Compete", icon: "🔥", verb: "rally the team for" },
+    EG: { style: "Create", icon: "🎨", verb: "brainstorm" },
+    HO: { style: "Perform", icon: "🎤", verb: "showcase" },
+    DW: { style: "Manage", icon: "📊", verb: "execute" },
+    IW: { style: "Opportunist", icon: "🎲", verb: "seize" },
+    DO: { style: "Discipline", icon: "⚖️", verb: "standardize" },
+    "7K": { style: "Conquer", icon: "⚔️", verb: "aggressively tackle" },
+    DR: { style: "Analyze", icon: "📚", verb: "research" },
+    IR: { style: "Intuitive", icon: "🔮", verb: "strategize" },
   };
 
   // 3. DEFINE THE "OFFICER" CONTEXT (The "What")
   const officerContext = {
-    "Establish":   { mood: "New Beginnings", tasks: "new projects, proposals, or job starts" },
-    "Remove":      { mood: "Decluttering",   tasks: "cleaning, medical procedures, or firing bad clients" },
-    "Full":        { mood: "Abundance",      tasks: "signing contracts, collecting debts, or assets" },
-    "Balance":     { mood: "Alignment",      tasks: "negotiations, travel, or meetings" },
-    "Stable":      { mood: "Persistence",    tasks: "operations planning, status quo or routine day" },
-    "Initiate":    { mood: "Start-up",       tasks: "starting construction, groundbreaking, or commencing a new job" },
-    "Destruction": { mood: "Breakthrough",   tasks: "demolition, breaking bad habits, or pivoting" },
-    "Danger":      { mood: "Risk Mgmt",      tasks: "risk assessment, delivering ultimatums, or managing crisis" },
-    "Success":     { mood: "Achievement",    tasks: "launches, pitches, or commercial deals" },
-    "Receive":     { mood: "Rewards",        tasks: "closing deals, asking for raises, or storing value" },
-    "Open":        { mood: "Expansion",      tasks: "grand openings, networking, or housewarming" },
-    "Close":       { mood: "Stagnation",     tasks: "internal review, filing, or whiteboarding" }
+    Establish: {
+      mood: "New Beginnings",
+      tasks: "new projects, proposals, or job starts",
+    },
+    Remove: {
+      mood: "Decluttering",
+      tasks: "cleaning, medical procedures, or firing bad clients",
+    },
+    Full: {
+      mood: "Abundance",
+      tasks: "signing contracts, collecting debts, or assets",
+    },
+    Balance: { mood: "Alignment", tasks: "negotiations, travel, or meetings" },
+    Stable: {
+      mood: "Persistence",
+      tasks: "operations planning, status quo or routine day",
+    },
+    Initiate: {
+      mood: "Start-up",
+      tasks: "starting construction, groundbreaking, or commencing a new job",
+    },
+    Destruction: {
+      mood: "Breakthrough",
+      tasks: "demolition, breaking bad habits, or pivoting",
+    },
+    Danger: {
+      mood: "Risk Mgmt",
+      tasks: "risk assessment, delivering ultimatums, or managing crisis",
+    },
+    Success: {
+      mood: "Achievement",
+      tasks: "launches, pitches, or commercial deals",
+    },
+    Receive: {
+      mood: "Rewards",
+      tasks: "closing deals, asking for raises, or storing value",
+    },
+    Open: {
+      mood: "Expansion",
+      tasks: "grand openings, networking, or housewarming",
+    },
+    Close: {
+      mood: "Stagnation",
+      tasks: "internal review, filing, or whiteboarding",
+    },
   };
 
   const myGod = godStrategies[god] || godStrategies["F"];
@@ -1520,7 +1587,7 @@ function getPersonalizedActions(officer, tenGodName) {
     context: `${myOff.mood} Day`,
     advice: synthesis,
     god: god,
-    officer: off
+    officer: off,
   };
 }
 
