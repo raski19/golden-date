@@ -444,8 +444,12 @@ function renderGrid(days) {
   grid.innerHTML = "";
 
   const firstDayOfWeek = new Date(currentYear, currentMonth - 1, 1).getDay();
-  // Adjust logic if you want Mon start vs Sun start. (0=Sun currently)
-  for (let i = 0; i < firstDayOfWeek; i++) {
+  // Adjust logic if you want Mon start vs Sun start.
+  const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+
+  // Render empty cells based on new offset
+  // for (let i = 0; i < firstDayOfWeek; i++) {
+  for (let i = 0; i < startOffset; i++) {
     grid.innerHTML += "<div></div>";
   }
 
