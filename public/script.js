@@ -225,6 +225,85 @@ fetch("/api/users")
     renderTeamCheckboxes(users);
   });
 
+function toggleTimeInput() {
+  const checkbox = document.getElementById("noTimeCheckbox");
+  const dobInput = document.getElementById("guestDob");
+
+  if (checkbox.checked) {
+    // Change type to 'date' removes the time picker UI
+    dobInput.type = "date";
+  } else {
+    dobInput.type = "datetime-local";
+  }
+}
+
+// 2. Update Generator Function
+async function generateGuestProfile() {
+  const name = document.getElementById("guestName").value;
+  let dob = document.getElementById("guestDob").value; // "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm"
+  const gender = document.getElementById("guestGender").value;
+  const noTime = document.getElementById("noTimeCheckbox").checked;
+
+  if (!name || !dob) {
+    alert("Please fill in Name and Date");
+    return;
+  }
+
+  // If no time is selected, append a default time for the Date constructor (Noon is safe)
+  // But we send a flag telling the server to ignore it.
+  if (noTime) {
+    dob += "T12:00:00";
+  }
+
+  loadingOverlay("flex");
+
+  try {
+    const res = await fetch("/api/generate-guest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        birthDate: dob,
+        gender,
+        hasTime: !noTime, // Send 'false' if checkbox is checked
+      }),
+    });
+
+    if (!res.ok) throw new Error("Calculation failed");
+
+    const guestUser = await res.json();
+
+    // 1. Set as Current User
+    currentUser = guestUser;
+
+    // 2. UI Updates
+    // Hide the dropdown since we are using a custom user
+    document.getElementById("userSelect").value = "";
+
+    // 3. Show Success Alert
+    alert(
+      `Profile Generated for ${guestUser.name}!\nDay Master: ${guestUser.dayMaster} (${guestUser.strength})`,
+    );
+
+    // 4. Reload Calendar with Guest Data
+    // IMPORTANT: We need to tweak loadCalendar() to accept a user object
+    // OR we pass the ID "guest" and handle it in the backend.
+
+    // EASIER WAY: Client-side rendering if you have the data.
+    // But since your calendar logic is server-side (/api/calendar),
+    // we should probably SAVE this guest temporarily or send the whole profile to the calendar endpoint.
+
+    // Let's assume you want to send this 'guestUser' data to the calendar API
+    // to get the day-by-day analysis.
+
+    await loadCalendar(guestUser); // See update below
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    loadingOverlay("none");
+  }
+}
+
 // --- NAVIGATION ---
 function updateDateInputs() {
   document.getElementById("monthSelect").value = currentMonth;
@@ -383,16 +462,28 @@ function showSearchResults(dates, action) {
 }
 
 // --- CALENDAR LOGIC ---
-async function loadCalendar() {
-  // Show Loading
+async function loadCalendar(guestUser = null) {
   loadingOverlay("flex");
 
-  const userId = document.getElementById("userSelect").value;
-  if (!userId) return;
+  let url = `/api/calendar?year=${currentYear}&month=${currentMonth}`;
+  let options = {};
 
-  const res = await fetch(
-    `/api/calendar?userId=${userId}&year=${currentYear}&month=${currentMonth}`,
-  );
+  // If we have a guest user, we must POST their profile to the calendar engine
+  if (guestUser) {
+    url = `/api/calendar/guest?year=${currentYear}&month=${currentMonth}`; // New Endpoint
+    options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user: guestUser }),
+    };
+  } else {
+    // Standard DB User
+    const userId = document.getElementById("userSelect").value;
+    if (!userId) return;
+    url += `&userId=${userId}`;
+  }
+
+  const res = await fetch(url, options);
   const data = await res.json();
 
   currentUser = data.user;
@@ -1384,7 +1475,7 @@ function showDetails(day) {
 
   // 2. SPOUSE PALACE CHECK (New Feature)
   // We need the Current User's Day Branch (Spouse Palace)
-  const userSpouseBranch = currentUser ? currentUser.baZiBranch : null;
+  const userSpouseBranch = currentUser ? currentUser.dayBranch : null;
   const dayBranch = day.info.dayBranch;
 
   let spouseStatusHtml = "";

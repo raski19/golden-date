@@ -9,6 +9,7 @@ import { STANDARD_RULES } from "./utils/constants";
 import { getDayInfo } from "./utils/tongShu";
 import { calculateScore, analyzeMonth } from "./utils/calculator";
 import { calculateTenGods } from "./utils/tenGods";
+import { calculateBaZiProfile } from "./utils/baziHelper";
 
 const app = express();
 
@@ -31,6 +32,25 @@ app.use(express.static("public"));
 app.get("/api/users", async (req: Request, res: Response) => {
   const users = await User.find({}, "name baZiProfile rules");
   res.json(users);
+});
+app.post("/api/generate-guest", (req: Request, res: Response) => {
+  try {
+    const { name, birthDate, gender, hasTime = true } = req.body;
+
+    // Parse Date (Ensure it's valid)
+    const dateObj = new Date(birthDate);
+    if (isNaN(dateObj.getTime())) {
+      return res.status(400).json({ error: "Invalid Date Format" });
+    }
+
+    // 1. Calculate Profile
+    const profile = calculateBaZiProfile(name, dateObj, gender, hasTime);
+
+    // 2. Return as a "User" object (No ID, it's a guest)
+    res.json(profile);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Get Calendar Data
@@ -94,6 +114,58 @@ app.get(
     });
   },
 );
+app.post("/api/calendar/guest", async (req: Request, res: Response) => {
+  // Extract year and month from query, user from body
+  const { year, month } = req.query;
+  const user = req.body.user as IUser; // The generated guest profile
+
+  if (!user || !year || !month) {
+    return res.status(400).json({ error: "Missing parameters" });
+  }
+
+  const y = parseInt(year as string);
+  const m = parseInt(month as string);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const monthlyData = [];
+
+  // 1. Calculate the "Dominant Branch" for the month (Using the 15th)
+  const midMonthDateStr = `${y}-${String(m).padStart(2, "0")}-15`;
+  const midMonthInfo = getDayInfo(midMonthDateStr);
+  const dominantMonthBranch = midMonthInfo.monthBranch;
+
+  // 2. Run the Month Analysis
+  const monthAnalysis = analyzeMonth(user, dominantMonthBranch);
+
+  // 3. Loop days (Exact same logic as your GET route)
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+    const dayInfo = getDayInfo(dateStr);
+    const analysis = calculateScore(user, dayInfo, y);
+
+    const cleanStem = dayInfo.stem.split(" ")[0] || "";
+    const tenGods = calculateTenGods(
+      user.dayMaster,
+      cleanStem,
+      dayInfo.dayBranch,
+    );
+
+    monthlyData.push({
+      day: d,
+      fullDate: dateStr,
+      info: dayInfo,
+      analysis,
+      tenGods,
+    });
+  }
+
+  // Return the exact same structure as the GET route
+  res.json({
+    user,
+    monthAnalysis: monthAnalysis,
+    days: monthlyData,
+  });
+});
 
 // Find Dates
 interface FindDatesBody {
@@ -225,9 +297,7 @@ app.post(
 );
 
 // 1. ADD TEAM SYNERGY ENDPOINT
-// src/server.ts
-
-app.post("/api/team-synergy", async (req, res) => {
+app.post("/api/team-synergy", async (req: Request, res: Response) => {
   try {
     const { userIds } = req.body;
 
@@ -334,7 +404,6 @@ app.post("/api/team-synergy", async (req, res) => {
     res.status(500).json({ error: "Calculation failed" });
   }
 });
-
 app.post("/api/momentum", async (req: Request, res: Response) => {
   try {
     const { userId, duration = 2 } = req.body;

@@ -6,17 +6,31 @@ interface IUserModel extends Omit<IUser, "_id">, Document {}
 
 const UserSchema: Schema = new Schema({
   name: { type: String, required: true },
-  baZiProfile: String,
+
+  // --- ANALYSIS DATA (New) ---
+  dayMasterElement: { type: String, required: true }, // e.g. "Fire"
+  strength: { type: String, required: true }, // e.g. "Strong"
+
+  // --- THE FOUR PILLARS ---
   dayMaster: { type: String, required: true },
+  dayBranch: { type: String, required: true },
+
   monthStem: { type: String, required: true },
-  yearStem: { type: String, required: true },
-  baZiBranch: { type: String, required: true },
   monthBranch: { type: String, required: true },
+
+  yearStem: { type: String, required: true },
   yearBranch: { type: String, required: true },
+
+  hourStem: { type: String, required: false },
+  hourBranch: { type: String, required: false },
+
+  // --- LIFE CYCLE ---
   luckBranch: { type: String, required: true },
   birthYear: { type: Number, required: true },
-  gender: { type: String, required: true },
+  gender: { type: String, required: true }, // "male" | "female"
   description: String,
+
+  // --- GENERATED RULES ---
   rules: {
     breaker: String,
     selfPunishment: String,

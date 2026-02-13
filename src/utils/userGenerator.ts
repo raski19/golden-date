@@ -233,18 +233,16 @@ export function generateUserProfile(
     : `The Strategist (${supportDescription}). Needs support (${resource}) and connection (${companion}).`;
 
   return {
-    name: name,
-    baZiProfile: profileName,
-    dayMaster: dayMaster,
-    monthStem: monthStem,
-    yearStem: yearStem,
-    baZiBranch: dayBranch,
-    monthBranch: monthBranch,
-    yearBranch: yearBranch,
-    luckBranch: luckBranch, // NEW: Added to return object
-    birthYear: birthYear,
-    gender: gender,
-    description: desc,
+    name,
+    dayMaster,
+    monthStem,
+    yearStem,
+    dayBranch,
+    monthBranch,
+    yearBranch,
+    luckBranch,
+    birthYear,
+    gender,
     rules: {
       breaker: CLASH_PAIRS[dayBranch] || "Unknown",
       selfPunishment: SELF_PUNISHMENT.includes(dayBranch) ? dayBranch : "",
@@ -257,6 +255,9 @@ export function generateUserProfile(
       badBranches: badBranches,
       favorableBranches: favorableBranches,
     },
+
+    dayMasterElement: "",
+    strength: "Unknown",
   };
 }
 

@@ -38,6 +38,51 @@ export const ELEMENT_MAP: Record<string, string> = {
   Rat: "Water",
 };
 
+export const STEM_ELEMENTS: Record<string, string> = {
+  Jia: "Wood",
+  Yi: "Wood",
+  Bing: "Fire",
+  Ding: "Fire",
+  Wu: "Earth",
+  Ji: "Earth",
+  Geng: "Metal",
+  Xin: "Metal",
+  Ren: "Water",
+  Gui: "Water",
+};
+
+export const BRANCH_MAP: Record<string, string> = {
+  子: "Rat",
+  丑: "Ox",
+  寅: "Tiger",
+  卯: "Rabbit",
+  辰: "Dragon",
+  巳: "Snake",
+  午: "Horse",
+  未: "Goat",
+  申: "Monkey",
+  酉: "Rooster",
+  戌: "Dog",
+  亥: "Pig",
+};
+
+export const BRANCH_ELEMENTS: Record<string, string> = {
+  Tiger: "Wood",
+  Rabbit: "Wood",
+  Snake: "Fire",
+  Horse: "Fire",
+  Monkey: "Metal",
+  Rooster: "Metal",
+  Pig: "Water",
+  Rat: "Water",
+  Dragon: "Earth",
+  Goat: "Earth",
+  Dog: "Earth",
+  Ox: "Earth",
+};
+
+export const ELEMENT_ORDER = ["Wood", "Fire", "Earth", "Metal", "Water"];
+
 // Production Cycle (Mother -> Child)
 export const PRODUCTION_CYCLE: Record<string, string> = {
   Wood: "Fire",
@@ -396,6 +441,19 @@ export const STEM_ORDER: string[] = ["Jia", "Yi", "Bing", "Ding", "Wu", "Ji", "G
 // The 12 Branches in order
 // prettier-ignore
 export const BRANCH_ORDER: string[] = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+
+export const STEM_MAP: Record<string, string> = {
+  甲: "Jia",
+  乙: "Yi",
+  丙: "Bing",
+  丁: "Ding",
+  戊: "Wu",
+  己: "Ji",
+  庚: "Geng",
+  辛: "Xin",
+  壬: "Ren",
+  癸: "Gui",
+};
 
 export const STEMS: Record<string, string> = {
   甲: "Jia (Wood)",

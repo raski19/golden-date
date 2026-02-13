@@ -1,3 +1,5 @@
+import { REVERSE_PRODUCTION_CYCLE } from "./constants";
+
 export interface RootStrengthResult {
   level: "High" | "Medium" | "Low" | "None" | "Resource";
   description: string;
@@ -175,16 +177,8 @@ export const calculateRootStrength = (
     }
   }
 
-  const resourceElements: Record<string, string> = {
-    Wood: "Water", // Water produces Wood
-    Fire: "Wood", // Wood produces Fire
-    Earth: "Fire", // Fire produces Earth
-    Metal: "Earth", // Earth produces Metal
-    Water: "Metal", // Metal produces Water
-  };
-
   // 1️⃣ What produces the Day Stem?
-  const resourceElement = resourceElements[s];
+  const resourceElement = REVERSE_PRODUCTION_CYCLE[s];
 
   // 2️⃣ Which stems belong to that element?
   const resourceStems = Object.keys(stemElement).filter(

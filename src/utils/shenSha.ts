@@ -41,7 +41,7 @@ export const calculateShenSha = (
     academic: ACADEMIC_STAR[dm] === dayBranch,
 
     // Negative Stars
-    robbingShaDay: ROBBING_SHA[user.baZiBranch] === dayBranch,
+    robbingShaDay: ROBBING_SHA[user.dayBranch] === dayBranch,
     robbingShaYear: ROBBING_SHA[yearBranch] === dayBranch,
     deathGod: DEATH_GOD[yearBranch] === dayBranch,
     solitaryStar: SOLITARY_STAR[yearBranch] === dayBranch,

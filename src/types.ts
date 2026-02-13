@@ -20,17 +20,28 @@ export interface UserRules {
 export interface IUser {
   _id?: string;
   name: string;
-  baZiProfile: string;
-  dayMaster: string; // e.g. "Bing"
-  yearStem: string;
+
+  // Analysis Data
+  dayMasterElement: string; // e.g. "Fire"
+  strength: "Strong" | "Weak" | "Unknown";
+
+  // Pillars
+  dayMaster: string; // Day Stem
+  dayBranch: string; // Day Branch
+
   monthStem: string;
-  baZiBranch: string; // Day Branch (The "Self")
-  monthBranch: string; // Month Branch (Career/Parents)
-  yearBranch: string; // Year Branch (Social/Grandparents)
+  monthBranch: string;
+
+  yearStem: string;
+  yearBranch: string;
+
+  hourStem?: string;
+  hourBranch?: string;
+
   birthYear: number;
   luckBranch: string;
   gender: "male" | "female";
-  description?: string;
+
   rules: UserRules;
 }
 
