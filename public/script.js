@@ -5,6 +5,7 @@ let currentMonth = currentDate.getMonth() + 1;
 let currentFilter = "all";
 let allUsersData = [];
 let currentUser;
+let currentGuestUser = null;
 let currentMonthDays = [];
 
 // TODO: Fetch this from Backend
@@ -229,11 +230,25 @@ function toggleTimeInput() {
   const checkbox = document.getElementById("noTimeCheckbox");
   const dobInput = document.getElementById("guestDob");
 
+  // 1. Capture the current value before the browser wipes it
+  const currentValue = dobInput.value;
+
   if (checkbox.checked) {
-    // Change type to 'date' removes the time picker UI
+    // Switch to Date Only
     dobInput.type = "date";
+
+    // Restore the YYYY-MM-DD part if a value existed
+    if (currentValue && currentValue.includes("T")) {
+      dobInput.value = currentValue.split("T")[0];
+    }
   } else {
+    // Switch back to Date & Time
     dobInput.type = "datetime-local";
+
+    // Restore the date and add a default time (Noon) so it's valid
+    if (currentValue && !currentValue.includes("T")) {
+      dobInput.value = currentValue + "T12:00";
+    }
   }
 }
 
@@ -261,42 +276,36 @@ async function generateGuestProfile() {
     const res = await fetch("/api/generate-guest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        birthDate: dob,
-        gender,
-        hasTime: !noTime, // Send 'false' if checkbox is checked
-      }),
+      body: JSON.stringify({ name, birthDate: dob, gender, hasTime: !noTime }),
     });
 
     if (!res.ok) throw new Error("Calculation failed");
 
     const guestUser = await res.json();
 
-    // 1. Set as Current User
-    currentUser = guestUser;
+    // 1. Save to Global Variables
+    currentGuestUser = currentUser = guestUser;
 
-    // 2. UI Updates
-    // Hide the dropdown since we are using a custom user
-    document.getElementById("userSelect").value = "";
+    // 2. UPDATE DROPDOWN (The Fix)
+    const userSelect = document.getElementById("userSelect");
 
-    // 3. Show Success Alert
-    alert(
-      `Profile Generated for ${guestUser.name}!\nDay Master: ${guestUser.dayMaster} (${guestUser.strength})`,
-    );
+    // Check if we already added a "Guest" slot
+    let guestOption = userSelect.querySelector("option[value='guest']");
 
-    // 4. Reload Calendar with Guest Data
-    // IMPORTANT: We need to tweak loadCalendar() to accept a user object
-    // OR we pass the ID "guest" and handle it in the backend.
+    if (!guestOption) {
+      guestOption = document.createElement("option");
+      guestOption.value = "guest";
+      userSelect.appendChild(guestOption);
+    }
 
-    // EASIER WAY: Client-side rendering if you have the data.
-    // But since your calendar logic is server-side (/api/calendar),
-    // we should probably SAVE this guest temporarily or send the whole profile to the calendar endpoint.
+    // Set the text and force selection
+    guestOption.text = `✨ Guest: ${guestUser.name}`;
+    guestOption.selected = true;
 
-    // Let's assume you want to send this 'guestUser' data to the calendar API
-    // to get the day-by-day analysis.
+    // 3. Show Success & Load
+    // alert(`Profile Generated for ${guestUser.name}...`); // Optional now since UI shows it
 
-    await loadCalendar(guestUser); // See update below
+    await loadCalendar(guestUser);
   } catch (e) {
     alert(e.message);
   } finally {

@@ -592,7 +592,7 @@ button:hover { background: #0056b3; }
     display: grid;
     grid-template-columns: 2fr 2fr 1fr auto; /* Name | Date | Gender | Button */
     gap: 15px;
-    align-items: end;
+    align-items: flex-start;
 }
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -640,6 +640,7 @@ button:hover { background: #0056b3; }
     background: linear-gradient(135deg, #111, #333);
     color: #ffd700; /* Gold Text */
     border: none;
+    margin-top: 22px;
     padding: 0 24px;
     height: 42px;
     border-radius: 8px;

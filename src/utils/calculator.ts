@@ -201,6 +201,14 @@ export const calculateScore = (
     );
   }
 
+  const isBrokenDay =
+    flags.includes("YEAR BREAKER") ||
+    flags.includes("MONTH BREAKER") ||
+    flags.includes("PERSONAL BREAKER") ||
+    flags.includes("Luck Clash") ||
+    flags.includes("Self Punishment") ||
+    dayBranch === rules.breaker;
+
   // =================================================================
   // ELEMENTAL ANALYSIS
   // =================================================================
@@ -208,9 +216,11 @@ export const calculateScore = (
   const dayElement = dayData.element;
 
   // A. TAGGING
-  if (rules.wealthElements?.includes(dayElement)) tags.push("WEALTH");
-  if (rules.careerElements?.includes(dayElement)) tags.push("CAREER");
-  if (rules.healthElements?.includes(dayElement)) tags.push("HEALTH");
+  if (!isBrokenDay) {
+    if (rules.wealthElements?.includes(dayElement)) tags.push("WEALTH");
+    if (rules.careerElements?.includes(dayElement)) tags.push("CAREER");
+    if (rules.healthElements?.includes(dayElement)) tags.push("HEALTH");
+  }
 
   // B. SCORING & LOGGING
   if (rules.avoidElements?.includes(dayElement)) {
@@ -219,10 +229,18 @@ export const calculateScore = (
   } else {
     if (rules.wealthElements?.includes(dayElement)) {
       score += 15;
-      log.push(`💰 ELEMENT: ${dayElement} supports your Wealth.`);
+      log.push(
+        isBrokenDay
+          ? `💸 WEALTH TRAP: ${dayElement} is Wealth, but the day is broken.`
+          : `💰 ELEMENT: ${dayElement} supports your Wealth.`,
+      );
     } else if (rules.careerElements?.includes(dayElement)) {
       score += 15;
-      log.push(`🚀 ELEMENT: ${dayElement} supports your Career.`);
+      log.push(
+        isBrokenDay
+          ? `⚠️ CAREER RISK: ${dayElement} is Output, but the day is broken.`
+          : `🚀 ELEMENT: ${dayElement} supports your Career.`,
+      );
     } else if (rules.healthElements?.includes(dayElement)) {
       score += 10;
       log.push(`🧘 ELEMENT: ${dayElement} supports your Health.`);
@@ -238,12 +256,6 @@ export const calculateScore = (
   let isStarFavorable = false;
   let isStarAvoid = false;
   let isAvoidElement = false;
-
-  const isBrokenDay =
-    flags.includes("YEAR BREAKER") ||
-    flags.includes("MONTH BREAKER") ||
-    flags.includes("PERSONAL BREAKER") ||
-    dayBranch === rules.breaker;
 
   if (starName && CONSTELLATION_DATA[starName]) {
     const starData = CONSTELLATION_DATA[starName];
