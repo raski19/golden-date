@@ -1388,11 +1388,11 @@ function showDetails(day) {
 
         // --- GENERAL (Medium Value) ---
         if (tag === "Day Nobleman")
-          return `<span style="background:#e8f5e9; color:#2e7d32; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ General Noble</span>`;
-        if (tag === "Harmony")
-          return `<span style="background:#fff3e0; color:#ef6c00; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">🤝 Harmony</span>`;
-        if (tag === "Teamwork")
-          return `<span style="background:#fff8e1; color:#f57f17; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">👥 Teamwork</span>`;
+          return `<span style="background:#e8f5e9; color:#2e7d32; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ Day Nobleman</span>`;
+        if (tag === "6 Harmony")
+          return `<span style="background:#fff3e0; color:#ef6c00; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">🤝 6 Harmony</span>`;
+        if (tag === "3 Harmony")
+          return `<span style="background:#fff8e1; color:#f57f17; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">👥 Teamwork (3H)</span>`;
 
         // --- RISKS ---
         if (tag === "Day Breaker")

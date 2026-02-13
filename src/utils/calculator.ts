@@ -515,8 +515,8 @@ export const calculateScore = (
   const userPeachDay = PEACH_BLOSSOM[userDayBranch];
 
   const dayNobleBranches = STEM_NOBLEMAN[dayStemClean] || [];
-  const dayHarmonyBranch = SIX_HARMONY[dayBranch];
-  const dayTeamBranches = THREE_HARMONY[dayBranch] || [];
+  const day6HarmonyBranch = SIX_HARMONY[dayBranch];
+  const day3HarmonyBranch = THREE_HARMONY[dayBranch] || [];
   const dayClashBranch = CLASH_PAIRS[dayBranch];
   const userClashBranch = CLASH_PAIRS[userDayBranch];
 
@@ -535,8 +535,8 @@ export const calculateScore = (
     if (userPeachDay === branch) tags.push("Romance Peach");
 
     if (dayNobleBranches.includes(branch)) tags.push("Day Nobleman");
-    if (dayHarmonyBranch === branch) tags.push("6 Harmony");
-    if (dayTeamBranches.includes(branch)) tags.push("Teamwork (3H)");
+    if (day6HarmonyBranch === branch) tags.push("6 Harmony");
+    if (day3HarmonyBranch.includes(branch)) tags.push("3 Harmony");
     if (dayClashBranch === branch) tags.push("Day Breaker");
 
     return { branch, time: timeLabel, tags };
