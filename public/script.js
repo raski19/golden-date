@@ -352,17 +352,38 @@ function changeMonth(delta) {
 }
 
 async function handleUserChange() {
+  const userSelect = document.getElementById("userSelect");
+  const selectedValue = userSelect.value;
+
   // Show Loading
   loadingOverlay("flex");
 
   // Use a small timeout to let the UI update before the heavy lifting starts
-  // (This ensures the blur renders instantly)
   setTimeout(async () => {
     try {
-      await loadCalendar(); // Wait for grid to render
-      populateGoalSelect(); // Reload goals
+      if (selectedValue === "guest") {
+        // CASE 1: SWITCHING TO GUEST (Memory)
+        if (currentGuestUser) {
+          currentUser = currentGuestUser; // Set global state
+          await loadCalendar(currentGuestUser); // Pass full object to loader
+        } else {
+          // Safety fallback if memory was cleared
+          alert("Guest session expired. Please generate a new profile.");
+          userSelect.value = "";
+          loadingOverlay("none");
+          return;
+        }
+      } else {
+        // CASE 2: SWITCHING TO DB USER (Server)
+        // We set currentUser to null so loadCalendar knows to fetch from DB
+        currentUser = null;
+        await loadCalendar();
+      }
+
+      populateGoalSelect(); // Reload goals for whoever is selected
     } catch (error) {
       console.error("Error loading profile:", error);
+      alert("Failed to load profile. Please try again.");
     } finally {
       // Hide Loading
       loadingOverlay("none");
