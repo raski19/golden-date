@@ -1026,6 +1026,7 @@ function showDetails(day) {
   const titleEl = document.getElementById("detailsTitle");
   const bodyEl = document.getElementById("detailsBody");
 
+  // --- 1. Navigation Logic ---
   let currentIndex = currentMonthDays.findIndex(
     (d) => d.fullDate === day.fullDate,
   );
@@ -1037,7 +1038,6 @@ function showDetails(day) {
   const prevDay = currentMonthDays[currentIndex - 1];
   const nextDay = currentMonthDays[currentIndex + 1];
 
-  // Button Styles
   const btnStyle = `
         cursor: pointer; border: none; background: transparent; 
         font-size: 1.2rem; color: #555; padding: 0 10px;
@@ -1063,11 +1063,12 @@ function showDetails(day) {
         </div>
     `;
 
+  // --- 2. Data Preparation ---
   const logs = day.analysis.log || [];
   const score = day.analysis.score || 0;
   const officer = day.info.officer;
 
-  // 1. Determine "Traffic Light" Status (The Math)
+  // Traffic Light Status
   let status = {
     color: "#198754",
     bg: "#d1e7dd",
@@ -1102,8 +1103,7 @@ function showDetails(day) {
     };
   }
 
-  // 2. Map Specific Actions (The Nature)
-  // This is the "Translator" part that users love.
+  // Action Maps
   const bestForMap = {
     Establish: "Proposing Marriage, Starting a Job, or Medical Diagnosis",
     Remove: "Cleaning, Decluttering, or Medical Procedures",
@@ -1134,98 +1134,62 @@ function showDetails(day) {
     Close: "Medical Procedures or Important Meetings",
   };
 
-  // 3. Build the Final "Hero Card" HTML
+  // --- 3. HTML Construction ---
+
+  // Executive Summary
   const executiveSummaryHtml = `
   <div style="background: ${status.bg}; border-left: 6px solid ${status.color}; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-      
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
           <div style="font-weight:900; color:${status.color}; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase;">
               ${status.icon} ${status.verdict} DAY
           </div>
           <div style="font-weight:bold; font-size:1.2rem; color:#333;">${score} pts</div>
       </div>
-  
-      <div style="font-size:0.95rem; color:#444; margin-bottom:15px; font-style:italic;">
-          "${status.advice}"
-      </div>
-  
+      <div style="font-size:0.95rem; color:#444; margin-bottom:15px; font-style:italic;">"${status.advice}"</div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
           <div>
               <div style="font-size:0.7rem; color:#198754; font-weight:bold; text-transform:uppercase;">✅ Best For</div>
-              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
-                  ${bestForMap[officer] || "Routine Work"}
-              </div>
+              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">${bestForMap[officer] || "Routine Work"}</div>
           </div>
           <div>
               <div style="font-size:0.7rem; color:#dc3545; font-weight:bold; text-transform:uppercase;">⛔ Avoid</div>
-              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">
-                  ${worstForMap[officer] || "High Risk Activities"}
-              </div>
+              <div style="font-weight:600; color:#2c3e50; font-size:0.9rem; line-height:1.2;">${worstForMap[officer] || "High Risk Activities"}</div>
           </div>
       </div>
-  </div>
-  `;
+  </div>`;
 
-  const tenGodName = day.tenGods?.stemGod || "F"; // This is PERSONAL to the user
-  const officerName = day.info.officer;
-  const strategy = getPersonalizedActions(officerName, tenGodName);
-
-  // 2. Build the HTML
+  // Strategy
+  const tenGodName = day.tenGods?.stemGod || "F";
+  const strategy = getPersonalizedActions(officer, tenGodName);
   const strategyHtml = `
   <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-      
       <div style="background: linear-gradient(to right, #f8f9fa, #ffffff); padding: 12px 15px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
           <div>
               <div style="font-size:0.75rem; text-transform:uppercase; color:#888; font-weight:700; letter-spacing:0.5px;">Your Strategy</div>
-              <div style="font-size:1.1rem; font-weight:700; color:#333;">
-                  ${strategy.title}
-              </div>
+              <div style="font-size:1.1rem; font-weight:700; color:#333;">${strategy.title}</div>
           </div>
           <div style="text-align:right;">
-             <span style="font-size:0.8rem; background:#e9ecef; padding:4px 8px; border-radius:4px; color:#555;">
-                Context: ${strategy.context}
-             </span>
+             <span style="font-size:0.8rem; background:#e9ecef; padding:4px 8px; border-radius:4px; color:#555;">Context: ${strategy.context}</span>
           </div>
       </div>
-
       <div style="padding: 20px;">
-          
-          <div style="font-size:1rem; line-height:1.5; color:#444; margin-bottom:15px; border-left:4px solid #0d6efd; padding-left:12px;">
-              ${strategy.advice}
-          </div>
-
+          <div style="font-size:1rem; line-height:1.5; color:#444; margin-bottom:15px; border-left:4px solid #0d6efd; padding-left:12px;">${strategy.advice}</div>
           <div style="display:flex; gap:8px;">
-             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">
-                #${strategy.god}
-             </span>
-             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">
-                #${strategy.officer}
-             </span>
+             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">#${strategy.god}</span>
+             <span style="font-size:0.75rem; border:1px solid #dee2e6; padding:2px 8px; border-radius:12px; color:#666;">#${strategy.officer}</span>
           </div>
-
       </div>
-  </div>
-  `;
-
-  // Prepare Data
-  const tenGods = day.tenGods || {};
-  const yb = day.info.yellowBlackBelt;
-  const starDesc = day.info.constellationDesc || "No specific data.";
-
-  // --- DAY INFO ---
-  const dayInfo = `<div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
-    <div>
-      <strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br>
-      <strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})
-    </div>
-    <div>
-      <strong>Officer:</strong> ${day.info.officer}<br>
-      <strong>Element:</strong> ${day.info.element}
-    </div>
   </div>`;
 
-  // --- ARCHETYPE CARD ---
-  const tenGod = day.analysis.tenGodName || "Day Energy";
+  // Day Info
+  const tenGods = day.tenGods || {};
+  const dayInfo = `<div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
+    <div><strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br><strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})</div>
+    <div><strong>Officer:</strong> ${day.info.officer}<br><strong>Element:</strong> ${day.info.element}</div>
+  </div>`;
+
+  // Archetype
+  const tenGodTitle = day.analysis.tenGodName || "Day Energy";
   const guideTitle = day.analysis.actionTitle || "The Guide";
   const guideTagline = day.analysis.actionTagline || "";
   const goodList = day.analysis.suitableActions || [];
@@ -1235,7 +1199,6 @@ function showDetails(day) {
   const bestHtml = goodList
     .map((item) => `<li style="margin-bottom:6px;">✅ ${item}</li>`)
     .join("");
-
   const keywordHtml = rawKeywords
     .split(",")
     .map((k) => {
@@ -1251,7 +1214,7 @@ function showDetails(day) {
             <div style="background: linear-gradient(to right, #f8f9fa, #ffffff); padding: 15px 20px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
                 <div>
                     <div style="font-size:0.75rem; text-transform:uppercase; color:#888; font-weight:600;">Archetype</div>
-                    <div style="font-size:1.25rem; font-weight:700; color:#333;">${tenGod}</div>
+                    <div style="font-size:1.25rem; font-weight:700; color:#333;">${tenGodTitle}</div>
                     <div style="font-size:0.9rem; color:#666; font-style:italic;">"${guideTitle}"</div>
                 </div>
                 <div style="background:#e3f2fd; color:#0d6efd; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">⚡</div>
@@ -1265,14 +1228,12 @@ function showDetails(day) {
                 </div>
                 <div style="margin-top:15px;">${keywordHtml}</div>
             </div>
-        </div>
-    `;
+        </div>`;
 
-  // --- ANALYSIS LOGIC (Pros/Cons) ---
-  const pros = [];
-  const cons = [];
-  const neutrals = [];
-
+  // Analysis Pros/Cons
+  const pros = [],
+    cons = [],
+    neutrals = [];
   logs.forEach((msg) => {
     if (
       msg.includes("Avoid") ||
@@ -1280,29 +1241,25 @@ function showDetails(day) {
       msg.includes("Killings") ||
       msg.includes("Clash") ||
       msg.includes("Risk")
-    ) {
+    )
       cons.push(msg);
-    } else if (
+    else if (
       msg.includes("Lucky") ||
       msg.includes("Great") ||
       msg.includes("Boost") ||
       msg.includes("Noble")
-    ) {
+    )
       pros.push(msg);
-    } else {
-      neutrals.push(msg);
-    }
+    else neutrals.push(msg);
   });
 
-  const renderList = (items, colorClass) => {
+  const renderAnalysisList = (items, colorClass) => {
     if (items.length === 0)
       return `<div style="font-size:0.85rem; color:#aaa; font-style:italic;">None</div>`;
     return items
       .map(
         (text) =>
-          `<div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem;">
-                <span class="${colorClass}">${text}</span>
-            </div>`,
+          `<div style="display:flex; align-items:start; margin-bottom:8px; font-size:0.9rem;"><span class="${colorClass}">${text}</span></div>`,
       )
       .join("");
   };
@@ -1313,65 +1270,30 @@ function showDetails(day) {
             <div class="grid-dashboard">
                 <div style="background: #f0fff4; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#155724; margin-bottom:12px; font-size:0.8rem;">✨ BOOSTS & LUCK</div>
-                    ${renderList(pros, "text-success")}
+                    ${renderAnalysisList(pros, "text-success")}
                 </div>
                 <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
                     <div style="font-weight:bold; color:#721c24; margin-bottom:12px; font-size:0.8rem;">⚠️ RISKS & CLASHES</div>
-                    ${renderList(cons, "text-danger")}
+                    ${renderAnalysisList(cons, "text-danger")}
                 </div>
             </div>
-                
-                ${
-                  neutrals.length > 0
-                    ? `
-                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 10px;">
-                    <div style="font-weight:bold; color:#6c757d; margin-bottom:12px; font-size:0.8rem;">ℹ️ GENERAL CONTEXT</div>
-                    ${renderList(neutrals, "text-muted")}
-                </div>
-                `
-                    : ""
-                }
-        </div>
-    `;
-
-  // --- HOURLY GRID ---
-  const energyDeepDive = `<div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;">
-            <h4 style="margin:0 0 10px 0; color:#856404; font-size:1rem;">🔮 Energy Deep Dive</h4>
-            <div style="margin-bottom:10px;">
-                <div style="font-weight:bold; color:#555;">${yb.icon} ${yb.name} Spirit</div>
-                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${yb.desc}"</div>
-            </div>
-            <div>
-                <div style="font-weight:bold; color:#555;">★ ${day.info.constellation} Star</div>
-                <div style="font-size:0.9rem; color:#666; font-style:italic;">"${starDesc}"</div>
-            </div>
+            ${neutrals.length > 0 ? `<div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 10px;"><div style="font-weight:bold; color:#6c757d; margin-bottom:12px; font-size:0.8rem;">ℹ️ GENERAL CONTEXT</div>${renderAnalysisList(neutrals, "text-muted")}</div>` : ""}
         </div>`;
 
-  // --- PERSONALIZED HOURLY GRID ---
+  // Hourly Grid (Personalized)
   const hoursData = day.analysis.hours || [];
-  // If data is missing (legacy cache), fallback to empty to prevent crash
-  if (!hoursData.length) {
-    console.warn("No hourly data found for this date");
-  }
-
   const formatHourRow = (h) => {
-    // 1. Identify Conflicts
     const positives = ["Nobleman", "Academic", "Horse"];
     const negatives = ["Clash", "Day Breaker"];
-
     const hasPositive = h.tags.some((t) => positives.includes(t));
     const hasNegative = h.tags.some((t) => negatives.includes(t));
-
-    // 2. Determine State
     let rowState = "neutral";
     if (hasPositive && hasNegative) rowState = "mixed";
     else if (hasPositive) rowState = "good";
     else if (hasNegative) rowState = "bad";
 
-    // 3. Generate Badges (Visual Tags)
     const badgesHtml = h.tags
       .map((tag) => {
-        // --- PERSONAL (High Value) ---
         if (tag === "User Nobleman")
           return `<span style="background:#d1e7dd; color:#0f5132; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800; border:1px solid #a3cfbb;">🌟 YOUR Nobleman</span>`;
         if (tag === "Academic")
@@ -1382,81 +1304,49 @@ function showDetails(day) {
           return `<span style="background:#f3e5f5; color:#7b1fa2; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #e1bee7;">🥂 Social Peach</span>`;
         if (tag === "Romance Peach")
           return `<span style="background:#fce4ec; color:#c2185b; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #f48fb1;">💘 Romance Peach</span>`;
-
         if (tag === "Personal Clash")
           return `<span style="background:#f8d7da; color:#842029; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800; border:1px solid #f1aeb5;">💥 YOUR Clash</span>`;
-
-        // --- GENERAL (Medium Value) ---
         if (tag === "Day Nobleman")
           return `<span style="background:#e8f5e9; color:#2e7d32; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ Day Nobleman</span>`;
         if (tag === "6 Harmony")
           return `<span style="background:#fff3e0; color:#ef6c00; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">🤝 6 Harmony</span>`;
         if (tag === "3 Harmony")
           return `<span style="background:#fff8e1; color:#f57f17; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">👥 Teamwork (3H)</span>`;
-
-        // --- RISKS ---
         if (tag === "Day Breaker")
           return `<span style="background:#e2e3e5; color:#666; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px; border:1px dashed #ccc;">⚡ Day Breaker</span>`;
-
         return "";
       })
       .join("");
 
-    // 4. Row Styling based on State
-    let rowBg = "transparent";
-    let borderStyle = "1px solid #f0f0f0"; // Default border
-
-    if (rowState === "good") {
-      rowBg = "linear-gradient(to right, #f0fff4, transparent)"; // Greenish
-    } else if (rowState === "bad") {
-      rowBg = "linear-gradient(to right, #fff5f5, transparent)"; // Reddish
-    } else if (rowState === "mixed") {
-      // AMBER / WARNING STATE
+    let rowBg = "transparent",
+      borderStyle = "1px solid #f0f0f0";
+    if (rowState === "good")
+      rowBg = "linear-gradient(to right, #f0fff4, transparent)";
+    else if (rowState === "bad")
+      rowBg = "linear-gradient(to right, #fff5f5, transparent)";
+    else if (rowState === "mixed") {
       rowBg = "linear-gradient(to right, #fff3cd, transparent)";
-      borderStyle = "1px solid #ffeeba"; // Gold border to highlight complexity
+      borderStyle = "1px solid #ffeeba";
     }
 
-    // 5. Render
-    return `
-        <div style="display:flex; align-items:center; padding:8px 0; border-bottom:${borderStyle}; background:${rowBg};">
-            <div style="width:100px; font-size:0.9rem; font-weight:bold; color:#555;">${h.time}</div>
-            <div style="width:80px; font-size:0.9rem; color:#666;">${h.branch}</div>
-            <div style="flex-grow:1; display:flex; flex-wrap:wrap; align-items:center;">
-                ${badgesHtml}
-                ${rowState === "mixed" ? `<span style="font-size:0.7rem; color:#856404; margin-left:8px; font-style:italic;">(Turbulent Opportunity)</span>` : ""}
-            </div>
-        </div>
-    `;
+    return `<div style="display:flex; align-items:center; padding:8px 0; border-bottom:${borderStyle}; background:${rowBg};"><div style="width:100px; font-size:0.9rem; font-weight:bold; color:#555;">${h.time}</div><div style="width:80px; font-size:0.9rem; color:#666;">${h.branch}</div><div style="flex-grow:1; display:flex; flex-wrap:wrap; align-items:center;">${badgesHtml}${rowState === "mixed" ? `<span style="font-size:0.7rem; color:#856404; margin-left:8px; font-style:italic;">(Turbulent Opportunity)</span>` : ""}</div></div>`;
   };
 
   const hourlyGrid = `
         <div style="margin-top:20px;">
-            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-                ⏰ Strategic Timing
-                <span style="font-size:0.7rem; font-weight:normal; color:#888;">(Personalized)</span>
-            </h5>
+            <h5 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; font-weight:700; display:flex; justify-content:space-between; align-items:center;">⏰ Strategic Timing <span style="font-size:0.7rem; font-weight:normal; color:#888;">(Personalized)</span></h5>
             <div class="grid-dashboard" style="display:block; max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px;">
-                ${
-                  hoursData.length > 0
-                    ? hoursData.map((h) => formatHourRow(h)).join("")
-                    : `<div style="text-align:center; padding:20px; color:#999;">No hourly data available.</div>`
-                }
+                ${hoursData.length > 0 ? hoursData.map((h) => formatHourRow(h)).join("") : `<div style="text-align:center; padding:20px; color:#999;">No hourly data available.</div>`}
             </div>
-            <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">
-                💡 <strong>Tip:</strong> Use "Nobleman" hours for asking favors. Use "Clash" hours for rest.
-            </div>
-        </div>
-    `;
+            <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">💡 <strong>Tip:</strong> Use "Nobleman" hours for asking favors. Use "Clash" hours for rest.</div>
+        </div>`;
 
-  // 9 STARS
-  // 1. Get 9 Star Data
+  // Cosmic & Energy
   const nineStarName = day.info.nineStar || "Unknown";
   const nineStarDesc = day.info.nineStarDesc || "No specific data.";
-
-  // 2. Helper: Get 9 Star Color for the badge
-  // The name usually contains the color (e.g. "Five Yellow", "Nine Purple")
-  let starColor = "#666"; // default
-  let starBg = "#eee";
+  const starDesc = day.info.constellationDesc || "No specific data.";
+  let starColor = "#666",
+    starBg = "#eee";
   if (nineStarName.includes("White")) {
     starColor = "#444";
     starBg = "#f8f9fa";
@@ -1469,8 +1359,7 @@ function showDetails(day) {
   } else if (nineStarName.includes("Yellow")) {
     starColor = "#b45309";
     starBg = "#ffecd1";
-  } // Darker yellow for text
-  else if (nineStarName.includes("Red")) {
+  } else if (nineStarName.includes("Red")) {
     starColor = "#dc3545";
     starBg = "#f8d7da";
   } else if (nineStarName.includes("Purple")) {
@@ -1478,118 +1367,53 @@ function showDetails(day) {
     starBg = "#e0cffc";
   }
 
-  // 3. Create the HTML Section
-  const cosmicSection = `
-  <div style="margin-top:20px; padding-top:15px;">
-      <h5 style="color:#444; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eee">🌌 Cosmic Atmosphere</h5>
-          
-      <div style="background:${starBg}; padding:10px; border-radius:6px; border-left:4px solid ${starColor};">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div style="font-weight:bold; color:${starColor};">
-                  🧭 9 Star Qi: ${nineStarName}
-              </div>
-          </div>
-          <div style="font-size:0.85rem; color:#555; margin-top:4px; font-style:italic;">
-              "${nineStarDesc}"
-          </div>
-      </div>
-  </div>
-`;
+  const energyDeepDive = `<div style="background:#fff3cd; margin-top:15px; padding:12px; border-radius:8px; border:1px solid #ffeeba;"><h4 style="margin:0 0 10px 0; color:#856404; font-size:1rem;">🔮 Energy Deep Dive</h4><div style="margin-bottom:10px;"><div style="font-weight:bold; color:#555;">${day.info.yellowBlackBelt.icon} ${day.info.yellowBlackBelt.name} Spirit</div><div style="font-size:0.9rem; color:#666; font-style:italic;">"${day.info.yellowBlackBelt.desc}"</div></div><div><div style="font-weight:bold; color:#555;">★ ${day.info.constellation} Star</div><div style="font-size:0.9rem; color:#666; font-style:italic;">"${starDesc}"</div></div></div>`;
 
-  // EMOTIONAL WEATHER  WIDGET
-  // 1. Get the Ten God (Stem)
+  const cosmicSection = `<div style="margin-top:20px; padding-top:15px;"><h5 style="color:#444; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eee">🌌 Cosmic Atmosphere</h5><div style="background:${starBg}; padding:10px; border-radius:6px; border-left:4px solid ${starColor};"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:bold; color:${starColor};">🧭 9 Star Qi: ${nineStarName}</div></div><div style="font-size:0.85rem; color:#555; margin-top:4px; font-style:italic;">"${nineStarDesc}"</div></div></div>`;
+
+  // Emotional Weather
   const stemGod = day.analysis.tenGodName || "Friend";
-  const cleanGodName = stemGod.split("(")[0].trim(); // Remove shortcuts like "(HO)"
-  const data =
+  const cleanGodName = stemGod.split("(")[0].trim();
+  const weatherData =
     RELATIONSHIP_WEATHER[cleanGodName] || RELATIONSHIP_WEATHER["Friend"];
 
-  // 2. SPOUSE PALACE CHECK (New Feature)
-  // We need the Current User's Day Branch (Spouse Palace)
+  // Spouse Check
   const userSpouseBranch = currentUser ? currentUser.dayBranch : null;
-  const dayBranch = day.info.dayBranch;
-
+  const db = day.info.dayBranch;
   let spouseStatusHtml = "";
-
   if (userSpouseBranch) {
-    // Check Clash
-    if (CLASH_PAIRS[userSpouseBranch] === dayBranch) {
-      spouseStatusHtml = `
-            <div style="margin-top:10px; padding:8px; background:#fff5f5; border-left:4px solid #dc3545; border-radius:4px;">
-                <strong style="color:#dc3545;">⚠️ Spouse Clash (${userSpouseBranch} ⚔️ ${dayBranch})</strong>
-                <p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">
-                    The energy hits your relationship sector directly. 
-                    Small disagreements can escalate quickly today. 
-                    <strong>Strategy:</strong> Give each other space.
-                </p>
-            </div>
-          `;
-    }
-    // Check Combination
-    else if (COMBO_PAIRS[userSpouseBranch] === dayBranch) {
-      spouseStatusHtml = `
-            <div style="margin-top:10px; padding:8px; background:#f3e5f5; border-left:4px solid #9c27b0; border-radius:4px;">
-                <strong style="color:#9c27b0;">💞 Spouse Harmony (${userSpouseBranch} ❤️ ${dayBranch})</strong>
-                <p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">
-                    Harmony activates your relationship sector. 
-                    You feel naturally connected and "sticky" .
-                    <strong>Strategy:</strong> Plan a date night or deep conversation.
-                </p>
-            </div>
-          `;
+    if (CLASH_PAIRS[userSpouseBranch] === db) {
+      spouseStatusHtml = `<div style="margin-top:10px; padding:8px; background:#fff5f5; border-left:4px solid #dc3545; border-radius:4px;"><strong style="color:#dc3545;">⚠️ Spouse Clash (${userSpouseBranch} ⚔️ ${db})</strong><p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">The energy hits your relationship sector directly. Small disagreements can escalate quickly today. <strong>Strategy:</strong> Give each other space.</p></div>`;
+    } else if (COMBO_PAIRS[userSpouseBranch] === db) {
+      spouseStatusHtml = `<div style="margin-top:10px; padding:8px; background:#f3e5f5; border-left:4px solid #9c27b0; border-radius:4px;"><strong style="color:#9c27b0;">💞 Spouse Harmony (${userSpouseBranch} ❤️ ${db})</strong><p style="margin:4px 0 0 0; font-size:0.9rem; color:#666;">Harmony activates your relationship sector. You feel naturally connected and "sticky". <strong>Strategy:</strong> Plan a date night or deep conversation.</p></div>`;
     }
   }
 
-  // 3. Determine Color Theme (Emotional Temperature)
-  let bgTheme = "#f8f9fa"; // Default Grey
-  let borderTheme = "#6c757d";
-
-  // Red: Conflict/High Energy
+  let bgTheme = "#f8f9fa",
+    borderTheme = "#6c757d";
   if (["Hurting Officer", "7 Killings"].includes(cleanGodName)) {
     bgTheme = "#f8d7da";
     borderTheme = "#dc3545";
-  }
-  // Green: Pleasant/Social
-  else if (["Friend", "Eating God"].includes(cleanGodName)) {
+  } else if (["Friend", "Eating God"].includes(cleanGodName)) {
     bgTheme = "#d4edda";
     borderTheme = "#28a745";
-  }
-  // Blue: Stable/Cold
-  else if (["Direct Officer", "Direct Wealth"].includes(cleanGodName)) {
+  } else if (["Direct Officer", "Direct Wealth"].includes(cleanGodName)) {
     bgTheme = "#cff4fc";
     borderTheme = "#0dcaf0";
-  }
-  // Purple: Introspective
-  else if (["Direct Resource", "Indirect Resource"].includes(cleanGodName)) {
+  } else if (["Direct Resource", "Indirect Resource"].includes(cleanGodName)) {
     bgTheme = "#e2e3e5";
     borderTheme = "#6f42c1";
-  }
-  // Orange: Active/Risky
-  else if (["Rob Wealth", "Indirect Wealth"].includes(cleanGodName)) {
+  } else if (["Rob Wealth", "Indirect Wealth"].includes(cleanGodName)) {
     bgTheme = "#fff3cd";
     borderTheme = "#ffc107";
   }
 
-  // 4. Build the HTML Widget
-  const weatherWidget = `
-    <div style="margin-top: 15px; background: ${bgTheme}; border-left: 5px solid ${borderTheme}; padding: 15px; border-radius: 4px;">
-        <h5 style="margin: 0 0 10px 0; color: ${borderTheme}; display: flex; align-items: center; gap: 8px;">
-            ${data.weather} <span style="font-size:0.8rem; color:#666; font-weight:normal;">(${cleanGodName})</span>
-        </h5>
-        
-        <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-            <div>
-                <strong>🧠 Mood:</strong> ${data.mood}
-            </div>
-            <div>
-                <strong>❤️ Advice:</strong> <i>${data.advice}</i>
-            </div>
-        </div>
+  const weatherWidget = `<div style="margin-top: 15px; background: ${bgTheme}; border-left: 5px solid ${borderTheme}; padding: 15px; border-radius: 4px;"><h5 style="margin: 0 0 10px 0; color: ${borderTheme}; display: flex; align-items: center; gap: 8px;">${weatherData.weather} <span style="font-size:0.8rem; color:#666; font-weight:normal;">(${cleanGodName})</span></h5><div style="display: grid; grid-template-columns: 1fr; gap: 8px;"><div><strong>🧠 Mood:</strong> ${weatherData.mood}</div><div><strong>❤️ Advice:</strong> <i>${weatherData.advice}</i></div></div>${spouseStatusHtml}</div>`;
 
-        ${spouseStatusHtml}
-    </div>
-  `;
+  // --- 4. Render Initial HTML (Sync Data) ---
+  // We append a container specifically for the Almanac
+  const almanacContainerHtml = `<div id="almanac-container"><small style="color:#aaa; display:block; text-align:center; margin-top:20px;">Checking Almanac...</small></div>`;
 
-  // Inject & Open
   bodyEl.innerHTML = `
         ${executiveSummaryHtml}
         ${strategyHtml}
@@ -1600,10 +1424,10 @@ function showDetails(day) {
         ${hourlyGrid}
         ${cosmicSection}
         ${weatherWidget}
+        ${almanacContainerHtml}
     `;
 
-  // Attach click events to the prev/next buttons
-  // We attach these AFTER innerHTML is set
+  // --- 5. Navigation Events ---
   const btnPrev = document.getElementById("btnPrevDay");
   const btnNext = document.getElementById("btnNextDay");
 
@@ -1625,7 +1449,26 @@ function showDetails(day) {
     btnNext.onmouseout = () => (btnNext.style.color = "#555");
   }
 
+  // --- 6. Open Modal & Fetch Async Data ---
   openModalById("detailsModal");
+
+  // Fetch Almanac Data (Lazy Load)
+  fetch(`/api/day-details/${day.fullDate}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("No data");
+      return res.json();
+    })
+    .then((data) => {
+      const container = document.getElementById("almanac-container");
+      if (container) {
+        container.innerHTML = generateAlmanacHTML(data);
+      }
+    })
+    .catch((err) => {
+      const container = document.getElementById("almanac-container");
+      if (container) container.innerHTML = ""; // Hide if fails
+      // console.warn("Almanac fetch missing:", err);
+    });
 }
 
 function getPersonalizedActions(officer, tenGodName) {
@@ -1710,6 +1553,145 @@ function getPersonalizedActions(officer, tenGodName) {
     god: god,
     officer: off,
   };
+}
+
+function generateAlmanacHTML(data) {
+  if (!data) return "";
+
+  const { summary, advice, technical, hours, directions } = data;
+
+  // Helpers
+  const badge = (text, color, bg) =>
+    `<span style="display:inline-block; background:${bg}; color:${color}; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; border:1px solid ${color}30; white-space:nowrap;">${text}</span>`;
+  const renderList = (items) =>
+    items && items.length
+      ? items
+          .slice(0, 6)
+          .map((i) => `<li style="margin-bottom:4px;">${i}</li>`)
+          .join("")
+      : `<li style="color:#999; font-style:italic;">None</li>`;
+
+  // --- FLYING STARS GRID ---
+  const fs = technical.flyingStars || {};
+  const gridOrder = ["SE", "S", "SW", "E", "Ctr", "W", "NE", "N", "NW"];
+
+  const fsGridHtml = gridOrder
+    .map((dir) => {
+      const num = fs[dir] || "-";
+      const isGood = ["1", "4", "6", "8", "9"].includes(num);
+      const color = isGood ? "#198754" : "#666";
+      const bg = dir === "Ctr" ? "#f8f9fa" : "#fff";
+      return `<div style="background:${bg}; border:1px solid #eee; display:flex; flex-direction:column; align-items:center; justify-content:center; height:45px;"><span style="font-size:0.65rem; color:#888;">${dir}</span><span style="font-size:1rem; font-weight:bold; color:${color};">${num}</span></div>`;
+    })
+    .join("");
+
+  // --- XKDG ---
+  const xkdg = technical.xkdg;
+  const xkdgHtml = xkdg
+    ? `
+    <div style="background:#f0f8ff; padding:8px 12px; border-radius:6px; border-left:4px solid #0d6efd; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div style="font-size:0.7rem; color:#666; text-transform:uppercase;">HEXAGRAM (XKDG)</div>
+            <div style="font-weight:bold; color:#0d6efd; font-size:0.9rem;">${xkdg.name}</div>
+        </div>
+        <div style="text-align:right; font-size:0.8rem; color:#555;">
+             <div>${xkdg.numbers} • ${xkdg.element}</div>
+             <div style="font-size:0.7rem; color:#888;">${xkdg.star}</div>
+        </div>
+    </div>`
+    : "";
+
+  // --- HTML STRUCTURE ---
+  return `
+    <div class="almanac-wrapper" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
+        <details>
+            <summary style="cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; padding:8px; background:#f8f9fa; border-radius:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">📜</span>
+                    <span style="color:#333; font-weight:700; font-size:0.95rem;">Tong Shu</span>
+                </div>
+                <div style="background:#000; color:#ffd700; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+                    🐰 ${summary.blackRabbit}
+                </div>
+            </summary>
+            
+            <div class="almanac-content" style="margin-top: 15px; padding:0 5px;">
+                
+                <div style="margin-bottom: 15px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                    ${badge(summary.pillar, "#333", "#fff")}
+                    ${badge(summary.officer, "#198754", "#d1e7dd")} 
+                    ${badge(summary.constellation, "#0d6efd", "#cfe2ff")}
+                    <span style="font-size:0.75rem; color:#666; margin-left:auto;">${summary.naYin}</span>
+                </div>
+
+                ${xkdgHtml}
+
+                <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 15px; margin-bottom: 15px;">
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="background:#f0fff4; padding:10px; border-radius:6px; border:1px solid #c3e6cb;">
+                            <strong style="color:#198754; display:block; margin-bottom:5px; font-size:0.75rem; text-transform:uppercase;">✅ Good For</strong>
+                            <ul style="margin:0; padding-left:15px; font-size:0.8rem; color:#444;">${renderList(advice.good)}</ul>
+                        </div>
+                        <div style="background:#fff5f5; padding:10px; border-radius:6px; border:1px solid #f5c6cb;">
+                            <strong style="color:#dc3545; display:block; margin-bottom:5px; font-size:0.75rem; text-transform:uppercase;">⛔ Avoid</strong>
+                            <ul style="margin:0; padding-left:15px; font-size:0.8rem; color:#444;">${renderList(advice.avoid)}</ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.7rem; font-weight:bold; color:#555; margin-bottom:5px; text-align:center;">FLYING STARS</div>
+                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border:1px solid #ddd; background:#ccc;">${fsGridHtml}</div>
+                        <div style="margin-top:10px; font-size:0.75rem; background:#f8f9fa; padding:6px; border-radius:4px; border:1px solid #eee;">
+                            <div>💰 Wealth: <strong>${directions.wealth}</strong></div>
+                            <div style="margin-top:2px;">👑 Noble: <strong>${directions.nobility}</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <details>
+                    <summary style="font-size:0.85rem; color:#6610f2; cursor:pointer; font-weight:600; padding:8px 0;">🔮 View Hours & Qi Men</summary>
+                    
+                    <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                        <div style="background:#f3e5f5; padding:8px; border-radius:6px;">
+                            <strong style="color:#6610f2; font-size:0.75rem;">San Yuan Qi Men</strong>
+                            <ul style="margin:4px 0 0 15px; font-size:0.7rem; color:#444; padding:0;">${technical.qiMen.sanYuan
+                              .slice(0, 4)
+                              .map((l) => `<li>${l}</li>`)
+                              .join("")}</ul>
+                        </div>
+                        <div style="background:#fff3e0; padding:8px; border-radius:6px;">
+                            <strong style="color:#e65100; font-size:0.75rem;">Zodiac Luck</strong>
+                            <ul style="margin:4px 0 0 15px; font-size:0.7rem; color:#444; padding:0;">${technical.zodiacRaw
+                              .slice(0, 4)
+                              .map((l) => `<li>${l}</li>`)
+                              .join("")}</ul>
+                        </div>
+                    </div>
+
+                    <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+                        <thead style="background:#f1f3f5;">
+                            <tr><th style="padding:6px; text-align:left;">Time</th><th style="padding:6px; text-align:left;">Stars</th></tr>
+                        </thead>
+                        <tbody>
+                        ${hours
+                          .map(
+                            (h) => `
+                            <tr style="border-bottom:1px solid #f0f0f0;">
+                                <td style="padding:6px; white-space:nowrap; color:#555; vertical-align:top;"><strong>${h.time}</strong><br><span style="font-size:0.7rem;">${h.name}</span></td>
+                                <td style="padding:6px;">
+                                    ${h.goodStars.length ? `<div style="color:#198754; font-size:0.75rem;">✨ ${h.goodStars.join(", ")}</div>` : ""}
+                                    ${h.badStars.length ? `<div style="color:#dc3545; font-size:0.75rem;">⚠️ ${h.badStars.join(", ")}</div>` : ""}
+                                </td>
+                            </tr>`,
+                          )
+                          .join("")}
+                        </tbody>
+                    </table>
+                </details>
+            </div>
+        </details>
+    </div>
+  `;
 }
 
 function toggleArchitectMode() {

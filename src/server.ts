@@ -10,6 +10,7 @@ import { getDayInfo } from "./utils/tongShu";
 import { calculateScore, analyzeMonth } from "./utils/calculator";
 import { calculateTenGods } from "./utils/tenGods";
 import { calculateBaZiProfile } from "./utils/baziHelper";
+import { getDayDetails } from "./data/calendarData";
 
 const app = express();
 
@@ -165,6 +166,17 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
     monthAnalysis: monthAnalysis,
     days: monthlyData,
   });
+});
+
+app.get("/api/day-details/:date", (req, res) => {
+  const { date } = req.params; // Expects YYYY-MM-DD
+  const details = getDayDetails(date);
+
+  if (!details) {
+    return res.status(404).json({ error: "No data found for this date" });
+  }
+
+  res.json(details);
 });
 
 // Find Dates
