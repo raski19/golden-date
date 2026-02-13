@@ -511,8 +511,6 @@ export const calculateScore = (
   const userNobleBranches = STEM_NOBLEMAN[userDmClean] || [];
   const userAcademicBranch = ACADEMIC_STAR[userDmClean];
   const userHorseBranch = TRAVELING_HORSE[userYearBranch];
-  const userClashBranch = CLASH_PAIRS[userDayBranch];
-
   const userPeachYear = PEACH_BLOSSOM[userYearBranch];
   const userPeachDay = PEACH_BLOSSOM[userDayBranch];
 
@@ -520,6 +518,7 @@ export const calculateScore = (
   const dayHarmonyBranch = SIX_HARMONY[dayBranch];
   const dayTeamBranches = THREE_HARMONY[dayBranch] || [];
   const dayClashBranch = CLASH_PAIRS[dayBranch];
+  const userClashBranch = CLASH_PAIRS[userDayBranch];
 
   const hours = BRANCHES_LIST.map((branch, index) => {
     const start = index === 0 ? 23 : index * 2 - 1;
@@ -536,8 +535,8 @@ export const calculateScore = (
     if (userPeachDay === branch) tags.push("Romance Peach");
 
     if (dayNobleBranches.includes(branch)) tags.push("Day Nobleman");
-    if (dayHarmonyBranch === branch) tags.push("Harmony");
-    if (dayTeamBranches.includes(branch)) tags.push("Teamwork");
+    if (dayHarmonyBranch === branch) tags.push("6 Harmony");
+    if (dayTeamBranches.includes(branch)) tags.push("Teamwork (3H)");
     if (dayClashBranch === branch) tags.push("Day Breaker");
 
     return { branch, time: timeLabel, tags };
