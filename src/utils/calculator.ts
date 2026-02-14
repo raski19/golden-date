@@ -1,4 +1,4 @@
-import { IUser, DayInfo, MonthAnalysis, ScoreResult } from "../types";
+import { IUser, DayInfo, ScoreResult, MonthAnalysis } from "../types";
 import { calculateShenSha } from "./shenSha";
 import {
   CLASH_PAIRS,
@@ -8,7 +8,6 @@ import {
   STEM_NOBLEMAN,
   SAN_SHA_RULES,
   GOAT_BLADE_RULES,
-  YANG_STEMS,
   ELEMENT_RELATIONSHIPS,
   STEM_INFO,
   TEN_GODS,
@@ -76,7 +75,7 @@ export const calculateScore = (
     action: "Proceed",
     icon: "⚠️",
     desc: "Proceed with caution.",
-    reality: "The energy is unstable.",
+    reality: "The energy is unstable and unsupported.",
   };
 
   const officerDef = OFFICER_DATA[officerName];
@@ -115,7 +114,7 @@ export const calculateScore = (
   const pillarScore = rootInfo.score;
 
   // =================================================================
-  // CLASH HIERARCHY (THE BREAKERS)
+  // CLASH HIERARCHY
   // =================================================================
 
   // A. GENERAL BREAKERS
@@ -132,13 +131,11 @@ export const calculateScore = (
 
   // B. PERSONAL BREAKERS
   if (userDayBranch && dayBranch === CLASH_PAIRS[userDayBranch]) {
-    score = -50; // Hard Reset
+    score = -50;
     flags.push("PERSONAL BREAKER");
     log.push(
       `💀 PERSONAL BREAKER: ${dayBranch} clashes with Day Branch. Risk of conflict/injury.`,
     );
-
-    // --- THE TROJAN HORSE TIP ---
     log.push(
       "⚔️ TROJAN HORSE TIP: Use this aggressive energy to break a bad habit (smoking, sugar) or end a toxic relationship.",
     );
@@ -168,18 +165,15 @@ export const calculateScore = (
     log.push(`☁️ Luck Pillar Clash: ${dayBranch} clashes with Luck Pillar.`);
   }
 
-  // MANUAL AVOID FALLBACK (The Safety Net)
-  // Catches branches that aren't Clashes but are marked "bad" in the user's rules
+  // MANUAL AVOID FALLBACK
   if (
     rules.badBranches?.includes(dayBranch) &&
-    // Ensure we don't double-penalize if it was already caught as a Luck Clash
     (!currentLuck || CLASH_PAIRS[currentLuck.branch] !== dayBranch)
   ) {
     score -= 20;
     log.push(`⚠️ Avoid: ${dayBranch} is in light conflict with your chart.`);
   }
 
-  // SELF PUNISHMENT
   if (dayBranch === rules.selfPunishment) {
     score -= 30;
     flags.push("Self Punishment");
@@ -201,14 +195,11 @@ export const calculateScore = (
   // =================================================================
   const dayElement = dayData.element;
 
-  // Tagging
-  if (!isBrokenDay) {
-    if (rules.wealthElements?.includes(dayElement)) tags.push("WEALTH");
-    if (rules.careerElements?.includes(dayElement)) tags.push("CAREER");
-    if (rules.healthElements?.includes(dayElement)) tags.push("HEALTH");
-  }
+  // ALWAYS TAG (Even on Broken Days - Better UX)
+  if (rules.wealthElements?.includes(dayElement)) tags.push("WEALTH");
+  if (rules.careerElements?.includes(dayElement)) tags.push("CAREER");
+  if (rules.healthElements?.includes(dayElement)) tags.push("HEALTH");
 
-  // Scoring
   if (rules.avoidElements?.includes(dayElement)) {
     score -= 15;
     log.push(`⛔ ELEMENT: ${dayElement} is unfavorable.`);
@@ -273,7 +264,7 @@ export const calculateScore = (
   }
 
   // =================================================================
-  // HARMONIES
+  // HARMONIES & BRANCH POWER
   // =================================================================
   if (userDayBranch) {
     if (SIX_HARMONY[userDayBranch] === dayBranch) {
@@ -292,7 +283,9 @@ export const calculateScore = (
 
   if (rules.favorableBranches?.includes(dayBranch)) {
     score += 20;
-    log.push(`Great Branch: ${dayBranch} provides favorable support.`);
+    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown";
+    const role = getRole(branchElem);
+    log.push(`Great Branch: ${dayBranch} provides ${role}.`);
   }
 
   // =================================================================
@@ -307,7 +300,6 @@ export const calculateScore = (
     let bonusApplied = false;
     STANDARD_RULES.forEach((rule) => {
       if (!rule.officers.includes(officerName)) return;
-      // Check if element supports this action type
       let matches = false;
       const dayEl = dayData.element;
       if (rule.type === "wealth" && rules.wealthElements?.includes(dayEl))
@@ -365,17 +357,14 @@ export const calculateScore = (
   const bladeBranch = GOAT_BLADE_RULES[userDmClean];
   if (bladeBranch === dayBranch) {
     flags.push("Goat Blade");
-
-    // Base penalty
     let bladeScore = -15;
     let bladeMsg = `🔪 Goat Blade: Intense, aggressive energy.`;
 
-    // Contextual Adjustment
     if (goal === "Career") {
-      bladeScore = 5; // Positive for career aggression
+      bladeScore = 5;
       bladeMsg = `⚔️ Goat Blade: Competitive Edge! Good for sales/debates.`;
     } else if (goal === "Love") {
-      bladeScore = -30; // Fatal for love
+      bladeScore = -30;
       bladeMsg = `💔 Goat Blade: High risk of conflict in relationships.`;
     }
 
@@ -407,25 +396,19 @@ export const calculateScore = (
     score += 15;
     log.push(`🎓 Academic Star: Strategy.`);
     flags.push("Intellect");
+    tags.push("CAREER");
   }
 
-  // ROBBING SHA (Day - Internal/Mindset)
   if (stars.robbingShaDay) {
     score -= 10;
-    flags.push("Robbing Sha (Int)"); // Int = Internal
-    log.push(
-      "💸 Self-Sabotage (Robbing Sha): You are prone to impulse buying, wasting time, or misplacing items today.",
-    );
+    flags.push("Robbing Sha (P)");
+    log.push("💸 Self-Sabotage (Robbing Sha): Impulse buying/wasting time.");
   }
-  // ROBBING SHA (Year - External/Social)
   if (stars.robbingShaYear) {
     score -= 10;
-    flags.push("Robbing Sha (Ext)"); // Ext = External
-    log.push(
-      "🛡️ External Risk (Robbing Sha): Watch out for fraud, theft, or people taking credit for your work.",
-    );
+    flags.push("Robbing Sha (Y)");
+    log.push("🛡️ External Risk (Robbing Sha): Fraud/Theft risk.");
   }
-
   if (stars.deathGod) {
     score -= 10;
     flags.push("Death God");
