@@ -31,7 +31,7 @@ app.use(express.static("public"));
 
 // Get Users
 app.get("/api/users", async (req: Request, res: Response) => {
-  const users = await User.find({}, "name baZiProfile rules");
+  const users = await User.find({}, "name dayMaster strength dayBranch");
   res.json(users);
 });
 app.post("/api/generate-guest", (req: Request, res: Response) => {

@@ -212,15 +212,34 @@ fetch("/api/users")
   .then((users) => {
     allUsersData = users;
     const select = document.getElementById("userSelect");
+
     users.forEach((u) => {
       const opt = document.createElement("option");
       opt.value = u._id;
-      opt.innerText = u.name;
+
+      const dm = u.dayMaster; // e.g. "Bing Fire" or "Jia Wood"
+      const str = u.strength; // e.g. "Weak" or "Strong"
+
+      if (dm && str) {
+        opt.innerText = `${u.name} - ${str} ${dm} DM`;
+      } else {
+        // Fallback for old users without saved stats
+        opt.innerText = u.name;
+      }
+
       select.appendChild(opt);
     });
 
+    // Check for a temporary Guest (from the global variable we set earlier)
+    if (typeof currentGuestUser !== "undefined" && currentGuestUser) {
+      const guestOpt = document.createElement("option");
+      guestOpt.value = "guest";
+      guestOpt.innerText = `✨ Guest: ${currentGuestUser.name} - ${currentGuestUser.strength} ${currentGuestUser.dayMaster}`;
+      guestOpt.selected = true; // Auto-select if just created
+      select.appendChild(guestOpt);
+    }
+
     updateDateInputs();
-    // Initialize Calendar & Goal Dropdown
     handleUserChange();
     populateGoalSelect();
     renderTeamCheckboxes(users);
@@ -1571,47 +1590,48 @@ function generateAlmanacHTML(data) {
           .join("")
       : `<li style="color:#999; font-style:italic;">None</li>`;
 
-  // --- FLYING STARS GRID ---
+  // --- 1. FLYING STARS GRID ---
   const fs = technical.flyingStars || {};
   const gridOrder = ["SE", "S", "SW", "E", "Ctr", "W", "NE", "N", "NW"];
-
   const fsGridHtml = gridOrder
     .map((dir) => {
       const num = fs[dir] || "-";
       const isGood = ["1", "4", "6", "8", "9"].includes(num);
-      const color = isGood ? "#198754" : "#666";
-      const bg = dir === "Ctr" ? "#f8f9fa" : "#fff";
-      return `<div style="background:${bg}; border:1px solid #eee; display:flex; flex-direction:column; align-items:center; justify-content:center; height:45px;"><span style="font-size:0.65rem; color:#888;">${dir}</span><span style="font-size:1rem; font-weight:bold; color:${color};">${num}</span></div>`;
+      return `<div style="background:${dir === "Ctr" ? "#f8f9fa" : "#fff"}; border:1px solid #eee; display:flex; flex-direction:column; align-items:center; justify-content:center; height:45px;"><span style="font-size:0.65rem; color:#888;">${dir}</span><span style="font-size:1rem; font-weight:bold; color:${isGood ? "#198754" : "#666"};">${num}</span></div>`;
     })
     .join("");
 
-  // --- XKDG ---
+  // --- 2. XKDG HTML ---
   const xkdg = technical.xkdg;
   const xkdgHtml = xkdg
     ? `
     <div style="background:#f0f8ff; padding:8px 12px; border-radius:6px; border-left:4px solid #0d6efd; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <div style="font-size:0.7rem; color:#666; text-transform:uppercase;">HEXAGRAM (XKDG)</div>
-            <div style="font-weight:bold; color:#0d6efd; font-size:0.9rem;">${xkdg.name}</div>
-        </div>
-        <div style="text-align:right; font-size:0.8rem; color:#555;">
-             <div>${xkdg.numbers} • ${xkdg.element}</div>
-             <div style="font-size:0.7rem; color:#888;">${xkdg.star}</div>
-        </div>
+        <div><div style="font-size:0.7rem; color:#666; text-transform:uppercase;">HEXAGRAM (XKDG)</div><div style="font-weight:bold; color:#0d6efd; font-size:0.9rem;">${xkdg.name}</div></div>
+        <div style="text-align:right; font-size:0.8rem; color:#555;"><div>${xkdg.numbers} • ${xkdg.element}</div><div style="font-size:0.7rem; color:#888;">${xkdg.star}</div></div>
     </div>`
     : "";
 
-  // --- HTML STRUCTURE ---
+  // --- 3. QI MEN CHARMS HTML ---
+  // We format this as a clean list of directions
+  const charmsHtml = technical.qiMen.charms
+    .map((line) => {
+      const parts = line.split(":");
+      const title = parts[0];
+      const dir = parts[1] || "";
+      return `<div style="display:flex; justify-content:space-between; font-size:0.75rem; border-bottom:1px solid #eee; padding:4px 0;"><span style="color:#444;">${title}</span><strong style="color:#6610f2;">${dir}</strong></div>`;
+    })
+    .join("");
+
   return `
     <div class="almanac-wrapper" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
         <details>
-            <summary style="cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; padding:8px; background:#f8f9fa; border-radius:8px;">
+            <summary style="cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; padding:10px; background:#f8f9fa; border-radius:8px; border:1px solid #e9ecef;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:1.1rem;">📜</span>
-                    <span style="color:#333; font-weight:700; font-size:0.95rem;">Tong Shu</span>
+                    <span style="color:#333; font-weight:700; font-size:0.95rem;">Advanced Almanac</span>
                 </div>
                 <div style="background:#000; color:#ffd700; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
-                    🐰 ${summary.blackRabbit}
+                    🐰 ${summary.blackRabbit} Path
                 </div>
             </summary>
             
@@ -1626,7 +1646,8 @@ function generateAlmanacHTML(data) {
 
                 ${xkdgHtml}
 
-                <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 15px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 15px; margin-bottom: 20px;">
+                    
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <div style="background:#f0fff4; padding:10px; border-radius:6px; border:1px solid #c3e6cb;">
                             <strong style="color:#198754; display:block; margin-bottom:5px; font-size:0.75rem; text-transform:uppercase;">✅ Good For</strong>
@@ -1641,42 +1662,58 @@ function generateAlmanacHTML(data) {
                     <div>
                         <div style="font-size:0.7rem; font-weight:bold; color:#555; margin-bottom:5px; text-align:center;">FLYING STARS</div>
                         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border:1px solid #ddd; background:#ccc;">${fsGridHtml}</div>
-                        <div style="margin-top:10px; font-size:0.75rem; background:#f8f9fa; padding:6px; border-radius:4px; border:1px solid #eee;">
+                        <div style="margin-top:10px; font-size:0.75rem; background:#f8f9fa; padding:8px; border-radius:4px; border:1px solid #eee;">
                             <div>💰 Wealth: <strong>${directions.wealth}</strong></div>
                             <div style="margin-top:2px;">👑 Noble: <strong>${directions.nobility}</strong></div>
+                            <div style="margin-top:4px; padding-top:4px; border-top:1px solid #ddd;">🧭 Path: <strong>${summary.heavenlyPath}</strong></div>
                         </div>
                     </div>
                 </div>
 
-                <details>
-                    <summary style="font-size:0.85rem; color:#6610f2; cursor:pointer; font-weight:600; padding:8px 0;">🔮 View Hours & Qi Men</summary>
-                    
-                    <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                        <div style="background:#f3e5f5; padding:8px; border-radius:6px;">
-                            <strong style="color:#6610f2; font-size:0.75rem;">San Yuan Qi Men</strong>
-                            <ul style="margin:4px 0 0 15px; font-size:0.7rem; color:#444; padding:0;">${technical.qiMen.sanYuan
-                              .slice(0, 4)
-                              .map((l) => `<li>${l}</li>`)
-                              .join("")}</ul>
+                <div style="margin-bottom:20px; background:#f3e5f5; border:1px solid #e1bee7; border-radius:8px; overflow:hidden;">
+                     <div style="background:#f3e5f5; padding:8px 12px; font-weight:bold; color:#6610f2; font-size:0.85rem; border-bottom:1px solid #e1bee7; display:flex; justify-content:space-between;">
+                        <span>🔮 Qi Men Dun Jia</span>
+                        <span style="font-size:0.7rem; background:#fff; padding:2px 8px; border-radius:10px; color:#4a148c;">Strategy & Travel</span>
+                     </div>
+                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0;">
+                        <div style="padding:10px; border-right:1px solid #e1bee7;">
+                             <div style="font-size:0.7rem; text-transform:uppercase; color:#888; margin-bottom:5px;">Action (San Yuan)</div>
+                             <ul style="margin:0; padding-left:15px; font-size:0.75rem; color:#444;">
+                                ${technical.qiMen.sanYuan
+                                  .slice(0, 4)
+                                  .map((l) => `<li>${l}</li>`)
+                                  .join("")}
+                             </ul>
                         </div>
-                        <div style="background:#fff3e0; padding:8px; border-radius:6px;">
-                            <strong style="color:#e65100; font-size:0.75rem;">Zodiac Luck</strong>
-                            <ul style="margin:4px 0 0 15px; font-size:0.7rem; color:#444; padding:0;">${technical.zodiacRaw
-                              .slice(0, 4)
-                              .map((l) => `<li>${l}</li>`)
-                              .join("")}</ul>
+                        <div style="padding:10px; background:#fff;">
+                             <div style="font-size:0.7rem; text-transform:uppercase; color:#888; margin-bottom:5px;">Travel (5 Charms)</div>
+                             ${charmsHtml}
+                        </div>
+                     </div>
+                </div>
+
+                <details style="margin-bottom:10px; border:1px solid #eee; border-radius:6px;">
+                    <summary style="font-size:0.85rem; color:#333; cursor:pointer; font-weight:600; padding:8px; background:#f9f9f9;">👥 General Fortune (Book)</summary>
+                    <div style="padding:10px; display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div>
+                             <strong style="color:#555; font-size:0.75rem;">10 Day Masters</strong>
+                             <ul style="margin:5px 0 0 15px; font-size:0.7rem; color:#666; padding:0;">${technical.dayMasters.map((l) => `<li>${l}</li>`).join("")}</ul>
+                        </div>
+                        <div>
+                             <strong style="color:#555; font-size:0.75rem;">12 Zodiacs</strong>
+                             <ul style="margin:5px 0 0 15px; font-size:0.7rem; color:#666; padding:0;">${technical.zodiacRaw.map((l) => `<li>${l}</li>`).join("")}</ul>
                         </div>
                     </div>
+                </details>
 
+                <details style="border:1px solid #eee; border-radius:6px;">
+                    <summary style="font-size:0.85rem; color:#333; cursor:pointer; font-weight:600; padding:8px; background:#f9f9f9;">⏰ General Hourly Stars</summary>
                     <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
-                        <thead style="background:#f1f3f5;">
-                            <tr><th style="padding:6px; text-align:left;">Time</th><th style="padding:6px; text-align:left;">Stars</th></tr>
-                        </thead>
                         <tbody>
                         ${hours
                           .map(
                             (h) => `
-                            <tr style="border-bottom:1px solid #f0f0f0;">
+                            <tr style="border-top:1px solid #f0f0f0;">
                                 <td style="padding:6px; white-space:nowrap; color:#555; vertical-align:top;"><strong>${h.time}</strong><br><span style="font-size:0.7rem;">${h.name}</span></td>
                                 <td style="padding:6px;">
                                     ${h.goodStars.length ? `<div style="color:#198754; font-size:0.75rem;">✨ ${h.goodStars.join(", ")}</div>` : ""}
@@ -1688,6 +1725,7 @@ function generateAlmanacHTML(data) {
                         </tbody>
                     </table>
                 </details>
+
             </div>
         </details>
     </div>
