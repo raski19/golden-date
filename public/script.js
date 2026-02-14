@@ -594,6 +594,7 @@ function renderGrid(days) {
   }
 
   days.forEach((day) => {
+    const analysis = day.analysis || {};
     const cssClass = day.analysis.cssClass || "neutral";
     const card = document.createElement("div");
     const tags = day.analysis.tags || [];
@@ -640,7 +641,6 @@ function renderGrid(days) {
     }
 
     // --- CONSTELLATION VISUAL LOGIC ---
-    const analysis = day.analysis || {};
     const quality = analysis.starQuality || "Mixed";
     const isFav = analysis.isStarFavorable || false;
     const isAvoid = analysis.isStarAvoid || false;
@@ -1581,7 +1581,7 @@ function generateAlmanacHTML(data) {
 
   // Helpers
   const badge = (text, color, bg) =>
-    `<span style="display:inline-block; background:${bg}; color:${color}; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; border:1px solid ${color}30; white-space:nowrap;">${text}</span>`;
+    `<span style="display:inline-block; background:${bg}; color:${color}; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; border:1px solid ${color}; white-space:nowrap;">${text}</span>`;
   const renderList = (items) =>
     items && items.length
       ? items
@@ -1631,7 +1631,7 @@ function generateAlmanacHTML(data) {
                     <span style="color:#333; font-weight:700; font-size:0.95rem;">Advanced Almanac</span>
                 </div>
                 <div style="background:#000; color:#ffd700; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
-                    🐰 ${summary.blackRabbit} Path
+                    🐰 ${summary.blackRabbit}
                 </div>
             </summary>
             
@@ -1665,7 +1665,7 @@ function generateAlmanacHTML(data) {
                         <div style="margin-top:10px; font-size:0.75rem; background:#f8f9fa; padding:8px; border-radius:4px; border:1px solid #eee;">
                             <div>💰 Wealth: <strong>${directions.wealth}</strong></div>
                             <div style="margin-top:2px;">👑 Noble: <strong>${directions.nobility}</strong></div>
-                            <div style="margin-top:4px; padding-top:4px; border-top:1px solid #ddd;">🧭 Path: <strong>${summary.heavenlyPath}</strong></div>
+                            <div style="margin-top:4px; padding-top:4px; border-top:1px solid #ddd;">🧭 Heavenly Path: <strong>${summary.heavenlyPath}</strong></div>
                         </div>
                     </div>
                 </div>
