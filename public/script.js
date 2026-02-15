@@ -1956,56 +1956,111 @@ async function calculateTeamSynergy() {
 }
 
 // 3. Render Results Cards
-function renderTeamResults(results) {
+function renderTeamResults(data) {
   const container = document.getElementById("teamResults");
+  container.innerHTML = "";
 
-  if (results.length === 0) {
-    container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#666;">No conflict-free dates found for this combination. 📉</div>`;
+  // 1. Safety Check
+  if (!Array.isArray(data) || data.length === 0) {
+    container.innerHTML =
+      '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#666; background:#f8f9fa; border-radius:8px;">No synergy dates found matching your criteria.</div>';
     return;
   }
 
-  container.innerHTML = results
-    .slice(0, 8)
-    .map((r) => {
-      // Show top 8
-      const avg = r.teamMetrics.avgScore;
-      // Visual Logic
-      let borderClass =
-        avg >= 80
-          ? "border-left:5px solid #28a745"
-          : "border-left:5px solid #0d6efd";
+  let html = "";
 
-      return `
-        <div onclick='openTeamModal(${JSON.stringify(r)})' style="background:#fff; border:1px solid #e0e0e0; ${borderClass}; border-radius:8px; padding:15px; cursor:pointer; transition:transform 0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            
-            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
-                <div>
-                    <div style="font-weight:bold; font-size:1.1rem; color:#333;">${r.dateStr}</div>
-                    <div style="font-size:0.85rem; color:#666;">${r.dayInfo.officer} • ${r.dayInfo.constellation}</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="background:#e8f4fd; color:#0d6efd; font-weight:bold; padding:4px 8px; border-radius:6px; font-size:0.9rem;">
-                        ${avg}% Avg
+  data.forEach((day) => {
+    // --- 1. HEADER LOGIC (Avg Score Color) ---
+    const avg = day.teamMetrics?.avgScore || 0;
+    let borderClass = "border-left: 5px solid #ccc;";
+    let scoreColor = "#666";
+
+    if (avg >= 90) {
+      borderClass = "border-left: 5px solid #ffc107;";
+      scoreColor = "#b68a00";
+    } // Gold
+    else if (avg >= 80) {
+      borderClass = "border-left: 5px solid #28a745;";
+      scoreColor = "#155724";
+    } // Green
+    else if (avg >= 60) {
+      borderClass = "border-left: 5px solid #0d6efd;";
+      scoreColor = "#084298";
+    } // Blue
+    else {
+      borderClass = "border-left: 5px solid #dc3545;";
+      scoreColor = "#842029";
+    } // Red
+
+    // --- 2. USER BREAKDOWN ROW GENERATOR ---
+    const userRows = day.userBreakdown
+      .map((u) => {
+        // Color code the verdict
+        let verdictBadge = `background:#eee; color:#555;`;
+        if (u.verdict === "GOLDEN DATE")
+          verdictBadge = `background:#fff3cd; color:#856404; border:1px solid #ffeeba;`;
+        if (u.verdict === "EXCELLENT")
+          verdictBadge = `background:#d1e7dd; color:#0f5132; border:1px solid #badbcc;`;
+        if (u.verdict === "AVOID")
+          verdictBadge = `background:#f8d7da; color:#721c24; border:1px solid #f5c2c7;`;
+
+        // Convert Flags to Icons
+        const icons = u.flags
+          .map((f) => {
+            if (f.includes("Nobleman")) return `<span title="${f}">🌟</span>`;
+            if (f.includes("San Sha")) return `<span title="${f}">⚠️</span>`;
+            if (f.includes("Robbing")) return `<span title="${f}">💸</span>`;
+            if (f.includes("Clash")) return `<span title="${f}">💥</span>`;
+            return "";
+          })
+          .join(" ");
+
+        return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #eee; font-size:0.9rem;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <strong>${u.name}</strong>
+                        <span style="font-size:0.8rem;">${icons}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="font-size:0.75rem; padding:2px 6px; border-radius:4px; font-weight:700; ${verdictBadge}">${u.verdict}</span>
                     </div>
                 </div>
-            </div>
+            `;
+      })
+      .join("");
 
-            <div style="display:flex; gap:4px; margin-top:10px;">
-                ${r.userBreakdown
-                  .map(
-                    (u) => `
-                    <div title="${u.name}: ${u.score}" style="flex:1; height:4px; background:${getColorForScore(u.score)}; border-radius:2px;"></div>
-                `,
-                  )
-                  .join("")}
+    // --- 3. BUILD THE CARD ---
+    html += `
+            <div style="background:#fff; border:1px solid #e0e0e0; border-radius:12px; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.05); overflow:hidden; ${borderClass}">
+                
+                <div style="padding:12px 15px; background:#fcfcfc; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:800; font-size:1.1rem; color:#333;">${day.fullDate}</div>
+                        <div style="font-size:0.8rem; color:#666; display:flex; gap:8px; align-items:center; margin-top:2px;">
+                            <span>${day.dayInfo.officer}</span> • 
+                            <span>${day.dayInfo.element}</span> • 
+                            <span title="${day.dayInfo.yellowBlackBelt.desc}">${day.dayInfo.yellowBlackBelt.icon}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:1.2rem; font-weight:800; color:${scoreColor}; line-height:1;">${avg}</div>
+                        <div style="font-size:0.65rem; text-transform:uppercase; color:#999; margin-top:2px;">Team Avg</div>
+                    </div>
+                </div>
+
+                <div style="background:${day.dayInfo.nineStar.includes("Purple") || day.dayInfo.nineStar.includes("1 White") || day.dayInfo.nineStar.includes("8 White") ? "#f0f8ff" : "#f9f9f9"}; padding:4px 15px; font-size:0.75rem; color:#555; border-bottom:1px solid #eee;">
+                    ✨ Star: <strong>${day.dayInfo.nineStar}</strong>
+                </div>
+
+                <div style="padding:10px 15px;">
+                    ${userRows}
+                </div>
+
             </div>
-            <div style="margin-top:5px; font-size:0.75rem; color:#888; text-align:center;">
-                Lowest Score: <strong>${r.teamMetrics.minScore}</strong>
-            </div>
-        </div>
         `;
-    })
-    .join("");
+  });
+
+  container.innerHTML = html;
 }
 
 // 4. Team Modal (The "Click" Action)
