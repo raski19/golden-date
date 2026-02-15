@@ -3,7 +3,7 @@ import {
   STEM_ELEMENTS,
   BRANCH_ELEMENTS,
   CLASH_PAIRS,
-  REVERSE_PRODUCTION_CYCLE,
+  RESOURCE_ELEMENT,
   STEM_MAP,
   BRANCH_MAP,
   SELF_PUNISHMENT,
@@ -43,7 +43,7 @@ const calculateDMStrength = (
     return { strength: "Unknown", score: 0, dmElement: "Unknown" };
 
   const monthElement = BRANCH_ELEMENTS[monthBranch];
-  const resourceElement = REVERSE_PRODUCTION_CYCLE[dmElement];
+  const resourceElement = RESOURCE_ELEMENT[dmElement];
 
   let score = 0;
 

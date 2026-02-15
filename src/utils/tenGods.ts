@@ -1,22 +1,5 @@
 import { TenGodsResult } from "../types";
-
-interface StemData {
-  element: string;
-  polarity: "+" | "-";
-}
-
-const STEM_INFO: Record<string, StemData> = {
-  Jia: { element: "Wood", polarity: "+" },
-  Yi: { element: "Wood", polarity: "-" },
-  Bing: { element: "Fire", polarity: "+" },
-  Ding: { element: "Fire", polarity: "-" },
-  Wu: { element: "Earth", polarity: "+" },
-  Ji: { element: "Earth", polarity: "-" },
-  Geng: { element: "Metal", polarity: "+" },
-  Xin: { element: "Metal", polarity: "-" },
-  Ren: { element: "Water", polarity: "+" },
-  Gui: { element: "Water", polarity: "-" },
-};
+import { STEM_INFO, CONTROL_CYCLE, PRODUCTION_CYCLE } from "./constants";
 
 const BRANCH_MAIN_QI: Record<string, string> = {
   Rat: "Gui",
@@ -48,23 +31,11 @@ function getGod(dayMaster: string, targetStem: string): string {
 
   if (dm.element === target.element) return samePolarity ? "F" : "RW";
 
-  const produces: Record<string, string> = {
-    Wood: "Fire",
-    Fire: "Earth",
-    Earth: "Metal",
-    Metal: "Water",
-    Water: "Wood",
-  };
+  const produces: Record<string, string> = PRODUCTION_CYCLE;
   if (produces[dm.element] === target.element)
     return samePolarity ? "EG" : "HO";
 
-  const controls: Record<string, string> = {
-    Wood: "Earth",
-    Fire: "Metal",
-    Earth: "Water",
-    Metal: "Wood",
-    Water: "Fire",
-  };
+  const controls: Record<string, string> = CONTROL_CYCLE;
   if (controls[dm.element] === target.element)
     return samePolarity ? "IW" : "DW";
 

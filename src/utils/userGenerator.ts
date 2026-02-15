@@ -5,8 +5,8 @@ import {
   CONTROL_CYCLE,
   ELEMENT_MAP,
   PRODUCTION_CYCLE,
-  REVERSE_CONTROL_CYCLE,
-  REVERSE_PRODUCTION_CYCLE,
+  INFLUENCE_ELEMENT,
+  RESOURCE_ELEMENT,
   SELF_PUNISHMENT,
 } from "./constants";
 
@@ -16,9 +16,9 @@ import {
 
 const getElement = (name: string): string => ELEMENT_MAP[name] || "Unknown";
 const getOutput = (el: string): string => PRODUCTION_CYCLE[el]; // Product (Output)
-const getResource = (el: string): string => REVERSE_PRODUCTION_CYCLE[el]; // Mother (Resource)
+const getResource = (el: string): string => RESOURCE_ELEMENT[el]; // Mother (Resource)
 const getWealth = (el: string): string => CONTROL_CYCLE[el]; // Object Controlled (Wealth)
-const getInfluence = (el: string): string => REVERSE_CONTROL_CYCLE[el]; // Controller (Influence)
+const getInfluence = (el: string): string => INFLUENCE_ELEMENT[el]; // Controller (Influence)
 
 // Check if a branch supports the Day Master (Same element or produces it)
 function branchSupportsDayMaster(

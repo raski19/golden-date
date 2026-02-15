@@ -407,6 +407,16 @@ async function handleUserChange() {
       // Hide Loading
       loadingOverlay("none");
     }
+
+    // Clear the wealth container so it reloads on next open
+    document.getElementById("wealthContainer").innerHTML = "";
+
+    // If the section is currently open, reload immediately
+    const wealthContent = document.getElementById("wealthContent");
+    if (wealthContent.style.display !== "none") {
+      const userId = document.getElementById("userSelect").value;
+      loadWealthStrategy(userId);
+    }
   }, 10);
 }
 
@@ -530,6 +540,7 @@ async function loadCalendar(guestUser = null) {
     const userId = document.getElementById("userSelect").value;
     if (!userId) return;
     url += `&userId=${userId}`;
+    // loadWealthStrategy(userId);
   }
 
   const res = await fetch(url, options);
@@ -880,7 +891,6 @@ function setFilter(filterType, btn) {
   else if (filterType === "HEALTH") btn.classList.add("health-active");
   applyFilter();
 }
-
 function applyFilter() {
   const cards = document.querySelectorAll(".day-card");
   cards.forEach((card) => {
@@ -1732,6 +1742,116 @@ function generateAlmanacHTML(data) {
   `;
 }
 
+function toggleTool(contentId, btnElement) {
+  const content = document.getElementById(contentId);
+  const isHidden = content.style.display === "none";
+
+  // 1. Toggle Visibility
+  content.style.display = isHidden ? "block" : "none";
+
+  // 2. Rotate Arrow
+  if (isHidden) {
+    btnElement.classList.add("active");
+  } else {
+    btnElement.classList.remove("active");
+  }
+
+  // 3. Lazy Load Data (Optimization)
+  // Only fetch data when opening the section for the first time
+  if (isHidden && contentId === "wealthContent") {
+    const userId = document.getElementById("userSelect").value;
+    const container = document.getElementById("wealthContainer");
+
+    // Only load if empty (haven't loaded yet)
+    if (userId && container.innerHTML.trim() === "") {
+      loadWealthStrategy(userId);
+    }
+  }
+}
+
+async function loadWealthStrategy(userId) {
+  // Ensure you have this container in your HTML modal
+  const container = document.getElementById("wealthContainer");
+  if (!container) return;
+
+  container.innerHTML =
+    '<div style="text-align:center; padding:20px; color:#666;">🔮 Decoding Strategy...</div>';
+
+  try {
+    const res = await fetch(`/api/users/${userId}/wealth-strategy`);
+    if (!res.ok) throw new Error("Failed to load");
+
+    const data = await res.json();
+    const { archetype, monthly, daily } = data;
+
+    let html = `
+        <div class="strategy-header ${archetype.css}">
+            <div class="arch-icon">${archetype.icon}</div>
+            <div style="flex:1;">
+                <h3 style="margin:0; font-size:1.4rem;">${archetype.title}</h3>
+                <div style="font-size:0.9rem; opacity:0.9; margin-bottom:5px;">${archetype.strategy}</div>
+                <div style="font-size:0.75rem; background:rgba(255,255,255,0.2); display:inline-block; padding:2px 8px; border-radius:4px;">
+                   Target: ${archetype.industries}
+                </div>
+            </div>
+        </div>
+    
+        <h4 style="margin:20px 0 10px 0; color:#444;">⚡ Next 7 Days: Tactical Plan</h4>
+        <div class="daily-scroller">
+            ${daily
+              .map(
+                (d) => `
+                <div class="daily-card ${d.css}">
+                    <div class="daily-date">${d.date}</div>
+                    <div class="daily-focus">${d.focus}</div>
+                    <div class="daily-advice">${d.advice}</div>
+                </div>
+            `,
+              )
+              .join("")}
+        </div>
+    
+        <h4 style="margin:20px 0 10px 0; color:#444;">📅 2026 Campaign Map</h4>
+        <div class="month-grid">
+            ${monthly
+              .map((m, idx) => {
+                const mNames = [
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                  "Jan '27",
+                ];
+                return `
+                <div class="month-card ${m.css}">
+                    <div class="m-head">
+                        <span>${mNames[idx]}</span>
+                        <small>${m.stem} ${m.branch}</small>
+                    </div>
+                    <div class="m-focus">${m.focus}</div>
+                    <div class="m-action">${m.action}</div>
+                </div>
+                `;
+              })
+              .join("")}
+        </div>
+      `;
+
+    container.innerHTML = html;
+  } catch (e) {
+    console.error(e);
+    container.innerHTML =
+      '<div style="color:red; padding:20px; text-align:center;">Failed to load strategy.</div>';
+  }
+}
+
 function toggleArchitectMode() {
   const isModeActive = document.getElementById("architectToggle").checked;
   const cards = document.querySelectorAll(".day-card");
@@ -1768,16 +1888,19 @@ function renderTeamCheckboxes(users) {
   const container = document.getElementById("teamCheckboxes");
   if (!container) return;
 
-  container.innerHTML = users
-    .map(
-      (u) => `
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #dee2e6;">
-            <input type="checkbox" value="${u._id}" class="team-cb">
-            <span style="font-size:0.9rem;">${u.name}</span>
-        </label>
-    `,
-    )
-    .join("");
+  container.innerHTML = "";
+
+  users.forEach((u) => {
+    const div = document.createElement("div");
+    div.style.cssText =
+      "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:6px; border:1px solid #ddd;";
+
+    div.innerHTML = `
+            <input type="checkbox" id="team_${u._id}" value="${u._id}" style="cursor:pointer;">
+            <label for="team_${u._id}" style="cursor:pointer; font-size:0.9rem; margin:0;">${u.name}</label>
+        `;
+    container.appendChild(div);
+  });
 }
 
 // 2. Calculate Synergy

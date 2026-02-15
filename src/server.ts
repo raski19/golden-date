@@ -11,6 +11,7 @@ import { calculateScore, analyzeMonth } from "./utils/calculator";
 import { calculateTenGods } from "./utils/tenGods";
 import { calculateBaZiProfile } from "./utils/baziHelper";
 import { getDayDetails } from "./data/calendarData";
+import { getWealthRoadmap } from "./utils/wealthEngine";
 
 const app = express();
 
@@ -304,6 +305,25 @@ app.post(
     } catch (error) {
       console.error("Search Error:", error);
       res.status(500).json({ error: "Search failed" });
+    }
+  },
+);
+
+app.get(
+  "/api/users/:id/wealth-strategy",
+  async (req: Request, res: Response) => {
+    try {
+      const user = (await User.findById(
+        req.params.id,
+      ).lean()) as unknown as IUser;
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      // Run the engine
+      const strategy = getWealthRoadmap(user);
+
+      res.json(strategy);
+    } catch (e) {
+      res.status(500).json({ error: (e as Error).message });
     }
   },
 );

@@ -1,4 +1,4 @@
-import { REVERSE_PRODUCTION_CYCLE } from "./constants";
+import { RESOURCE_ELEMENT } from "./constants";
 
 export interface RootStrengthResult {
   level: "High" | "Medium" | "Low" | "None" | "Resource";
@@ -178,7 +178,7 @@ export const calculateRootStrength = (
   }
 
   // 1️⃣ What produces the Day Stem?
-  const resourceElement = REVERSE_PRODUCTION_CYCLE[s];
+  const resourceElement = RESOURCE_ELEMENT[s];
 
   // 2️⃣ Which stems belong to that element?
   const resourceStems = Object.keys(stemElement).filter(

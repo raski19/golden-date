@@ -102,7 +102,7 @@ export const CONTROL_CYCLE: Record<string, string> = {
 };
 
 // Reverse Lookup for Control (Victim -> Controller) - Used for finding Influence
-export const REVERSE_CONTROL_CYCLE: Record<string, string> = {
+export const INFLUENCE_ELEMENT: Record<string, string> = {
   Earth: "Wood",
   Water: "Earth",
   Fire: "Water",
@@ -111,7 +111,7 @@ export const REVERSE_CONTROL_CYCLE: Record<string, string> = {
 };
 
 // Reverse Lookup for Production (Child -> Mother) - Used for finding Resource
-export const REVERSE_PRODUCTION_CYCLE: Record<string, string> = {
+export const RESOURCE_ELEMENT: Record<string, string> = {
   Fire: "Wood",
   Earth: "Fire",
   Metal: "Earth",
