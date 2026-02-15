@@ -560,15 +560,10 @@ async function loadCalendar(guestUser = null) {
 function renderBanner(analysis) {
   const banner = document.getElementById("monthBanner");
   // Safety check if element exists (you added it to HTML in previous step)
-  if (!banner) return;
-
-  if (!analysis) {
-    banner.style.display = "none";
-    return;
-  }
+  if (!analysis || !banner) return;
 
   banner.className = `month-banner ${analysis.cssClass}`;
-  banner.style.display = "flex";
+  // banner.style.display = "flex";
 
   let icon = "📅";
   if (analysis.verdict === "DANGEROUS") icon = "⚠️";
@@ -1882,8 +1877,7 @@ function toggleArchitectMode() {
 }
 
 // --- TEAM SYNERGY LOGIC ---
-
-// 1. Render Checkboxes (Call this in your initial fetch("/api/users") block)
+// --- 1. RENDER TEAM CHECKBOXES (Better UX) ---
 function renderTeamCheckboxes(users) {
   const container = document.getElementById("teamCheckboxes");
   if (!container) return;
@@ -1891,53 +1885,73 @@ function renderTeamCheckboxes(users) {
   container.innerHTML = "";
 
   users.forEach((u) => {
-    const div = document.createElement("div");
-    div.style.cssText =
-      "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:6px; border:1px solid #ddd;";
+    // Create a LABEL element (clicking anywhere toggles the input)
+    const label = document.createElement("label");
+    label.className = "team-option";
 
-    div.innerHTML = `
-            <input type="checkbox" id="team_${u._id}" value="${u._id}" style="cursor:pointer;">
-            <label for="team_${u._id}" style="cursor:pointer; font-size:0.9rem; margin:0;">${u.name}</label>
+    label.innerHTML = `
+            <input type="checkbox" class="team-check" value="${u._id}">
+            <span class="team-name">${u.name}</span>
+            <span class="team-checkmark">✔</span>
         `;
-    container.appendChild(div);
+
+    container.appendChild(label);
   });
 }
 
-// 2. Calculate Synergy
+// --- 2. CALCULATE SYNERGY (Fixing the Selection Logic) ---
 async function calculateTeamSynergy() {
-  // Get Selected IDs
-  const checkboxes = document.querySelectorAll(".team-cb:checked");
-  const userIds = Array.from(checkboxes).map((cb) => cb.value);
+  const container = document.getElementById("teamResults");
 
-  if (userIds.length < 2) {
-    alert("Please select at least 2 team members.");
+  // 1. GATHER DATA
+  const checkboxes = document.querySelectorAll(
+    "#teamCheckboxes .team-check:checked",
+  );
+  const selectedIds = Array.from(checkboxes).map((cb) => cb.value);
+
+  // Get current Date context from your header dropdowns
+  const year =
+    document.getElementById("yearInput").value || new Date().getFullYear();
+  const month =
+    document.getElementById("monthSelect").value || new Date().getMonth() + 1;
+
+  // 2. VALIDATION
+  if (selectedIds.length < 2) {
+    container.innerHTML = `
+            <div style="background:#fff3cd; color:#856404; padding:15px; border-radius:8px; text-align:center; border:1px solid #ffeeba;">
+                ⚠️ Please select at least <strong>2 members</strong> to analyze synergy.
+            </div>`;
     return;
   }
 
-  const btn = document.querySelector(
-    "button[onclick='calculateTeamSynergy()']",
-  );
-  const originalText = btn.innerText;
-  btn.innerText = "Calculating...";
-  btn.disabled = true;
+  // 3. SHOW LOADING STATE
+  container.innerHTML =
+    '<div style="text-align:center; padding:20px; color:#666;">🔮 Calculating Team Dynamics...</div>';
 
   try {
-    const year = document.getElementById("yearInput").value;
-    const month = document.getElementById("monthSelect").value;
-
+    // 4. API CALL (POST)
     const res = await fetch("/api/team-synergy", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userIds, year, month }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userIds: selectedIds,
+        year: year.toString(),
+        month: month.toString(),
+      }),
     });
 
+    if (!res.ok) throw new Error("Analysis failed");
+
     const data = await res.json();
-    renderTeamResults(data);
+
+    // 5. RENDER RESULTS
+    renderTeamResults(data); // Call your render function
   } catch (e) {
-    alert("Error: " + e.message);
-  } finally {
-    btn.innerText = originalText;
-    btn.disabled = false;
+    console.error(e);
+    container.innerHTML =
+      '<div style="color:red; text-align:center; padding:20px;">Failed to calculate synergy. Please try again.</div>';
   }
 }
 

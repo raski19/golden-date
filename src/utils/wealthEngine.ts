@@ -4,40 +4,16 @@ import {
   CLASH_PAIRS,
   STEMS_LIST,
   BRANCHES_LIST,
+  STEM_INFO,
+  ELEMENT_RELATIONSHIPS,
   CONTROL_CYCLE,
-  INFLUENCE_ELEMENT,
 } from "./constants";
 
 // --- CONFIGURATION ---
-// 2026 is Bing Wu Year. The "Five Tigers" rule starts the year with Geng-Tiger.
-const MONTH_STEMS_2026 = [
-  "Geng",
-  "Xin",
-  "Ren",
-  "Gui",
-  "Jia",
-  "Yi",
-  "Bing",
-  "Ding",
-  "Wu",
-  "Ji",
-  "Geng",
-  "Xin",
-];
-const MONTH_BRANCHES = [
-  "Tiger",
-  "Rabbit",
-  "Dragon",
-  "Snake",
-  "Horse",
-  "Goat",
-  "Monkey",
-  "Rooster",
-  "Dog",
-  "Pig",
-  "Rat",
-  "Ox",
-];
+// prettier-ignore
+const MONTH_STEMS_2026 = ["Geng", "Xin", "Ren", "Gui", "Jia", "Yi", "Bing", "Ding", "Wu", "Ji", "Geng", "Xin"];
+// prettier-ignore
+const MONTH_BRANCHES = ["Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig", "Rat", "Ox"];
 
 // Industries based on Wealth Element
 const WEALTH_INDUSTRIES: Record<string, string[]> = {
@@ -48,9 +24,7 @@ const WEALTH_INDUSTRIES: Record<string, string[]> = {
   Water: ["Logistics", "F&B", "Tourism", "Retail", "Trading"],
 };
 
-// --- HELPER: CALCULATE DAILY PILLAR ---
-// Reference: Jan 1, 2000 was a Wu-Wu (Earth Horse) day.
-// Stem Index: 4 (Wu), Branch Index: 6 (Wu/Horse)
+// Reference for Daily Calculation (Jan 1, 2000 = Wu Wu)
 const REF_DATE = new Date(2000, 0, 1);
 const REF_STEM_IDX = 4;
 const REF_BRANCH_IDX = 6;
@@ -68,157 +42,215 @@ const getDailyPillar = (date: Date) => {
   const stem = STEMS_LIST[stemIdx];
   const branch = BRANCHES_LIST[branchIdx];
 
-  return {
-    stem,
-    branch,
-    stemElement: ELEMENT_MAP[stem],
-    branchElement: ELEMENT_MAP[branch], // Simplified branch element mapping
-  };
+  return { stem, branch, stemElement: ELEMENT_MAP[stem] };
 };
 
-// --- 1. ARCHETYPE LOGIC ---
-const getArchetype = (dm: string, strength: string, wealthEl: string) => {
-  const isStrong = strength === "Strong";
-  const baseIndustries = WEALTH_INDUSTRIES[wealthEl] || [];
-  const topIndustries = baseIndustries.slice(0, 3).join(", ");
+// CRITICAL NEW HELPER: Calculates the specific "Ten God" (e.g., "7 Killings")
+const getTenGod = (dmStem: string, targetStem: string): string => {
+  const dm = STEM_INFO[dmStem.split(" ")[0]];
+  const target = STEM_INFO[targetStem.split(" ")[0]];
 
+  if (!dm || !target) return "Friend";
+
+  const relation = ELEMENT_RELATIONSHIPS[dm.element][target.element];
+  const isSamePolarity = dm.polarity === target.polarity;
+
+  // Map Element Relation + Polarity to Ten God Name
+  if (relation === "Same") return isSamePolarity ? "Friend" : "Rob Wealth";
+  if (relation === "Output")
+    return isSamePolarity ? "Eating God" : "Hurting Officer";
+  if (relation === "Wealth")
+    return isSamePolarity ? "Indirect Wealth" : "Direct Wealth";
+  if (relation === "Power")
+    return isSamePolarity ? "7 Killings" : "Direct Officer";
+  if (relation === "Resource")
+    return isSamePolarity ? "Indirect Resource" : "Direct Resource";
+
+  return "Friend";
+};
+
+// --- 2. ARCHETYPE LOGIC ---
+const getArchetype = (dm: string, strength: string) => {
+  const isStrong = strength === "Strong";
+  const dmElem = ELEMENT_MAP[dm];
+  const wealthEl = CONTROL_CYCLE[dmElem];
+
+  const baseIndustries = WEALTH_INDUSTRIES[wealthEl] || ["General Business"];
+  const industries = baseIndustries.slice(0, 3).join(", "); // "Finance, Auto, Legal"
+
+  // Logic: Strong DM = Output/Wealth (Execution); Weak DM = Resource/Friend (Leverage)
   if (isStrong) {
     if (["Jia", "Yi", "Geng", "Xin"].includes(dm))
       return {
         title: "The Dealmaker",
         icon: "🤝",
-        strategy: "Direct Execution. Buy inventory, trade actively, and scale.",
+        strategy: "Direct Execution. Buy, trade, and scale.",
         css: "profile-dealmaker",
-        industries: topIndustries,
+        wealthEl,
+        industries,
       };
     if (["Bing", "Ding", "Ren", "Gui"].includes(dm))
       return {
         title: "The Creator",
         icon: "🎨",
-        strategy: "Visibility & Innovation. Launch products and build a brand.",
+        strategy: "Visibility & Innovation. Launch products.",
         css: "profile-creator",
-        industries: topIndustries,
+        wealthEl,
+        industries,
       };
     return {
       title: "The Architect",
       icon: "🏛️",
-      strategy: "Systems & Assets. Build platforms and manage resources.",
+      strategy: "Systems & Assets. Build platforms.",
       css: "profile-architect",
-      industries: topIndustries,
+      wealthEl,
+      industries,
     };
   } else {
     if (["Jia", "Yi", "Bing", "Ding"].includes(dm))
       return {
         title: "The Connector",
         icon: "🔗",
-        strategy: "Leverage & Networks. Don't build alone; partner up.",
+        strategy: "Leverage & Networks. Partner up.",
         css: "profile-connector",
-        industries: topIndustries,
+        wealthEl,
+        industries,
       };
     return {
       title: "The Specialist",
       icon: "🧠",
-      strategy: "Niche Skills & IP. Charge for value/consulting, not time.",
+      strategy: "Niche Skills & IP. Consult and license.",
       css: "profile-specialist",
-      industries: topIndustries,
+      wealthEl,
+      industries,
     };
   }
 };
 
-// --- 2. MONTHLY STRATEGY ---
+// --- 3. MONTHLY STRATEGY (Enhanced with User's Logic) ---
 const generateMonthlyPlan = (user: IUser) => {
-  const dmElement = ELEMENT_MAP[user.dayMaster.split(" ")[0]];
+  const userDm = user.dayMaster.split(" ")[0];
+  const userBranch = user.dayBranch;
 
   return MONTH_BRANCHES.map((branch, index) => {
     const stem = MONTH_STEMS_2026[index];
-    const stemElement = ELEMENT_MAP[stem];
-    const isClash = CLASH_PAIRS[user.dayBranch] === branch;
 
-    let focus;
-    let action;
-    let css;
+    // 1. Calculate Ten God
+    const tenGod = getTenGod(userDm, stem);
 
-    // Detect Ten God of the Month
-    if (isClash) {
-      focus = "Pivot";
-      action = "Cut Costs / Break Habits";
+    // 2. Critical Safety Checks
+    // Triple Penalty: 2026 is Horse Year. If Month is Horse + User is Horse => Danger.
+    const isSelfPunish = userBranch === "Horse" && branch === "Horse";
+    const isClash = CLASH_PAIRS[userBranch] === branch;
+
+    let focus = "Maintain";
+    let action = "Steady progress";
+    let css = "neutral-month";
+
+    // --- A. DANGER ZONES (Override all others) ---
+    if (isSelfPunish) {
+      focus = "🛑 DEFENSE";
+      action = "Triple Penalty (Jian Xing). High stress/injury risk. Lie low.";
+      css = "clash-month"; // Re-using clash style for danger
+    } else if (isClash) {
+      focus = "⚠️ PIVOT";
+      action = `Clash with ${branch}. Cut costs. Do not sign contracts.`;
       css = "clash-month";
-    } else if (user.rules.wealthElements.includes(stemElement)) {
-      focus = "Revenue";
-      action = "Launch / Sell / Close";
+    }
+    // --- B. OPPORTUNITY ZONES (Ten Gods) ---
+    else if (["Direct Wealth", "Indirect Wealth"].includes(tenGod)) {
+      focus = "💰 REVENUE";
+      action = "Launch products. Ask for the sale. Scale.";
       css = "wealth-month";
-    } else if (user.rules.careerElements.includes(stemElement)) {
-      focus = "Visibility";
-      action = "Marketing / Creation";
-      css = "career-month";
-    } else if (user.rules.healthElements.includes(stemElement)) {
-      focus = "Strategy";
-      action = "Learn / Plan / Rest";
-      css = "resource-month";
-    } else if (INFLUENCE_ELEMENT[dmElement] === stemElement) {
-      focus = "Power";
-      action = "Lead / Solve Problems";
+    } else if (["Direct Officer", "7 Killings"].includes(tenGod)) {
+      focus = "⚔️ POWER";
+      action = "Lead the team. Solve crises. Execute strategy.";
       css = "power-month";
+    } else if (["Hurting Officer", "Eating God"].includes(tenGod)) {
+      focus = "🚀 VISIBILITY";
+      action = "Marketing push. Public speaking. Create content.";
+      css = "career-month";
+    } else if (["Direct Resource", "Indirect Resource"].includes(tenGod)) {
+      focus = "📚 STRATEGY";
+      action = "Deep work. Research. Asset planning.";
+      css = "resource-month";
     } else {
-      focus = "Network";
-      action = "Partner / Connect";
+      // Friend / Rob Wealth
+      focus = "🤝 NETWORK";
+      action = "Partnerships. Competitor analysis. Socialize.";
       css = "social-month";
     }
 
-    return { month: index + 1, stem, branch, focus, action, css };
+    return {
+      month: index + 1,
+      stem,
+      branch,
+      focus,
+      action,
+      css,
+    };
   });
 };
 
-// --- 3. DAILY TACTICS (Next 7 Days) ---
+// --- 4. DAILY TACTICS (Next 7 Days) ---
 const generateDailyTactics = (user: IUser) => {
   const tactics = [];
   const today = new Date();
-  const userDmElement = ELEMENT_MAP[user.dayMaster.split(" ")[0]];
+  const userDm = user.dayMaster.split(" ")[0];
+  const userBranch = user.dayBranch;
 
   for (let i = 0; i < 7; i++) {
     const d = new Date();
     d.setDate(today.getDate() + i);
 
+    // 1. Get Real Pillar
     const pillar = getDailyPillar(d);
+
+    // 2. Get Relationship
+    const dayTenGod = getTenGod(userDm, pillar.stem);
 
     let focus = "Routine";
     let advice = "Maintain steady progress.";
     let css = "neutral-day";
 
-    // CHECK 1: PERSONAL CLASH (High Priority)
-    if (CLASH_PAIRS[user.dayBranch] === pillar.branch) {
-      focus = "⚠️ DEFENSE";
-      advice = "Do not sign contracts. Avoid conflict.";
+    // CHECK 1: RISKS
+    if (CLASH_PAIRS[userBranch] === pillar.branch) {
+      focus = "💥 CLASH";
+      advice = "Expect disruptions. Delay big decisions.";
       css = "clash-card";
     }
-    // CHECK 2: WEALTH DAY
-    else if (user.rules.wealthElements.includes(pillar.stemElement)) {
-      focus = "💰 REVENUE";
-      advice = "Ask for the sale. Send invoices.";
+    // Self-Punishment Check (Day Level - Horse/Horse, Dragon/Dragon, Pig/Pig, Rooster/Rooster)
+    else if (
+      userBranch === pillar.branch &&
+      ["Horse", "Dragon", "Pig", "Rooster"].includes(pillar.branch)
+    ) {
+      focus = "🔥 COOL DOWN";
+      advice = "Self-Punishment day. Watch your temper/mistakes.";
+      css = "clash-card";
+    }
+    // CHECK 2: OPPORTUNITIES
+    else if (dayTenGod.includes("Wealth")) {
+      focus = "💰 MONEY";
+      advice = "Send invoices. Close deals. Buy assets.";
       css = "wealth-card";
-    }
-    // CHECK 3: OUTPUT DAY
-    else if (user.rules.careerElements.includes(pillar.stemElement)) {
-      focus = "🚀 VISIBILITY";
-      advice = "Pitch ideas. Publish content.";
-      css = "career-card";
-    }
-    // CHECK 4: POWER DAY
-    else if (INFLUENCE_ELEMENT[userDmElement] === pillar.stemElement) {
-      focus = "⚔️ AUTHORITY";
-      advice = "Solve problems. Admin tasks.";
+    } else if (
+      dayTenGod.includes("Officer") ||
+      dayTenGod.includes("Killings")
+    ) {
+      focus = "⚔️ EXECUTE";
+      advice = "Clear your to-do list. Handle admin/legal.";
       css = "power-card";
-    }
-    // CHECK 5: RESOURCE DAY
-    else if (user.rules.healthElements.includes(pillar.stemElement)) {
-      focus = "📚 STRATEGY";
-      advice = "Plan, learn, and review.";
+    } else if (dayTenGod.includes("Eating") || dayTenGod.includes("Hurting")) {
+      focus = "🎤 PITCH";
+      advice = "Post content. Share ideas. Design.";
+      css = "career-card";
+    } else if (dayTenGod.includes("Resource")) {
+      focus = "🧠 PLAN";
+      advice = "Review goals. Learn. Rest & recharge.";
       css = "resource-card";
-    }
-    // CHECK 6: COMPANION DAY
-    else {
-      focus = "🤝 NETWORK";
-      advice = "Connect with partners.";
+    } else {
+      focus = "🤝 CONNECT";
+      advice = "Team syncs. Networking. Sales calls.";
       css = "social-card";
     }
 
@@ -236,10 +268,9 @@ const generateDailyTactics = (user: IUser) => {
 // --- MAIN EXPORT ---
 export const getWealthRoadmap = (user: IUser) => {
   const dm = user.dayMaster.split(" ")[0];
-  const wealthEl = CONTROL_CYCLE[ELEMENT_MAP[dm]];
 
   return {
-    archetype: getArchetype(dm, user.strength, wealthEl),
+    archetype: getArchetype(dm, user.strength),
     monthly: generateMonthlyPlan(user),
     daily: generateDailyTactics(user),
   };
