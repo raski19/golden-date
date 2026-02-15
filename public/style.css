@@ -332,11 +332,43 @@ header {
     position: relative;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
-
 .day-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-md);
     z-index: var(--z-card-hover);
+}
+.day-card[data-today="true"] {
+    border: 2px solid var(--primary, #4f46e5) !important; /* Thick Indigo Border */
+    transform: scale(1.03); /* Pop out slightly */
+    z-index: 20; /* Layer above neighboring cards */
+    position: relative; /* Anchor point for the badge */
+    animation: pulse-today 2s infinite;
+}
+.day-card[data-today="true"]::after {
+    content: "TODAY";
+    position: absolute;
+    top: -10px; /* Floats above the top border */
+    right: 10px;
+    background: var(--primary, #4f46e5);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
+    pointer-events: none; /* Ensures clicks pass through to the card */
+}
+@keyframes pulse-today {
+    0% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); /* Ripple expands and fades */
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+    }
 }
 
 .day-card.dimmed { opacity: 0.15; filter: grayscale(100%); pointer-events: none; }
@@ -660,4 +692,30 @@ header {
     .tool-toggle { padding: 15px; }
     .legend-bar { gap: 10px; justify-content: flex-start; }
     .legend-group { width: 100%; justify-content: space-between; }
+
+    /* FORCE FULL SCREEN MODAL */
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        max-width: none; /* Override the desktop limit */
+        max-height: none; /* Override the 90vh limit */
+        border-radius: 0; /* Square corners look better full screen */
+        margin: 0;
+        border: none; /* Remove border in full screen */
+
+        /* Animation: Slide up from bottom looks better on mobile than scaling */
+        transform: translateY(100%);
+        transition: transform 0.3s ease-out;
+    }
+
+    /* Adjust animation for full screen */
+    .modal.show .modal-content {
+        transform: translateY(0);
+    }
+
+    /* Ensure header stays at top */
+    .modal-header {
+        border-radius: 0; /* Remove top rounded corners */
+        padding: 15px; /* Slightly tighter padding */
+    }
 }
