@@ -1323,7 +1323,7 @@ function showDetails(day) {
       borderStyle = "1px solid #ffeeba";
     }
 
-    return `<div style="display:flex; align-items:center; padding:8px 0; border-bottom:${borderStyle}; background:${rowBg};"><div style="width:100px; font-size:0.9rem; font-weight:bold; color:#555;">${h.time}</div><div style="width:80px; font-size:0.9rem; color:#666;">${h.branch}</div><div style="flex-grow:1; display:flex; flex-wrap:wrap; align-items:center;">${badgesHtml}${rowState === "mixed" ? `<span style="font-size:0.7rem; color:#856404; margin-left:8px; font-style:italic;">(Turbulent Opportunity)</span>` : ""}</div></div>`;
+    return `<div style="display:flex; align-items:center; padding:8px 0; border-bottom:${borderStyle}; background:${rowBg};"><div style="min-width:100px; font-size:0.9rem; font-weight:bold; color:#555;">${h.time}</div><div style="width:80px; font-size:0.9rem; color:#666;">${h.branch}</div><div style="flex-grow:1; display:flex; flex-wrap:wrap; align-items:center;">${badgesHtml}${rowState === "mixed" ? `<span style="font-size:0.7rem; color:#856404; margin-left:8px; font-style:italic;">(Turbulent Opportunity)</span>` : ""}</div></div>`;
   };
 
   const hourlyGrid = `
