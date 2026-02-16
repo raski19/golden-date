@@ -814,7 +814,7 @@ function renderGrid(days) {
                     <span class="god-badge" data-god="${stemBadge}">${stemBadge}</span>
                 </div>
                 
-                <div style="text-align:center; margin:4px 0; line-height:1.2;">
+                <div style="text-align:center; line-height:1.2;">
                     <div style="font-size:0.9rem;">${pIcon}</div>
                     
                     <div style="font-size:0.65rem; font-weight:bold; color:${supportColor}; text-transform:uppercase; letter-spacing:0.5px;">

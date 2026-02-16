@@ -250,10 +250,10 @@ header {
     gap: 20px;
     background: #ffffff;
     padding: 8px 16px;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
     border: 1px solid #e0e0e0;
     box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    margin-right: auto; /* Pushes search bar to the right if flex container */
+    margin-right: auto;
 }
 .t-item {
     display: flex;
@@ -290,9 +290,9 @@ header {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .traffic-legend {
-        width: 100%; /* Force it to take the entire top row */
-        margin-right: 0; /* Reset the desktop spacing */
-        order: 1; /* Ensure it stays at the top */
+        width: 100%;
+        margin-right: 0;
+        order: 1;
 
         /* Optional: Enable horizontal scroll if legend is wide */
         overflow-x: auto;
@@ -300,13 +300,13 @@ header {
     }
 
     .t-item {
-        flex-direction: column; /* Stack dot above text to save space */
+        flex-direction: column;
         gap: 4px;
         text-align: center;
     }
 
     .t-label {
-        font-size: 0.7rem; /* Smaller text on mobile */
+        font-size: 0.7rem;
         white-space: nowrap;
     }
 
@@ -391,16 +391,16 @@ header {
     z-index: var(--z-card-hover);
 }
 .day-card[data-today="true"] {
-    border: 2px solid var(--primary, #4f46e5) !important; /* Thick Indigo Border */
-    transform: scale(1.02); /* Pop out slightly */
-    z-index: 20; /* Layer above neighboring cards */
-    position: relative; /* Anchor point for the badge */
+    border: 2px solid var(--primary, #4f46e5) !important;
+    transform: scale(1.02);
+    z-index: 20;
+    position: relative;
     animation: pulse-today 2s infinite;
 }
 .day-card[data-today="true"]::after {
     content: "TODAY";
     position: absolute;
-    top: -10px; /* Floats above the top border */
+    top: -10px;
     right: 10px;
     background: var(--primary, #4f46e5);
     color: white;
@@ -410,14 +410,14 @@ header {
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     letter-spacing: 0.5px;
-    pointer-events: none; /* Ensures clicks pass through to the card */
+    pointer-events: none;
 }
 @keyframes pulse-today {
     0% {
         box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
     }
     70% {
-        box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); /* Ripple expands and fades */
+        box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
     }
     100% {
         box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
@@ -437,8 +437,8 @@ header {
 .date-num { font-size: 1.1rem; font-weight: 700; color: #333; }
 .officer-row { font-size: 0.65rem; color: #666; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
 
-.pillars-container { background: rgba(255,255,255,0.5); border-radius: 6px; padding: 4px; margin: 4px 0; }
-.pillar-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 3px; }
+.pillars-container { background: rgba(255,255,255,0.5); border: 1px solid #ddd; border-radius: 6px; padding: 4px 6px; margin: 4px 0; }
+.pillar-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
 .pillar-txt { font-weight: 600; color: #444; }
 
 .action-row {
@@ -464,7 +464,7 @@ header {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    user-select: none; /* Prevents text highlighting on quick clicks */
+    user-select: none;
     position: relative;
 }
 .team-option:hover {
@@ -492,7 +492,7 @@ header {
 /* --- STATE: CHECKED --- */
 /* When input is checked, style the parent Label */
 .team-option:has(input:checked) {
-    background: #e8f4fd; /* Light Blue/Green bg */
+    background: #e8f4fd;
     border-color: #0d6efd;
     box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
 }
@@ -521,7 +521,7 @@ header {
     top: 0; left: 0; right: 0;
     height: 6px;
     background: linear-gradient(90deg, #FFD700, #FDB931, #d4af37);
-    z-index: 5; /* Sit on top of the button */
+    z-index: 5;
     pointer-events: none;
 }
 /* Add padding to the toggle button so text clears the gold line */
@@ -709,9 +709,7 @@ header {
 @media (max-width: 768px) {
 
     /* --- 1. GLOBAL LAYOUT --- */
-    body {
-        padding: 5px;
-    }
+    body { padding: 0 }
 
     /* --- 2. HEADER ADJUSTMENTS --- */
     header {
@@ -730,6 +728,7 @@ header {
     .brand {
         font-size: 1.2rem;
         flex-grow: 1;
+        gap: 0
     }
     .user-controls {
         gap: 8px;
@@ -748,9 +747,9 @@ header {
 
     /* Row 2: Legend & Tools Wrapper */
     .header-bottom {
-        flex-direction: column; /* Stack vertical */
+        flex-direction: column;
         align-items: stretch;
-        gap: 15px;
+        gap: 5px;
     }
 
     /* A. Traffic Legend (Full Width, Scrollable if needed) */
@@ -760,14 +759,14 @@ header {
         padding: 10px 12px;
         border-radius: 12px;
         margin: 0;
-        overflow-x: auto; /* Horizontal scroll if text is long */
+        overflow-x: auto;
         gap: 5px;
     }
     .t-item {
-        flex-direction: column; /* Stack dot above text */
+        flex-direction: column;
         gap: 4px;
         text-align: center;
-        min-width: 60px; /* Ensure click target size */
+        min-width: 60px;
     }
     .t-label {
         font-size: 0.65rem;
@@ -777,8 +776,8 @@ header {
     /* B. Tools Container (Search + Rules Button) */
     .header-tools {
         display: flex;
-        flex-direction: column; /* Stack vertically */
-        gap: 12px;
+        flex-direction: column;
+        gap: 5px;
         width: 100%;
     }
 
@@ -800,7 +799,7 @@ header {
         padding: 12px;
         background-color: #fff;
         border: 1px solid #e0e0e0;
-        border-radius: 50px; /* Match Search Pill */
+        border-radius: 50px;
         color: #555;
         text-decoration: none;
         display: block;
@@ -811,9 +810,12 @@ header {
     /* --- 3. CALENDAR GRID (Single Column List View) --- */
     .calendar-wrapper {
         display: flex;
-        flex-direction: column; /* List view is better for details */
+        flex-direction: column;
         gap: 10px;
+        padding: 5px;
     }
+    .pillars-container { margin: 0 }
+
     .day-header { display: none; } /* Hide Mon/Tue/Wed headers */
 
     .day-card {
@@ -851,12 +853,12 @@ header {
 
     /* --- 5. MODULES & FORMS --- */
     .grid-dashboard {
-        grid-template-columns: 1fr; /* Stack Dashboard items */
+        grid-template-columns: 1fr;
         gap: 15px;
     }
 
     .form-grid {
-        grid-template-columns: 1fr; /* Stack Form Inputs */
+        grid-template-columns: 1fr;
     }
 
     .tool-toggle {
