@@ -477,7 +477,6 @@ async function findDates() {
 }
 
 function showSearchResults(dates, action) {
-  // 1. Target the Body ID we defined in HTML
   const container = document.getElementById("searchBody");
 
   if (!container) {
@@ -485,7 +484,6 @@ function showSearchResults(dates, action) {
     return;
   }
 
-  // 2. Build Content
   if (!dates || dates.length === 0) {
     container.innerHTML = `
             <div style="padding:30px; text-align:center; color:#666;">
@@ -496,7 +494,9 @@ function showSearchResults(dates, action) {
     container.innerHTML = dates
       .map(
         (d) => `
-            <div style="border:1px solid #eee; margin:5px 0; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc;">
+            <div onclick="jumpToDateAndShow('${d.fullDate}')" 
+                 style="border:1px solid #eee; margin:5px 0; padding:15px; border-radius:8px; border-left:5px solid ${getColorBg(d.cssClass)}; background:#fcfcfc; cursor:pointer; transition:transform 0.1s;">
+                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                     <strong style="font-size:1.1rem; color:#333;">${d.fullDate}</strong>
                     <span class="badge ${d.cssClass} ${d.score >= 85 ? "golden" : ""}" style="font-weight:bold; letter-spacing:1px;">${d.verdict} (${d.score}pts)</span>
@@ -515,7 +515,6 @@ function showSearchResults(dates, action) {
       .join("");
   }
 
-  // 3. Open Modal
   openModalById("searchModal");
 }
 
@@ -2116,13 +2115,24 @@ function openTeamModal(dayData) {
 
 async function findMomentum() {
   const userId = document.getElementById("userSelect").value;
-  const duration = document.getElementById("momentumDuration").value;
+  const durationInput = document.getElementById("momentumDuration");
+  const duration = durationInput ? durationInput.value : 2;
+
   const btn = document.querySelector("button[onclick='findMomentum()']");
+  const originalText = btn ? btn.innerText : "Find Streaks";
 
-  if (!userId) return;
+  if (!userId) {
+    alert("Please select a user first.");
+    return;
+  }
 
-  btn.innerText = "Scanning...";
-  btn.disabled = true;
+  if (btn) {
+    btn.innerText = "Scanning 180 Days...";
+    btn.disabled = true;
+  }
+
+  // Clear previous results
+  document.getElementById("momentumResults").innerHTML = "";
 
   try {
     const res = await fetch("/api/momentum", {
@@ -2131,82 +2141,109 @@ async function findMomentum() {
       body: JSON.stringify({ userId, duration }),
     });
 
+    if (!res.ok) throw new Error("Calculation failed");
+
     const data = await res.json();
     renderMomentumResults(data);
   } catch (e) {
-    alert("Error: " + e.message);
+    console.error(e);
+    document.getElementById("momentumResults").innerHTML =
+      `<div style="color:red; text-align:center; padding:15px;">Error: ${e.message}</div>`;
   } finally {
-    btn.innerText = "Find Streaks";
-    btn.disabled = false;
+    if (btn) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
   }
 }
 
 function renderMomentumResults(data) {
   const container = document.getElementById("momentumResults");
 
-  if (data.chains.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">No strong streaks found.</div>`;
+  // 1. Handle Empty State
+  if (!data.chains || data.chains.length === 0) {
+    container.innerHTML = `
+        <div style="text-align:center; padding:30px; background:#f8f9fa; border-radius:8px; border:1px dashed #ccc;">
+            <div style="font-size:2rem; margin-bottom:10px;">📉</div>
+            <div style="color:#666; font-weight:600;">No unbroken streaks found.</div>
+            <div style="font-size:0.85rem; color:#888; margin-top:5px;">
+                Try reducing the duration to 2 days or checking a different date range.
+            </div>
+        </div>`;
     return;
   }
 
-  let lastMonth = "";
-  let html = "";
+  // 2. Configuration: Map Backend Themes to UI
+  const MOMENTUM_UI = {
+    LAUNCH: {
+      label: "Velocity Sequence",
+      icon: "🚀",
+      color: "#0d6efd", // Blue
+      bg: "#e7f1ff",
+      desc: "Ideal for starting new projects, ground-breaking, or opening businesses.",
+    },
+    HARVEST: {
+      label: "Harvest Sequence",
+      icon: "💰",
+      color: "#198754", // Green
+      bg: "#d1e7dd",
+      desc: "Perfect for sales, signing contracts, collecting debts, and banking.",
+    },
+    FOUNDATION: {
+      label: "Foundation Sequence",
+      icon: "🏗️",
+      color: "#6610f2", // Purple
+      bg: "#e0cffc",
+      desc: "Best for internal strategy, long-term planning, and negotiations.",
+    },
+    CLEANSING: {
+      label: "Reset Sequence",
+      icon: "✨",
+      color: "#0dcaf0", // Cyan
+      bg: "#cff4fc",
+      desc: "Use for removing obstacles, medical procedures, or ending bad habits.",
+    },
+  };
 
+  let lastMonth = "";
+  let html = `<div style="margin-bottom:15px; font-size:0.9rem; color:#666; text-align:right;">Found <strong>${data.summary.totalChainsFound}</strong> streaks in next 6 months.</div>`;
+
+  // 3. Render Chains
   data.chains.forEach((chain) => {
-    const d = new Date(chain.days[0].date);
+    // A. Month Headers
+    const d = new Date(chain.startDateObj || chain.startDate); // Handle both date obj or string
     const currentMonth = d.toLocaleString("default", {
       month: "long",
       year: "numeric",
     });
 
-    // Month Header
     if (currentMonth !== lastMonth) {
-      html += `<h4 style="margin: 25px 0 10px 0; color:#0d6efd; border-bottom:2px solid #e0e0e0; padding-bottom:5px;">${currentMonth}</h4>`;
+      html += `
+        <div style="display:flex; align-items:center; gap:10px; margin: 25px 0 15px 0;">
+            <span style="font-weight:800; color:#333; font-size:1.1rem;">${currentMonth}</span>
+            <div style="height:1px; background:#e0e0e0; flex-grow:1;"></div>
+        </div>`;
       lastMonth = currentMonth;
     }
 
-    // UI Configuration for Momentum Themes
-    const MOMENTUM_THEMES = {
-      LAUNCH: {
-        label: "Launch Sequence",
-        icon: "🚀",
-        color: "#0d6efd", // Blue
-        desc: "Best for starting new projects.",
-      },
-      HARVEST: {
-        label: "Harvest Sequence",
-        icon: "💰",
-        color: "#198754", // Green
-        desc: "Best for sales and collection.",
-      },
-      FOUNDATION: {
-        label: "Foundation Sequence",
-        icon: "🧱",
-        color: "#6610f2", // Purple
-        desc: "Best for planning and internal work.",
-      },
-      CLEANSING: {
-        label: "Cleansing Sequence",
-        icon: "🧹",
-        color: "#dc3545", // Red
-        desc: "Best for removal and detox.",
-      },
-    };
+    // B. Get UI Settings (Fallback to Launch if undefined)
+    const ui = MOMENTUM_UI[chain.theme] || MOMENTUM_UI["LAUNCH"];
 
-    // 🎨 GET UI DETAILS FROM CONFIG
-    // Fallback to GENERAL if key not found
-    const ui = MOMENTUM_THEMES[chain.theme] || MOMENTUM_THEMES["GENERAL"];
-
+    // C. Build Card
     html += `
-        <div style="background:#fff; border:1px solid #e0e0e0; border-left: 5px solid ${ui.color}; border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="background:#fff; border:1px solid #e0e0e0; border-left: 5px solid ${ui.color}; border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.02); transition:transform 0.2s;">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:15px; border-bottom:1px solid #f9f9f9; padding-bottom:10px;">
                 <div>
-                    <h5 style="margin:0; color:#333; font-size:1.1rem;">${ui.icon} ${ui.label}</h5>
-                    <span style="font-size:0.85rem; color:#666;">Starts ${chain.startDate}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.2rem;">${ui.icon}</span>
+                        <h5 style="margin:0; color:#333; font-size:1rem; font-weight:700;">${ui.label}</h5>
+                    </div>
+                    <div style="font-size:0.8rem; color:#888; margin-top:4px;">${ui.desc}</div>
                 </div>
-                <div style="background:${ui.color}20; color:${ui.color}; font-weight:bold; padding:5px 10px; border-radius:20px;">
-                    ${chain.avgScore}% Power
+                <div style="text-align:right;">
+                    <div style="font-size:1.4rem; font-weight:800; color:${ui.color}; line-height:1;">${chain.avgScore}</div>
+                    <div style="font-size:0.65rem; text-transform:uppercase; color:#999; margin-top:2px;">Avg Score</div>
                 </div>
             </div>
 
@@ -2214,21 +2251,32 @@ function renderMomentumResults(data) {
                 ${chain.days
                   .map((day, index) => {
                     const isLast = index === chain.days.length - 1;
-                    const color = getColorForScore(day.score);
+                    const scoreColor = getColorForScore(day.score);
+
+                    // Determine Day Officer Badge Color
+                    let officerBadge = `background:#f8f9fa; color:#666; border:1px solid #e9ecef;`;
+                    if (day.score >= 80)
+                      officerBadge = `background:#d1e7dd; color:#0f5132; border:1px solid #badbcc;`;
 
                     return `
                     <div style="display:flex; gap:15px;">
                         <div style="display:flex; flex-direction:column; align-items:center; width:20px;">
-                            <div style="width:12px; height:12px; background:${color}; border-radius:50%; margin-top:6px;"></div>
-                            ${!isLast ? `<div style="width:2px; flex:1; background:#e0e0e0; min-height:30px;"></div>` : ``}
+                            <div style="width:12px; height:12px; background:${ui.color}; border-radius:50%; margin-top:6px; box-shadow: 0 0 0 3px ${ui.bg};"></div>
+                            ${!isLast ? `<div style="width:2px; flex:1; background:${ui.bg}; min-height:35px; margin-top:-2px; margin-bottom:-2px;"></div>` : ``}
                         </div>
+                        
                         <div style="padding-bottom:15px; flex:1;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <strong style="color:#333;">${day.fullDate}</strong>
-                                <span style="font-weight:bold; color:${color};">${day.score}</span>
+                                <strong style="color:#333; font-size:0.95rem;">${day.fullDate}</strong>
+                                <span style="font-weight:bold; color:${scoreColor}; font-size:0.9rem;">${day.score}</span>
                             </div>
-                            <div style="font-size:0.9rem; color:#555;">
-                                ${day.dayInfo.officer} Officer • ${day.dayInfo.element}
+                            <div style="display:flex; gap:6px; margin-top:4px;">
+                                <span style="font-size:0.75rem; padding:2px 8px; border-radius:4px; ${officerBadge}">
+                                    ${day.dayInfo.officer}
+                                </span>
+                                <span style="font-size:0.75rem; padding:2px 8px; border-radius:4px; background:#fff; border:1px solid #eee; color:#666;">
+                                    ${day.dayInfo.element}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -2236,11 +2284,92 @@ function renderMomentumResults(data) {
                   })
                   .join("")}
             </div>
+            
+            <div style="margin-top:5px; padding-top:10px; border-top:1px dashed #eee; text-align:center;">
+                <button onclick="jumpToDateAndShow('${chain.days[0].fullDate}')" style="background:none; border:none; color:${ui.color}; font-size:0.85rem; font-weight:600; cursor:pointer;">
+                    View First Day Details →
+                </button>
+            </div>
+
         </div>
         `;
   });
 
   container.innerHTML = html;
+}
+
+async function jumpToDateAndShow(dateStr) {
+  // 1. If we are coming from the "Search Modal", we MUST close it
+  // to avoid "Modal over Modal" (stacking).
+  const searchModal = document.getElementById("searchModal");
+  if (searchModal && searchModal.style.display === "flex") {
+    closeModal("searchModal");
+  }
+
+  // 2. Parse Date
+  // We use safe parsing to avoid timezone issues
+  const targetDate = new Date(dateStr);
+  const targetDay = targetDate.getDate(); // e.g. 16
+  const targetMonth = targetDate.getMonth() + 1; // e.g. 2 (Feb)
+  const targetYear = targetDate.getFullYear(); // e.g. 2026
+
+  // 3. Show Loading
+  loadingOverlay("flex");
+
+  try {
+    // 4. Switch Month if necessary
+    if (targetMonth !== currentMonth || targetYear !== currentYear) {
+      // Update Globals
+      currentMonth = targetMonth;
+      currentYear = targetYear;
+
+      // Sync Dropdowns
+      const mSelect = document.getElementById("monthSelect");
+      const yInput = document.getElementById("yearInput");
+      if (mSelect) mSelect.value = currentMonth;
+      if (yInput) yInput.value = currentYear;
+
+      // Load the new month data and WAIT
+      await loadCalendar();
+    }
+
+    // 5. Scroll the Calendar to the Day (The "Anchor")
+    // We do this inside a small timeout to ensure the DOM is rendered
+    setTimeout(() => {
+      const dayCards = document.querySelectorAll(".day-card");
+      for (const card of dayCards) {
+        // Find the card by the date number displayed inside it
+        const dateNum = card.querySelector(".date-num");
+        if (dateNum && parseInt(dateNum.innerText) === targetDay) {
+          // A. Scroll it into the center of the viewport
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // B. Add a brief "Flash" effect so the eye catches it
+          card.style.transition = "box-shadow 0.4s ease-out";
+          card.style.boxShadow = "0 0 0 4px rgba(13, 110, 253, 0.4)";
+          setTimeout(() => {
+            card.style.boxShadow = "";
+          }, 1500);
+          break;
+        }
+      }
+    }, 100);
+
+    // 6. Open the Day Details Modal
+    // We find the full data object from our global array
+    const dayData = currentMonthDays.find((d) => d.day === targetDay);
+
+    if (dayData) {
+      showDetails(dayData);
+    } else {
+      console.warn(`Day ${targetDay} not found in loaded month.`);
+    }
+  } catch (e) {
+    console.error("Jump failed:", e);
+    alert("Failed to load data for that date.");
+  } finally {
+    loadingOverlay("none");
+  }
 }
 
 // ==========================================

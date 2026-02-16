@@ -436,13 +436,14 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Calculation failed" });
   }
 });
+
 app.post("/api/momentum", async (req: Request, res: Response) => {
   try {
     const { userId, duration = 2 } = req.body;
     const durationNum = parseInt(duration, 10);
 
     // Validate duration parameter
-    if (durationNum !== 2 && durationNum !== 3) {
+    if (![2, 3].includes(durationNum)) {
       return res.status(400).json({
         error: "Duration must be 2 or 3 days",
       });
