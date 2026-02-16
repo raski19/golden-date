@@ -290,12 +290,13 @@ header {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .traffic-legend {
-        width: 100%;
-        justify-content: space-between; /* Spread evenly */
-        padding: 10px 12px;
-        border-radius: 12px; /* Rectangular box on mobile */
-        gap: 0;
-        overflow-x: auto; /* In case text is too long */
+        width: 100%; /* Force it to take the entire top row */
+        margin-right: 0; /* Reset the desktop spacing */
+        order: 1; /* Ensure it stays at the top */
+
+        /* Optional: Enable horizontal scroll if legend is wide */
+        overflow-x: auto;
+        justify-content: flex-start;
     }
 
     .t-item {
@@ -391,7 +392,7 @@ header {
 }
 .day-card[data-today="true"] {
     border: 2px solid var(--primary, #4f46e5) !important; /* Thick Indigo Border */
-    transform: scale(1.03); /* Pop out slightly */
+    transform: scale(1.02); /* Pop out slightly */
     z-index: 20; /* Layer above neighboring cards */
     position: relative; /* Anchor point for the badge */
     animation: pulse-today 2s infinite;
@@ -705,63 +706,160 @@ header {
     .calendar-wrapper { grid-template-columns: repeat(2, 1fr); }
     .day-header { display: none; }
 }
-
 @media (max-width: 768px) {
-    header { padding: 10px 15px; position: relative; }
 
-    .header-top { flex-wrap: wrap; gap: 10px; }
-    .brand { font-size: 1.2rem; flex-grow: 1; }
-    .user-controls { gap: 8px; }
+    /* --- 1. GLOBAL LAYOUT --- */
+    body {
+        padding: 5px;
+    }
 
-    /* Move Date Nav to a new line */
+    /* --- 2. HEADER ADJUSTMENTS --- */
+    header {
+        padding: 10px 15px;
+        gap: 15px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    /* Row 1: Brand & User Controls */
+    .header-top {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .brand {
+        font-size: 1.2rem;
+        flex-grow: 1;
+    }
+    .user-controls {
+        gap: 8px;
+    }
+
+    /* Date Nav: Force to new line, centered */
     .date-nav {
-        order: 3; width: 100%;
-        justify-content: center; margin-top: 5px;
-        background: var(--light); padding: 8px;
+        width: 100%;
+        justify-content: center;
+        margin-top: 5px;
+        background: #f8f9fa;
+        padding: 8px;
+        order: 3;
+        border-radius: 8px;
     }
 
-    .header-bottom { flex-direction: column; align-items: stretch; gap: 12px; }
+    /* Row 2: Legend & Tools Wrapper */
+    .header-bottom {
+        flex-direction: column; /* Stack vertical */
+        align-items: stretch;
+        gap: 15px;
+    }
 
-    /* Full Width Search */
-    .search-container { width: 100%; justify-content: space-between; }
-    .search-select { flex-grow: 1; width: auto; }
+    /* A. Traffic Legend (Full Width, Scrollable if needed) */
+    .traffic-legend {
+        width: 100%;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-radius: 12px;
+        margin: 0;
+        overflow-x: auto; /* Horizontal scroll if text is long */
+        gap: 5px;
+    }
+    .t-item {
+        flex-direction: column; /* Stack dot above text */
+        gap: 4px;
+        text-align: center;
+        min-width: 60px; /* Ensure click target size */
+    }
+    .t-label {
+        font-size: 0.65rem;
+        white-space: nowrap;
+    }
 
-    /* Ghost button as block */
+    /* B. Tools Container (Search + Rules Button) */
+    .header-tools {
+        display: flex;
+        flex-direction: column; /* Stack vertically */
+        gap: 12px;
+        width: 100%;
+    }
+
+    /* Search Bar (Row 1 of Tools) */
+    .search-container {
+        width: 100%;
+        justify-content: space-between;
+        padding: 8px 12px;
+    }
+    .search-select {
+        flex-grow: 1;
+        width: auto;
+    }
+
+    /* Rules Button (Row 2 of Tools) */
     .btn-ghost {
-        text-align: center; width: 100%; padding: 10px;
-        background: var(--light); border: 1px solid var(--border-neutral);
-        border-radius: var(--radius-md); text-decoration: none;
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 50px; /* Match Search Pill */
+        color: #555;
+        text-decoration: none;
+        display: block;
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
 
-    .form-grid { grid-template-columns: 1fr; }
-    .grid-dashboard { grid-template-columns: 1fr; gap: 15px; }
-    .tool-toggle { padding: 15px; }
-    .legend-bar { gap: 10px; justify-content: flex-start; }
-    .legend-group { width: 100%; justify-content: space-between; }
+    /* --- 3. CALENDAR GRID (Single Column List View) --- */
+    .calendar-wrapper {
+        display: flex;
+        flex-direction: column; /* List view is better for details */
+        gap: 10px;
+    }
+    .day-header { display: none; } /* Hide Mon/Tue/Wed headers */
 
-    /* FORCE FULL SCREEN MODAL */
+    .day-card {
+        min-height: auto;
+        padding: 15px;
+    }
+
+    /* --- 4. FULL SCREEN MODALS (Native App Feel) --- */
     .modal-content {
         width: 100%;
         height: 100%;
-        max-width: none; /* Override the desktop limit */
-        max-height: none; /* Override the 90vh limit */
-        border-radius: 0; /* Square corners look better full screen */
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
         margin: 0;
-        border: none; /* Remove border in full screen */
+        border: none;
 
-        /* Animation: Slide up from bottom looks better on mobile than scaling */
+        /* Slide Up Animation */
         transform: translateY(100%);
-        transition: transform 0.3s ease-out;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        display: flex;
+        flex-direction: column;
     }
 
-    /* Adjust animation for full screen */
     .modal.show .modal-content {
         transform: translateY(0);
     }
 
-    /* Ensure header stays at top */
     .modal-header {
-        border-radius: 0; /* Remove top rounded corners */
-        padding: 15px; /* Slightly tighter padding */
+        border-radius: 0;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* --- 5. MODULES & FORMS --- */
+    .grid-dashboard {
+        grid-template-columns: 1fr; /* Stack Dashboard items */
+        gap: 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr; /* Stack Form Inputs */
+    }
+
+    .tool-toggle {
+        padding: 15px;
     }
 }
