@@ -42,12 +42,23 @@
         </div>
 
         <div class="header-bottom">
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-                <button class="filter-btn" onclick="setFilter('WEALTH', this)">💰 Wealth</button>
-                <button class="filter-btn" onclick="setFilter('CAREER', this)">🚀 Career</button>
-                <button class="filter-btn" onclick="setFilter('PEOPLE', this)">🤝 People</button>
-                <button class="filter-btn" onclick="setFilter('HEALTH', this)">🧘 Health</button>
+            <div class="traffic-legend">
+                <div class="t-item">
+                    <span class="t-dot t-gold"></span>
+                    <span class="t-label">High Opportunity</span>
+                </div>
+                <div class="t-item">
+                    <span class="t-dot t-green"></span>
+                    <span class="t-label">Excellent</span>
+                </div>
+                <div class="t-item">
+                    <span class="t-dot t-blue"></span>
+                    <span class="t-label">Good / Stable</span>
+                </div>
+                <div class="t-item">
+                    <span class="t-dot t-red"></span>
+                    <span class="t-label">Warning / Clash</span>
+                </div>
             </div>
 
             <div class="header-tools">
@@ -64,54 +75,59 @@
         </div>
     </header>
 
-    <div class="profile-card">
-        <div class="pc-header">
-            <h4><span>🔮</span> BaZi Chart Calculator</h4>
-            <span style="font-size:0.8rem; color:#888; background:#f5f5f5; padding:4px 10px; border-radius:20px;">
-            Generates 4 Pillars + Luck Cycle
-        </span>
-        </div>
+    <div class="profile-card tool-section">
 
-        <div class="form-grid">
-            <div class="input-group">
-                <label>Name</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">👤</span>
-                    <input type="text" id="guestName" placeholder="Enter Name..." class="form-control-custom">
-                </div>
+        <button class="tool-toggle" onclick="toggleTool('calcContent', this)">
+            <span class="tool-icon">🔮</span>
+            <div style="flex-grow:1; text-align:left;">
+                <span class="tool-title" style="display:block;">BaZi Chart Calculator</span>
+                <span style="font-size:0.75rem; color:#888; font-weight:400;">Generates 4 Pillars + Luck Cycle</span>
             </div>
+            <span class="tool-arrow">▼</span>
+        </button>
 
-            <div class="input-group">
-                <label>Birth Date & Time</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">📅</span>
-                    <input type="datetime-local" id="guestDob" class="form-control-custom">
+        <div id="calcContent" class="tool-content" style="display:none;">
+            <div class="form-grid">
+
+                <div class="input-group">
+                    <label>Name</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="guestName" placeholder="Enter Name..." class="form-control-custom">
+                    </div>
                 </div>
 
-                <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="noTimeCheckbox" onchange="toggleTimeInput()" style="accent-color: #d4af37; cursor: pointer;">
-                    <label for="noTimeCheckbox" style="font-size: 0.8rem; margin: 0; cursor: pointer; color: #666; font-weight: 500;">
-                        I don't know the birth time
-                    </label>
-                </div>
-            </div>
+                <div class="input-group">
+                    <label>Birth Date & Time</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📅</span>
+                        <input type="datetime-local" id="guestDob" class="form-control-custom">
+                    </div>
 
-            <div class="input-group">
-                <label>Gender</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">⚧</span>
-                    <select id="guestGender" class="form-control-custom" style="appearance:none; cursor:pointer;">
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
-                    <span style="position:absolute; right:10px; font-size:0.7rem; color:#999; pointer-events:none;">▼</span>
+                    <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="noTimeCheckbox" onchange="toggleTimeInput()" style="accent-color: #d4af37; cursor: pointer;">
+                        <label for="noTimeCheckbox" style="font-size: 0.8rem; margin: 0; cursor: pointer; color: #666; font-weight: 500;">
+                            I don't know the birth time
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div>
+                <div class="input-group">
+                    <label>Gender</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">⚧</span>
+                        <select id="guestGender" class="form-control-custom" style="appearance:none; cursor:pointer;">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <span style="position:absolute; right:10px; font-size:0.7rem; color:#999; pointer-events:none;">▼</span>
+                    </div>
+                </div>
+
                 <button onclick="generateGuestProfile()" class="btn-generate">
                     <span>✨ Analyze</span>
                 </button>
+
             </div>
         </div>
     </div>

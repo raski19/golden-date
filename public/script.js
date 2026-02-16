@@ -2,7 +2,6 @@
 let currentDate = new Date();
 let currentYear = currentDate.getFullYear();
 let currentMonth = currentDate.getMonth() + 1;
-let currentFilter = "all";
 let allUsersData = [];
 let currentUser;
 let currentGuestUser = null;
@@ -604,7 +603,6 @@ function renderGrid(days) {
     const cssClass = day.analysis.cssClass || "neutral";
     const card = document.createElement("div");
     const tags = day.analysis.tags || [];
-    card.dataset.tags = tags.join(",");
 
     // Mark today's card
     const isToday = isCurrentMonth && day.day === today.getDate();
@@ -851,8 +849,6 @@ function renderGrid(days) {
     grid.appendChild(card);
   });
 
-  applyFilter();
-
   // Check if the toggles are ON, and re-apply the visual effects immediately
   if (document.getElementById("architectToggle")?.checked) {
     toggleArchitectMode();
@@ -871,32 +867,6 @@ function renderGrid(days) {
       }
     });
   }
-}
-
-// --- FILTERING ---
-function setFilter(filterType, btn) {
-  currentFilter = filterType;
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => (b.className = "filter-btn"));
-  if (filterType === "all") btn.classList.add("active");
-  else if (filterType === "WEALTH") btn.classList.add("wealth-active");
-  else if (filterType === "CAREER") btn.classList.add("career-active");
-  else if (filterType === "PEOPLE") btn.classList.add("people-active");
-  else if (filterType === "HEALTH") btn.classList.add("health-active");
-  applyFilter();
-}
-function applyFilter() {
-  const cards = document.querySelectorAll(".day-card");
-  cards.forEach((card) => {
-    const tags = card.dataset.tags ? card.dataset.tags.split(",") : [];
-    if (currentFilter === "all") card.classList.remove("dimmed");
-    else {
-      tags.includes(currentFilter)
-        ? card.classList.remove("dimmed")
-        : card.classList.add("dimmed");
-    }
-  });
 }
 
 // --- LEGEND LOGIC ---
