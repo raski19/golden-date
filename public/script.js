@@ -793,6 +793,18 @@ function renderGrid(days) {
     const yb = day.info.yellowBlackBelt;
     const ybClass = yb.type === "Yellow" ? "spirit-yellow" : "spirit-black";
 
+    // CALCULATE BAR COLOR & WIDTH
+    const dayScore = day.analysis.score || 0;
+    let barColor = "#dc3545"; // Default Red (< 40)
+
+    if (dayScore >= 80)
+      barColor = "#198754"; // Green (Excellent)
+    else if (dayScore >= 60)
+      barColor = "#0d6efd"; // Blue (Good)
+    else if (dayScore >= 40) barColor = "#fd7e14"; // Orange (Average)
+
+    const barWidth = Math.min(dayScore, 100); // Cap at 100%
+
     card.className = `day-card ${cssClass}`;
     card.innerHTML = `
             <div class="card-header">
@@ -805,6 +817,10 @@ function renderGrid(days) {
             <div class="officer-row" style="text-align:center; margin-bottom:5px;">
                 <span style="font-size:0.85rem; color:#555; font-weight:600; text-transform: uppercase;">${strongFoundation ? "️<span title='Strong Foundation'>🏛️</span>" : ""}${day.info.officer}</span>
                 <span style="${typeStyle}">(${type})</span>
+            </div>
+            
+            <div class="score-bar-container" title="Day Score: ${dayScore}">
+                <div class="score-bar-fill" style="width: ${barWidth}%; background: ${barColor};"></div>
             </div>
             
             <div class="pillars-container" style="position:relative;" title="${pNote}">
@@ -1941,8 +1957,8 @@ function renderTeamResults(data) {
   data.forEach((day) => {
     // --- 1. HEADER LOGIC (Avg Score Color) ---
     const avg = day.teamMetrics?.avgScore || 0;
-    let borderClass = "border-left: 5px solid #ccc;";
-    let scoreColor = "#666";
+    let borderClass;
+    let scoreColor;
 
     if (avg >= 90) {
       borderClass = "border-left: 5px solid #ffc107;";
