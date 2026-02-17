@@ -91,10 +91,10 @@ header {
 }
 
 .brand span {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 1.6rem;
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    background: url("/Golden-Date-Logo.png") 0 0 no-repeat;
 }
 
 /* User Controls */
