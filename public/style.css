@@ -287,35 +287,6 @@ header {
     background-color: #dc3545;
     box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
 }
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .traffic-legend {
-        width: 100%;
-        margin-right: 0;
-        order: 1;
-
-        /* Optional: Enable horizontal scroll if legend is wide */
-        overflow-x: auto;
-        justify-content: flex-start;
-    }
-
-    .t-item {
-        flex-direction: column;
-        gap: 4px;
-        text-align: center;
-    }
-
-    .t-label {
-        font-size: 0.7rem;
-        white-space: nowrap;
-    }
-
-    .t-dot {
-        width: 8px;
-        height: 8px;
-    }
-}
-
 /* --- Badges --- */
 .badge, .l-badge, .spirit-badge, .god-badge {
     display: inline-block;
@@ -733,7 +704,7 @@ header {
 
     /* --- 2. HEADER ADJUSTMENTS --- */
     header {
-        padding: 10px 15px;
+        padding: 10px 5px;
         gap: 15px;
         position: sticky;
         top: 0;
@@ -775,30 +746,24 @@ header {
     /* A. Traffic Legend (Full Width, Scrollable if needed) */
     .traffic-legend {
         width: 100%;
-        justify-content: space-between;
-        padding: 10px 12px;
-        border-radius: 12px;
-        margin: 0;
+        margin-right: 0;
+        order: 1;
+
+        /* Optional: Enable horizontal scroll if legend is wide */
         overflow-x: auto;
-        gap: 5px;
+        justify-content: flex-start;
     }
-    .t-item {
-        flex-direction: column;
-        gap: 4px;
-        text-align: center;
-        min-width: 60px;
-    }
-    .t-label {
-        font-size: 0.65rem;
-        white-space: nowrap;
-    }
+
+    .t-item { flex-direction: column; gap: 4px; text-align: center }
+    .t-label { font-size: 0.7rem; white-space: nowrap }
+    .t-dot { width: 8px; height: 8px }
 
     /* B. Tools Container (Search + Rules Button) */
     .header-tools {
-        display: flex;
-        flex-direction: column;
+        display: grid;
         gap: 5px;
         width: 100%;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     /* Search Bar (Row 1 of Tools) */
@@ -828,20 +793,11 @@ header {
     }
 
     /* --- 3. CALENDAR GRID (Single Column List View) --- */
-    .calendar-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 5px;
-    }
+    .calendar-wrapper { padding: 0 3px; gap: 5px }
     .pillars-container { margin: 0 }
 
     .day-header { display: none; } /* Hide Mon/Tue/Wed headers */
-
-    .day-card {
-        min-height: auto;
-        padding: 15px;
-    }
+    .day-card { min-height: auto; padding: 15px }
 
     /* --- 4. FULL SCREEN MODALS (Native App Feel) --- */
     .modal-content {
@@ -860,9 +816,7 @@ header {
         flex-direction: column;
     }
 
-    .modal.show .modal-content {
-        transform: translateY(0);
-    }
+    .modal.show .modal-content { transform: translateY(0) }
 
     .modal-header {
         border-radius: 0;
@@ -872,16 +826,8 @@ header {
     }
 
     /* --- 5. MODULES & FORMS --- */
-    .grid-dashboard {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .tool-toggle {
-        padding: 15px;
-    }
+    .grid-dashboard { grid-template-columns: 1fr; gap: 15px }
+    .form-grid { grid-template-columns: 1fr }
+    .tool-toggle { padding: 15px }
+    .tool-content { padding: 5px }
 }
