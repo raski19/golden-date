@@ -819,8 +819,8 @@ function renderGrid(days) {
                 <span style="${typeStyle}">(${type})</span>
             </div>
             
-            <div class="score-bar-container" title="Day Score: ${dayScore}">
-                <div class="score-bar-fill" style="width: ${barWidth}%; background: ${barColor};"></div>
+            <div class="score-bar-container">
+                <div class="score-bar-fill" style="--target-width: ${barWidth}%; background: ${barColor};"></div>
             </div>
             
             <div class="pillars-container" style="position:relative;" title="${pNote}">
@@ -862,26 +862,46 @@ function renderGrid(days) {
 
     card.onclick = () => showDetails(day);
     grid.appendChild(card);
-  });
 
-  // Check if the toggles are ON, and re-apply the visual effects immediately
-  if (document.getElementById("architectToggle")?.checked) {
-    toggleArchitectMode();
-  }
+    // Check if the toggles are ON, and re-apply the visual effects immediately
+    if (document.getElementById("architectToggle")?.checked) {
+      toggleArchitectMode();
+    }
 
-  // Scroll to today
-  if (isCurrentMonth) {
-    requestAnimationFrame(() => {
-      const todayEl = grid.querySelector('[data-today="true"]');
-      if (todayEl) {
-        todayEl.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
+    // Scroll to today
+    if (isCurrentMonth) {
+      requestAnimationFrame(() => {
+        const todayEl = grid.querySelector('[data-today="true"]');
+        if (todayEl) {
+          todayEl.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+        }
+      });
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // If the bar is visible on screen (even 10%)
+          if (entry.isIntersecting) {
+            // Add the class that triggers the CSS transition
+            entry.target.classList.add("visible");
+
+            // Stop watching this element (so it doesn't re-animate when you scroll up/down)
+            observer.unobserve(entry.target);
+          }
         });
-      }
-    });
-  }
+      },
+      { threshold: 0.1 },
+    ); // Trigger when 10% of the bar is visible
+
+    // Attach observer to all bars
+    const allBars = grid.querySelectorAll(".score-bar-fill");
+    allBars.forEach((bar) => observer.observe(bar));
+  });
 }
 
 // --- LEGEND LOGIC ---

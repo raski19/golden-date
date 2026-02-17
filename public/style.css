@@ -449,7 +449,7 @@ header {
 }
 .footer-badges { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 3px; }
 
-/* VISUAL SCORE BAR */
+/* INTELLIGENT SCORE BAR */
 .score-bar-container {
     width: 60%;
     height: 4px;
@@ -461,7 +461,12 @@ header {
 .score-bar-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+    transition: width 2s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width;
+}
+.score-bar-fill.visible {
+    width: var(--target-width);
 }
 
 /* =========================================
