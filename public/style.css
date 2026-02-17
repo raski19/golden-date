@@ -763,7 +763,6 @@ header {
         display: grid;
         gap: 5px;
         width: 100%;
-        grid-template-columns: repeat(2, 1fr);
     }
 
     /* Search Bar (Row 1 of Tools) */
