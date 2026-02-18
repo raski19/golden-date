@@ -853,7 +853,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "角",
     pinyin: "Jiao",
     group: "East",
-    element: "Wood", // [1]
+    element: "Wood",
     quality: "Good",
     keywords: ["Wealth", "Assets", "Marriage", "Travel"],
     description:
@@ -864,7 +864,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "亢",
     pinyin: "Kang",
     group: "East",
-    element: "Metal", // [2]
+    element: "Metal",
     quality: "Bad",
     keywords: ["Loss", "Divorce", "Scuppered Plans"],
     description:
@@ -875,7 +875,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "氐",
     pinyin: "Di",
     group: "East",
-    element: "Earth", // [3]
+    element: "Earth",
     quality: "Mixed",
     keywords: ["Public Speaking", "Property", "Injury"],
     description:
@@ -886,7 +886,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "房",
     pinyin: "Fang",
     group: "East",
-    element: "Fire", // [4]
+    element: "Fire",
     quality: "Good",
     keywords: ["Prosperity", "Multiplier", "Container"],
     description:
@@ -897,7 +897,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "心",
     pinyin: "Xin",
     group: "East",
-    element: "Fire", // [5] but associated with Fire star
+    element: "Fire",
     quality: "Bad",
     keywords: ["Disaster", "Plague", "Affliction"],
     description:
@@ -908,7 +908,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "尾",
     pinyin: "Wei",
     group: "East",
-    element: "Fire", // [6]
+    element: "Fire",
     quality: "Good",
     keywords: ["Negotiation", "Closing Deals", "Renovation"],
     description:
@@ -919,7 +919,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "箕",
     pinyin: "Ji",
     group: "East",
-    element: "Water", // [7]
+    element: "Water",
     quality: "Good",
     keywords: ["Collections", "Feng Shui", "Business"],
     description:
@@ -932,7 +932,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "井",
     pinyin: "Jing",
     group: "South",
-    element: "Wood", // [8]
+    element: "Wood",
     quality: "Mixed",
     keywords: ["Planning", "Legal", "Obstacles"],
     description:
@@ -943,7 +943,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "鬼",
     pinyin: "Gui",
     group: "South",
-    element: "Metal", // [9]
+    element: "Metal",
     quality: "Bad",
     keywords: ["Fear", "Withdrawal", "Negative Influence"],
     description:
@@ -954,7 +954,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "柳",
     pinyin: "Liu",
     group: "South",
-    element: "Earth", // [10]
+    element: "Earth",
     quality: "Bad",
     keywords: ["Discord", "Anxiety", "Tantrums"],
     description:
@@ -965,7 +965,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "星",
     pinyin: "Xing",
     group: "South",
-    element: "Fire", // [11]
+    element: "Fire",
     quality: "Mixed",
     keywords: ["Negotiation", "Openings", "Loneliness"],
     description:
@@ -976,7 +976,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "張",
     pinyin: "Zhang",
     group: "South",
-    element: "Fire", // [12]
+    element: "Fire",
     quality: "Good",
     keywords: ["Launches", "Branding", "Reunion"],
     description:
@@ -987,7 +987,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "翼",
     pinyin: "Yi",
     group: "South",
-    element: "Fire", // [13]
+    element: "Fire",
     quality: "Bad",
     keywords: ["Treachery", "Change of Tides", "Separation"],
     description:
@@ -998,7 +998,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "軫",
     pinyin: "Zhen",
     group: "South",
-    element: "Water", // [14]
+    element: "Water",
     quality: "Good",
     keywords: ["Transport", "Sales", "Return on Investment"],
     description:
@@ -1011,7 +1011,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "奎",
     pinyin: "Kui",
     group: "West",
-    element: "Wood", // [15]
+    element: "Wood",
     quality: "Good",
     keywords: ["Renovation", "Travel", "Unity"],
     description:
@@ -1022,7 +1022,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "婁",
     pinyin: "Lou",
     group: "West",
-    element: "Metal", // [16] (Arietis/Metal)
+    element: "Metal",
     quality: "Good",
     keywords: ["Health", "Wealth Guardian", "Medicine"],
     description:
@@ -1033,7 +1033,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "胃",
     pinyin: "Wei",
     group: "West",
-    element: "Earth", // [17]
+    element: "Earth",
     quality: "Good",
     keywords: ["Storage", "Savings", "Value"],
     description:
@@ -1044,7 +1044,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "昴",
     pinyin: "Mao",
     group: "West",
-    element: "Fire", // [18] (Sun/Fire)
+    element: "Fire",
     quality: "Bad",
     keywords: ["Endings", "Gossip", "Financial Ruin"],
     description:
@@ -1055,7 +1055,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "畢",
     pinyin: "Bi",
     group: "West",
-    element: "Metal", // [19] associated with Moon/Metal
+    element: "Metal",
     quality: "Mixed",
     keywords: ["Capture", "Construction", "Hunting"],
     description:
@@ -1066,7 +1066,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "觜",
     pinyin: "Zui",
     group: "West",
-    element: "Fire", // [20]
+    element: "Fire",
     quality: "Bad",
     keywords: ["Arguments", "Legal issues", "Loss"],
     description:
@@ -1077,7 +1077,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "參",
     pinyin: "Shen",
     group: "West",
-    element: "Water", // [21]
+    element: "Water",
     quality: "Mixed",
     keywords: ["Business", "Promotion", "Construction"],
     description:
@@ -1090,7 +1090,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "斗",
     pinyin: "Dou",
     group: "North",
-    element: "Water", // [22]
+    element: "Water",
     quality: "Good",
     keywords: ["Ambition", "Career", "Feng Shui"],
     description:
@@ -1101,7 +1101,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "牛",
     pinyin: "Niu",
     group: "North",
-    element: "Metal", // [23]
+    element: "Metal",
     quality: "Bad",
     keywords: ["Broken Promises", "Loss", "Disaster"],
     description:
@@ -1112,7 +1112,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "女",
     pinyin: "Nu",
     group: "North",
-    element: "Earth", // [24]
+    element: "Earth",
     quality: "Mixed",
     keywords: ["Disputes", "Construction", "Learning"],
     description:
@@ -1123,7 +1123,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "虛",
     pinyin: "Xu",
     group: "North",
-    element: "Fire", // [25]
+    element: "Fire",
     quality: "Bad",
     keywords: ["Emptiness", "Illness", "Grief"],
     description:
@@ -1134,7 +1134,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "危",
     pinyin: "Wei",
     group: "North",
-    element: "Fire", // [26]
+    element: "Fire",
     quality: "Bad",
     keywords: ["Danger", "Bodily Harm", "Extreme Risk"],
     description:
@@ -1145,7 +1145,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "室",
     pinyin: "Shi",
     group: "North",
-    element: "Water", // [27]
+    element: "Water",
     quality: "Good",
     keywords: ["Multiplier", "Real Estate", "Marriage"],
     description:
@@ -1156,7 +1156,7 @@ export const CONSTELLATION_DATA: Record<string, Constellation> = {
     chineseName: "壁",
     pinyin: "Bi",
     group: "North",
-    element: "Water", // [28]
+    element: "Water",
     quality: "Good",
     keywords: ["Stability", "Protection", "Contracts"],
     description:
@@ -1327,8 +1327,8 @@ export const NINE_STARS: Record<string, string> = {
   "5": "5 Yellow (Disaster)",
   "6": "6 White (Authority)",
   "7": "7 Red (Robbery)",
-  "8": "8 White (Asset/Slow)", // Updated from "Wealth"
-  "9": "9 Purple (King/Wealth)", // Updated from "Celebration"
+  "8": "8 White (Asset/Slow)",
+  "9": "9 Purple (King/Wealth)",
 };
 export const NINE_STAR_DEFINITIONS: Record<string, string> = {
   "1 White (Noble)":
@@ -1619,4 +1619,52 @@ export const TEN_GOD_ACTIONS: Record<
     caution: "Isolation. You may feel lonely, paranoid, or misunderstood.",
     keywords: "Intuition, Mystery, Unconventional",
   },
+};
+
+export const SCORING = {
+  BASE_NEUTRAL: 50,
+
+  // General Luck
+  OFFICER_GOOD: 15,
+  OFFICER_BAD: -10,
+  CONSTELLATION_GOOD: 10,
+  CONSTELLATION_BAD: -15,
+  NINE_STAR_WEALTH: 20,
+  NINE_STAR_NOBLE: 10,
+  NINE_STAR_BAD: -20,
+
+  // 12 Spirits
+  SPIRIT_BLACK: -15,
+  SPIRIT_YELLOW: 10,
+
+  // Personal Boosts
+  NOBLEMAN: 30,
+  USEFUL_GOD: 30,
+  HARMONY_6: 25,
+  HARMONY_3: 15,
+  PEACH_BLOSSOM: 15,
+  ACADEMIC: 15,
+  TRAVEL_HORSE: 10,
+  FAVORABLE_ELEMENT: 15,
+
+  // Personal Risks
+  UNFAVORABLE_ELEMENT: -10,
+  CLASH_YEAR: -20,
+  CLASH_MONTH: -15,
+  CLASH_LUCK: -25,
+  SELF_PUNISH: -25,
+  VOID_DAY: -15,
+  BAD_BRANCH: -20,
+
+  // Shen Sha Risks
+  ROBBING_SHA: -15,
+  DEATH_GOD: -10,
+  SOLITARY: -5,
+
+  // Safety Caps
+  PENALTY_PERSONAL_CLASH: -50,
+  CAP_PERSONAL_BREAKER: 45,
+  CAP_MONTH_BREAKER: 55,
+  CAP_BLACK_SPIRIT: 80,
+  CAP_FLAWED_DAY: 85,
 };

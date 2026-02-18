@@ -20,6 +20,7 @@ import {
   TRAVELING_HORSE,
   PEACH_BLOSSOM,
   BRANCHES_LIST,
+  SCORING,
 } from "./constants";
 import { calculateRootStrengthCached } from "./rootStrength";
 import { getCurrentLuckPillar } from "./calculateLuckPillar";
@@ -31,53 +32,97 @@ export const calculateScore = (
   year: number,
   goal: string = "General",
 ): ScoreResult => {
-  let score = 50; // Start Neutral
+  // =================================================================
+  // PHASE 0: SETUP & CLEANING
+  // =================================================================
+  let score = SCORING.BASE_NEUTRAL;
   let log: string[] = [];
-  let flags: string[] = [];
-  let tags: string[] = [];
+  let flags: Set<string> = new Set();
+  let tags: Set<string> = new Set();
   let specificActions: { action: string; icon: string; desc: string }[] = [];
 
   const rules = user.rules;
 
-  // =================================================================
-  // 0. CLEAN ALL STRINGS GLOBALLY
-  // =================================================================
   const dayBranch = (dayData.dayBranch || "").split(" ")[0];
+  const dayStemClean = (dayData.stem || "").split(" ")[0];
   const monthBranch = (dayData.monthBranch || "").split(" ")[0];
   const yearBranch = (dayData.yearBranch || "").split(" ")[0];
   const officerName = (dayData.officer || "").trim();
-  const dayStemClean = (dayData.stem || "").split(" ")[0];
 
   const userDmClean = (user.dayMaster || "").split(" ")[0];
   const userDayBranch = (user.dayBranch || "").split(" ")[0];
-  const userMonthBranch = (user.monthBranch || "").split(" ")[0];
   const userYearBranch = (user.yearBranch || "").split(" ")[0];
+  const userMonthBranch = (user.monthBranch || "").split(" ")[0];
 
-  // Helper: Determine Element Role
   const getRole = (element: string) => {
     if (rules.wealthElements?.includes(element)) return "Wealth (Profit)";
-    if (rules.careerElements?.includes(element))
-      return "Career (Output/Action)";
+    if (rules.careerElements?.includes(element)) return "Career (Action)";
     if (rules.healthElements?.includes(element)) return "Health (Balance)";
-    if (
-      [
-        ...rules.wealthElements,
-        ...rules.careerElements,
-        ...rules.healthElements,
-      ].includes(element)
-    )
-      return "Favorable Support";
-    return "Unfavorable";
+    return "Support";
   };
 
-  // --- 1. OFFICER SCORE ---
-  const officerRec = OFFICER_RECOMMENDATIONS[officerName] || {
-    action: "Proceed",
-    icon: "⚠️",
-    desc: "Proceed with caution.",
-    reality: "The energy is unstable and unsupported.",
-  };
+  // =================================================================
+  // PHASE 1: DIAGNOSTICS
+  // =================================================================
 
+  // 1.1 Element Analysis
+  const dayElement = dayData.element;
+  const isWealthEl = rules.wealthElements?.includes(dayElement);
+  const isCareerEl = rules.careerElements?.includes(dayElement);
+  const isHealthEl = rules.healthElements?.includes(dayElement);
+  const isAvoidEl = rules.avoidElements?.includes(dayElement);
+
+  // 1.2 Ten God Calculation
+  let tenGodName = "Friend";
+  let dayType = "Companion";
+
+  const userDm = STEM_INFO[userDmClean];
+  const dayStem = STEM_INFO[dayStemClean];
+  if (userDm && dayStem) {
+    const relationship = ELEMENT_RELATIONSHIPS[userDm.element][dayStem.element];
+    const polarity = userDm.polarity === dayStem.polarity ? "Same" : "Diff";
+
+    if (relationship && TEN_GODS[relationship])
+      tenGodName = TEN_GODS[relationship][polarity];
+
+    if (relationship === "Power") dayType = "Influence";
+    else if (relationship === "Same") dayType = "Companion";
+    else dayType = relationship;
+  }
+  const guide = TEN_GOD_ACTIONS[tenGodName] || TEN_GOD_ACTIONS["Friend"];
+
+  // 1.3 Shen Sha (Stars)
+  const stars = calculateShenSha(user, dayBranch);
+
+  // 1.4 Pillar Strength
+  const rootInfo = calculateRootStrengthCached(dayStemClean, dayBranch);
+  const pillarScore = rootInfo.score;
+
+  // 1.5 Clashes & Harmonies
+  const isPersonalClash = CLASH_PAIRS[userDayBranch] === dayBranch;
+  const isYearClash = CLASH_PAIRS[userYearBranch] === dayBranch;
+  const isMonthClash = CLASH_PAIRS[userMonthBranch] === dayBranch;
+  const isGeneralYearClash = CLASH_PAIRS[yearBranch] === dayBranch;
+  const isGeneralMonthClash = CLASH_PAIRS[monthBranch] === dayBranch;
+
+  const is6Harmony = SIX_HARMONY[userDayBranch] === dayBranch;
+  const is3Harmony = THREE_HARMONY[userDayBranch]?.includes(dayBranch);
+  const isSelfPunish = dayBranch === rules.selfPunishment;
+
+  // 1.6 Luck Pillar
+  const currentLuck = getCurrentLuckPillar(user, year);
+  const isLuckClash =
+    currentLuck && dayBranch === CLASH_PAIRS[currentLuck.branch];
+
+  // 1.7 Goat Blade
+  const bladeBranch = GOAT_BLADE_RULES[userDmClean];
+  const isGoatBlade = bladeBranch === dayBranch;
+
+  // =================================================================
+  // PHASE 2: BASE SCORING
+  // =================================================================
+
+  // 2.1 Officer
   const officerDef = OFFICER_DATA[officerName];
   if (officerDef) {
     score += officerDef.baseScore;
@@ -87,419 +132,240 @@ export const calculateScore = (
       log.push(`⚠️ OFFICER: ${officerName} is generally unstable/restrictive.`);
   }
 
-  // --- 2. CALCULATE DAY TYPE (Ten God) ---
-  const dmElement = ELEMENT_MAP[userDmClean];
-  const dayStemElement = ELEMENT_MAP[dayStemClean];
-  let dayType = "Unknown";
-  if (dmElement && dayStemElement && ELEMENT_RELATIONSHIPS[dmElement]) {
-    dayType = ELEMENT_RELATIONSHIPS[dmElement][dayStemElement] || "Unknown";
+  // 2.2 Constellation
+  const starName = dayData.constellation;
+  let finalIsStarAvoid = false;
+
+  if (starName && CONSTELLATION_DATA[starName]) {
+    const starData = CONSTELLATION_DATA[starName];
+
+    if (starData.quality === "Good") {
+      score += SCORING.CONSTELLATION_GOOD;
+      log.push(`⭐ STAR: ${starName} is auspicious.`);
+      finalIsStarAvoid = false;
+
+      if (isAvoidEl) {
+        score -= 2;
+      }
+    } else if (starData.quality === "Bad") {
+      score += SCORING.CONSTELLATION_BAD;
+      log.push(`⛔ STAR: ${starName} is unfavorable.`);
+      finalIsStarAvoid = true;
+    } else {
+      if (isAvoidEl) {
+        score -= 5;
+        log.push(`⛔ STAR: ${starName} conflicts with element.`);
+        finalIsStarAvoid = true;
+      } else if (isWealthEl || isCareerEl || isHealthEl) {
+        score += 5;
+        log.push(`✨ STAR: ${starName} matches useful elements.`);
+        finalIsStarAvoid = false;
+      }
+    }
   }
 
-  const userDm = STEM_INFO[userDmClean];
-  const dayStem = STEM_INFO[dayStemClean];
-  let tenGodName = "Friend";
-  if (userDm && dayStem) {
-    const relationship = ELEMENT_RELATIONSHIPS[userDm.element][dayStem.element];
-    const polarity = userDm.polarity === dayStem.polarity ? "Same" : "Diff";
-    if (relationship && TEN_GODS[relationship])
-      tenGodName = TEN_GODS[relationship][polarity];
+  // 2.3 Nine Stars
+  const nineStar = dayData.nineStar || "";
+  if (nineStar.includes("9 Purple")) {
+    score += SCORING.NINE_STAR_WEALTH;
+    tags.add("WEALTH");
+    log.push(`🔥 9 Purple: Supreme Wealth Star.`);
+  } else if (nineStar.includes("1 White")) {
+    score += SCORING.NINE_STAR_NOBLE;
+    log.push(`🌊 1 White: Noble People.`);
+  } else if (nineStar.includes("5 Yellow")) {
+    score += SCORING.NINE_STAR_BAD;
+    flags.add("5 Yellow");
+    log.push(`☣️ 5 Yellow: Emperor of Calamity.`);
+  } else if (nineStar.includes("2 Black")) {
+    score += -15;
+    flags.add("2 Black");
+    log.push(`💊 2 Black: Illness Star.`);
   }
 
-  const guide = TEN_GOD_ACTIONS[tenGodName] || TEN_GOD_ACTIONS["Friend"];
+  // 2.4 Yellow/Black Belt
+  const spiritName = dayData.yellowBlackBelt?.name || "";
+  const badSpirits = [
+    "Heavenly Punishment",
+    "Red Phoenix",
+    "White Tiger",
+    "Heavenly Jail",
+    "Black Tortoise",
+    "Grappling Hook",
+  ];
+  const goodSpirits = [
+    "Green Dragon",
+    "Bright Hall",
+    "Golden Lock",
+    "Precious Light",
+    "Jade Hall",
+    "Life Governor",
+  ];
 
-  // --- 3. PILLAR STRENGTH ---
-  const rootInfo = calculateRootStrengthCached(dayStemClean, dayBranch);
-  const pillarNote = rootInfo.description;
-  const pillarIcon = rootInfo.icon;
-  const pillarScore = rootInfo.score;
+  if (badSpirits.includes(spiritName)) {
+    score += SCORING.SPIRIT_BLACK;
+    log.push(`🌑 SPIRIT: ${spiritName} brings hidden negativity.`);
+    flags.add("Black Spirit");
+  } else if (goodSpirits.includes(spiritName)) {
+    score += SCORING.SPIRIT_YELLOW;
+    log.push(`☀️ SPIRIT: ${spiritName} is auspicious.`);
+  }
 
   // =================================================================
-  // CLASH HIERARCHY
+  // PHASE 3: PERSONALIZATION
   // =================================================================
 
-  // A. GENERAL BREAKERS
-  if (CLASH_PAIRS[yearBranch] === dayBranch) {
-    score -= 20;
-    flags.push("YEAR BREAKER");
+  // 3.1 Boosts
+  if (stars.nobleman) {
+    score += SCORING.NOBLEMAN;
+    flags.add("Nobleman");
+    log.push(`🌟 Nobleman: Great help available from powerful people.`);
+  }
+
+  if (rules.favorableBranches?.includes(dayBranch)) {
+    score += SCORING.USEFUL_GOD;
+    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown";
+    const role = getRole(branchElem);
+    log.push(`🔥 Great Branch (Useful God): ${dayBranch} provides ${role}.`);
+  }
+
+  if (stars.academic) {
+    score += SCORING.ACADEMIC;
+    flags.add("Intellect");
+    tags.add("CAREER");
+    log.push(`🎓 Academic Star: Excellent for strategy & learning.`);
+  }
+  if (stars.travelingHorse) {
+    score += SCORING.TRAVEL_HORSE;
+    flags.add("Travel");
+    log.push(`🐴 Sky Horse: Good for travel and expansion.`);
+  }
+  if (stars.peachBlossom) {
+    score += SCORING.PEACH_BLOSSOM;
+    flags.add("Social");
+    tags.add("PEOPLE");
+    log.push(`🌸 Peach Blossom: High likability & social charisma.`);
+  }
+
+  if (is6Harmony) {
+    score += SCORING.HARMONY_6;
+    flags.add("6-Harmony");
+    tags.add("PEOPLE");
+    log.push(`✨ Six Harmony: ${dayBranch} is your Secret Friend.`);
+  }
+
+  if (is3Harmony) {
+    score += SCORING.HARMONY_3;
+    flags.add("3-Harmony");
+    tags.add("PEOPLE");
+    log.push(`🤝 Three Harmony: ${dayBranch} boosts Social Luck.`);
+  }
+
+  // 3.3 Elements
+  if (isWealthEl) {
+    score += SCORING.FAVORABLE_ELEMENT;
+    tags.add("WEALTH");
+    log.push(
+      isPersonalClash
+        ? `💸 WEALTH TRAP: ${dayElement} is Wealth, but day is broken.`
+        : `💰 ELEMENT: ${dayElement} supports Wealth.`,
+    );
+  } else if (isCareerEl) {
+    score += SCORING.FAVORABLE_ELEMENT;
+    tags.add("CAREER");
+    log.push(
+      isPersonalClash
+        ? `⚠️ CAREER RISK: ${dayElement} is Output, but day is broken.`
+        : `🚀 ELEMENT: ${dayElement} supports Career.`,
+    );
+  } else if (isHealthEl) {
+    score += 10;
+    tags.add("HEALTH");
+    log.push(`🧘 ELEMENT: ${dayElement} supports Health.`);
+  } else if (isAvoidEl) {
+    score += SCORING.UNFAVORABLE_ELEMENT;
+    log.push(`⛔ ELEMENT: ${dayElement} is unfavorable.`);
+  }
+
+  // 3.4 General Breaks
+  if (isGeneralYearClash) {
+    score += SCORING.CLASH_YEAR;
+    flags.add("YEAR BREAKER");
     log.push(`⚠️ General Year Breaker: Date is unstable (Year vs Day).`);
   }
-  if (CLASH_PAIRS[monthBranch] === dayBranch) {
-    score -= 15;
-    flags.push("MONTH BREAKER");
+  if (isGeneralMonthClash) {
+    score += SCORING.CLASH_MONTH;
+    flags.add("MONTH BREAKER");
     log.push(`⚠️ General Month Breaker: Date is unstable (Month vs Day).`);
   }
 
-  // B. PERSONAL BREAKERS
-  if (userDayBranch && dayBranch === CLASH_PAIRS[userDayBranch]) {
-    score = -50;
-    flags.push("PERSONAL BREAKER");
-    log.push(
-      `💀 PERSONAL BREAKER: ${dayBranch} clashes with Day Branch. Risk of conflict/injury.`,
-    );
-    log.push(
-      "⚔️ TROJAN HORSE TIP: Use this aggressive energy to break a bad habit (smoking, sugar) or end a toxic relationship.",
-    );
-  }
-
-  if (userYearBranch && dayBranch === CLASH_PAIRS[userYearBranch]) {
-    score -= 30;
-    flags.push("Social Clash");
+  // 3.5 Personal Negatives
+  if (isYearClash) {
+    score += SCORING.CLASH_YEAR;
+    flags.add("Social Clash");
     log.push(
       `🎭 Year Clash: ${dayBranch} clashes with your Year. Avoid networking.`,
     );
   }
-
-  if (userMonthBranch && dayBranch === CLASH_PAIRS[userMonthBranch]) {
-    score -= 20;
-    flags.push("Career Clash");
+  if (isMonthClash) {
+    score += SCORING.CLASH_MONTH;
+    flags.add("Career Clash");
+    tags.add("CAREER CLASH");
     log.push(
       `🏢 Month Clash: ${dayBranch} clashes with your Month. Expect work friction.`,
     );
-    tags.push("CAREER CLASH");
   }
-
-  const currentLuck = getCurrentLuckPillar(user, year);
-  if (currentLuck && dayBranch === CLASH_PAIRS[currentLuck.branch]) {
-    score -= 30;
-    flags.push("Luck Clash");
+  if (isLuckClash) {
+    score += SCORING.CLASH_LUCK;
+    flags.add("Luck Clash");
     log.push(`☁️ Luck Pillar Clash: ${dayBranch} clashes with Luck Pillar.`);
   }
-
-  // MANUAL AVOID FALLBACK
-  if (
-    rules.badBranches?.includes(dayBranch) &&
-    (!currentLuck || CLASH_PAIRS[currentLuck.branch] !== dayBranch)
-  ) {
-    score -= 20;
-    log.push(`⚠️ Avoid: ${dayBranch} is in light conflict with your chart.`);
-  }
-
-  if (dayBranch === rules.selfPunishment) {
-    score -= 30;
-    flags.push("Self Punishment");
+  if (isSelfPunish) {
+    score += SCORING.SELF_PUNISH;
+    flags.add("Self Punishment");
     log.push(
       `⚠️ Self Punishment: ${dayBranch} triggers self-sabotage/mistakes.`,
     );
   }
 
-  const isBrokenDay =
-    flags.some(
-      (f) =>
-        f.includes("BREAKER") ||
-        f.includes("Clash") ||
-        f.includes("Punishment"),
-    ) || dayBranch === rules.breaker;
-
-  // =================================================================
-  // ELEMENTAL ANALYSIS
-  // =================================================================
-  const dayElement = dayData.element;
-
-  // ALWAYS TAG (Even on Broken Days - Better UX)
-  if (rules.wealthElements?.includes(dayElement)) tags.push("WEALTH");
-  if (rules.careerElements?.includes(dayElement)) tags.push("CAREER");
-  if (rules.healthElements?.includes(dayElement)) tags.push("HEALTH");
-
-  if (rules.avoidElements?.includes(dayElement)) {
-    score -= 15;
-    log.push(`⛔ ELEMENT: ${dayElement} is unfavorable.`);
-  } else {
-    if (rules.wealthElements?.includes(dayElement)) {
-      score += 15;
-      log.push(
-        isBrokenDay
-          ? `💸 WEALTH TRAP: ${dayElement} is Wealth, but day is broken.`
-          : `💰 ELEMENT: ${dayElement} supports Wealth.`,
-      );
-    } else if (rules.careerElements?.includes(dayElement)) {
-      score += 15;
-      log.push(
-        isBrokenDay
-          ? `⚠️ CAREER RISK: ${dayElement} is Output, but day is broken.`
-          : `🚀 ELEMENT: ${dayElement} supports Career.`,
-      );
-    } else if (rules.healthElements?.includes(dayElement)) {
-      score += 10;
-      log.push(`🧘 ELEMENT: ${dayElement} supports Health.`);
-    }
-  }
-
-  // =================================================================
-  // CONSTELLATION CHECK
-  // =================================================================
-  const starName = dayData.constellation;
-  let starQuality: "Good" | "Bad" | "Mixed" = "Mixed";
-  let isStarFavorable = false;
-  let isStarAvoid = false;
-  let isAvoidElement = false;
-
-  if (starName && CONSTELLATION_DATA[starName]) {
-    const starData = CONSTELLATION_DATA[starName];
-    const starElement = starData.element;
-    starQuality = starData.quality;
-    const allUseful = [
-      ...(rules.wealthElements || []),
-      ...(rules.careerElements || []),
-      ...(rules.healthElements || []),
-    ];
-
-    if (allUseful.includes(starElement)) isStarFavorable = true;
-    isAvoidElement = (rules.avoidElements || []).includes(starElement);
-
-    if (starQuality === "Bad") isStarAvoid = true;
-    else if (starQuality === "Mixed" && isAvoidElement) isStarAvoid = true;
-    else if (starQuality === "Good" && isAvoidElement)
-      isStarAvoid = isBrokenDay;
-
-    if (isStarAvoid) {
-      score -= 10;
-      log.push(`⛔ CONSTELLATION: ${starName} is unfavorable.`);
-    } else if (isStarFavorable) {
-      score += 10;
-      log.push(`✨ CONSTELLATION: ${starName} matches useful elements.`);
-    } else if (starQuality === "Good") {
-      score += 2;
-      log.push(`⭐ CONSTELLATION: ${starName} is generally positive.`);
-    }
-  }
-
-  // =================================================================
-  // HARMONIES & BRANCH POWER
-  // =================================================================
-  if (userDayBranch) {
-    if (SIX_HARMONY[userDayBranch] === dayBranch) {
-      score += 20;
-      log.push(`✨ Six Harmony: ${dayBranch} is your Secret Friend.`);
-      flags.push("6-Harmony");
-      tags.push("PEOPLE");
-    }
-    if (THREE_HARMONY[userDayBranch]?.includes(dayBranch)) {
-      score += 10;
-      log.push(`🤝 Three Harmony: ${dayBranch} boosts Social Luck.`);
-      flags.push("3-Harmony");
-      tags.push("PEOPLE");
-    }
-  }
-
-  if (rules.favorableBranches?.includes(dayBranch)) {
-    score += 20;
-    const branchElem = ELEMENT_MAP[dayBranch] || "Unknown";
-    const role = getRole(branchElem);
-    log.push(`Great Branch: ${dayBranch} provides ${role}.`);
-  }
-
-  // =================================================================
-  // ACTIONS FILTER
-  // =================================================================
-  const unstableOfficers = ["Destruction", "Danger", "Close", "Remove"];
-  const isUnstableDay =
-    unstableOfficers.includes(officerName) ||
-    flags.some((f) => f.includes("BREAKER"));
-
-  if (score > 50 && !isUnstableDay) {
-    let bonusApplied = false;
-    STANDARD_RULES.forEach((rule) => {
-      if (!rule.officers.includes(officerName)) return;
-      let matches = false;
-      const dayEl = dayData.element;
-      if (rule.type === "wealth" && rules.wealthElements?.includes(dayEl))
-        matches = true;
-      if (rule.type === "career" && rules.careerElements?.includes(dayEl))
-        matches = true;
-      if (rule.type === "health" && rules.healthElements?.includes(dayEl))
-        matches = true;
-
-      if (matches) {
-        specificActions.push({
-          action: rule.action,
-          icon: rule.icon,
-          desc: rule.description,
-        });
-        if (!bonusApplied) {
-          score += 15;
-          bonusApplied = true;
-          log.push(`🎯 MATCH: Perfect day for ${rule.action}.`);
-        }
-      }
-    });
-  }
-
-  // =================================================================
-  // 9 STARS & SAN SHA
-  // =================================================================
-  const nineStar = dayData.nineStar || "";
-  if (nineStar.includes("9 Purple")) {
-    score += 20;
-    tags.push("WEALTH");
-    log.push(`🔥 9 Purple: Supreme Wealth Star.`);
-  } else if (nineStar.includes("1 White")) {
-    score += 10;
-    log.push(`🌊 1 White: Noble People.`);
-  } else if (nineStar.includes("5 Yellow")) {
-    score -= 20;
-    flags.push("5 Yellow");
-    log.push(`☣️ 5 Yellow: Emperor of Calamity.`);
-  } else if (nineStar.includes("2 Black")) {
-    score -= 10;
-    log.push(`💊 2 Black: Illness Energy.`);
-  }
-
-  const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
-  if (monthBadBranches.includes(dayBranch)) {
-    flags.push("San Sha");
-    score -= 10;
-    log.push(`🗡️ Three Killings: ${dayBranch} opposes the Month.`);
-  }
-
-  // =================================================================
-  // GOAT BLADE (Context Aware)
-  // =================================================================
-  const bladeBranch = GOAT_BLADE_RULES[userDmClean];
-  if (bladeBranch === dayBranch) {
-    flags.push("Goat Blade");
-    let bladeScore = -15;
-    let bladeMsg = `🔪 Goat Blade: Intense, aggressive energy.`;
-
-    if (goal === "Career") {
-      bladeScore = 5;
-      bladeMsg = `⚔️ Goat Blade: Competitive Edge! Good for sales/debates.`;
-    } else if (goal === "Love") {
-      bladeScore = -30;
-      bladeMsg = `💔 Goat Blade: High risk of conflict in relationships.`;
-    }
-
-    score += bladeScore;
-    log.push(bladeMsg);
-  }
-
-  // =================================================================
-  // SHEN SHA
-  // =================================================================
-  const stars = calculateShenSha(user, dayBranch);
-  if (stars.nobleman) {
-    score += 25;
-    log.push(`🌟 Nobleman: Mentorship & Help.`);
-    flags.push("Nobleman");
-  }
-  if (stars.travelingHorse) {
-    score += 10;
-    log.push(`🐴 Sky Horse: Travel Luck.`);
-    flags.push("Travel");
-  }
-  if (stars.peachBlossom) {
-    score += 15;
-    log.push(`🌸 Peach Blossom: Social/Romance.`);
-    flags.push("Social");
-    tags.push("PEOPLE");
-  }
-  if (stars.academic) {
-    score += 15;
-    log.push(`🎓 Academic Star: Strategy.`);
-    flags.push("Intellect");
-    tags.push("CAREER");
-  }
-
+  // 3.6 Shen Sha Risks
   if (stars.robbingShaDay) {
-    score -= 10;
-    flags.push("Robbing Sha (P)");
+    score += SCORING.ROBBING_SHA;
+    flags.add("Robbing Sha");
     log.push("💸 Self-Sabotage (Robbing Sha): Impulse buying/wasting time.");
   }
   if (stars.robbingShaYear) {
-    score -= 10;
-    flags.push("Robbing Sha (Y)");
+    score += SCORING.ROBBING_SHA;
+    flags.add("Robbing Sha (Y)");
     log.push("🛡️ External Risk (Robbing Sha): Fraud/Theft risk.");
   }
   if (stars.deathGod) {
-    score -= 10;
-    flags.push("Death God");
+    score += SCORING.DEATH_GOD;
+    flags.add("Death God");
     log.push("⚖️ Death God: Legal risks.");
   }
   if (stars.solitaryStar) {
-    score -= 5;
-    flags.push("Solitary");
+    score += SCORING.SOLITARY;
+    flags.add("Solitary");
     log.push("🥀 Solitary Star: Inner isolation.");
   }
 
-  // =================================================================
-  // 🆕 GOAL-BASED WEIGHTING
-  // =================================================================
-  if (goal !== "General") {
-    // --- WEALTH ---
-    if (goal === "Wealth") {
-      if (rules.wealthElements?.includes(dayElement)) {
-        score += 20;
-        log.push("🎯 GOAL: Wealth Element Boost.");
-      }
-      if (nineStar.includes("9 Purple")) {
-        score += 15;
-        log.push("🔥 GOAL: 9 Purple Wealth.");
-      }
-      if (tenGodName === "Rob Wealth") {
-        score -= 25;
-        log.push("🚫 GOAL: Rob Wealth risk.");
-      }
-      if (stars.robbingShaDay || stars.robbingShaYear) {
-        score -= 20;
-        log.push("🚫 GOAL: Robbing Sha risk.");
-      }
-    }
-
-    // --- CAREER ---
-    else if (goal === "Career") {
-      if (rules.careerElements?.includes(dayElement)) {
-        score += 20;
-        log.push("🎯 GOAL: Output Element Boost.");
-      }
-      if (stars.nobleman || stars.academic) {
-        score += 15;
-        log.push("🚀 GOAL: Nobleman/Academic help.");
-      }
-      if (officerName === "Destruction") {
-        score -= 15;
-        log.push("🛑 GOAL: Destruction Officer.");
-      }
-    }
-
-    // --- LOVE ---
-    else if (goal === "Love") {
-      if (stars.peachBlossom) {
-        score += 30;
-        log.push("❤️ GOAL: Peach Blossom Romance.");
-      }
-      if (SIX_HARMONY[userDayBranch] === dayBranch) {
-        score += 25;
-        log.push("💞 GOAL: 6 Harmony Connection.");
-      }
-      if (stars.solitaryStar) {
-        score -= 25;
-        log.push("❄️ GOAL: Solitary Star cools love.");
-      }
-      if (flags.includes("Personal Clash")) {
-        score -= 30;
-        log.push("💔 GOAL: Clash guarantees conflict.");
-      }
-    }
-
-    // --- HEALTH ---
-    else if (goal === "Health") {
-      if (rules.healthElements?.includes(dayElement)) {
-        score += 20;
-        log.push("🧘 GOAL: Health Element Boost.");
-      }
-      if (officerName === "Remove" || officerName === "Balance") {
-        score += 15;
-        log.push("🩺 GOAL: Detox/Healing Officer.");
-      }
-      if (nineStar.includes("2 Black") || nineStar.includes("5 Yellow")) {
-        score -= 30;
-        log.push("☣️ GOAL: Illness Star.");
-      }
+  // 3.7 Goat Blade
+  if (isGoatBlade) {
+    flags.add("Goat Blade");
+    if (goal === "Career") {
+      score += 15;
+      log.push(`⚔️ Goat Blade: Competitive Edge! Good for sales/debates.`);
+    } else if (goal === "Love") {
+      score -= 30;
+      log.push(`💔 Goat Blade: High risk of conflict in relationships.`);
+    } else {
+      score -= 10;
+      log.push(`🔪 Goat Blade: Intense, aggressive energy.`);
     }
   }
 
-  // =================================================================
-  // VOID DAYS
-  // =================================================================
+  // 3.8 Void Day
   const userVoidBranches = getVoidStatus(
     userDmClean,
     userDayBranch,
@@ -509,19 +375,136 @@ export const calculateScore = (
   const isVoidDay =
     userVoidBranches.isVoid && userVoidBranches.type === "True Void";
   if (isVoidDay) {
-    flags.push("VOID");
+    score += SCORING.VOID_DAY;
+    flags.add("VOID");
     log.push("🌌 Void Day (Kong Wang): Results are slippery.");
   }
 
+  // 3.9 Manual Avoid
+  if (rules.badBranches?.includes(dayBranch)) {
+    if (!isLuckClash) {
+      score += SCORING.BAD_BRANCH;
+      log.push(`⚠️ Avoid: ${dayBranch} is in light conflict with your chart.`);
+    }
+  }
+
   // =================================================================
-  // HOURLY BREAKDOWN
+  // PHASE 4: GOAL-BASED WEIGHTING
   // =================================================================
+  if (goal !== "General") {
+    if (goal === "Wealth") {
+      if (isWealthEl) score += 20;
+      if (tenGodName === "Rob Wealth") score -= 25;
+      if (stars.robbingShaDay || stars.robbingShaYear) score -= 20;
+      if (nineStar.includes("9 Purple")) score += 15;
+    } else if (goal === "Career") {
+      if (isCareerEl) score += 20;
+      if (stars.nobleman || stars.academic) score += 15;
+      if (officerName === "Destruction") score -= 15;
+    } else if (goal === "Love") {
+      if (stars.peachBlossom) score += 30;
+      if (is6Harmony) score += 25;
+      if (stars.solitaryStar) score -= 25;
+      if (isPersonalClash) score -= 30;
+    } else if (goal === "Health") {
+      if (isHealthEl) score += 20;
+      if (officerName === "Remove" || officerName === "Balance") score += 15;
+      if (nineStar.includes("2 Black") || nineStar.includes("5 Yellow"))
+        score -= 30;
+    }
+  }
+
+  // =================================================================
+  // PHASE 5: SAFETY CAPS & VETOS
+  // =================================================================
+
+  // 5.1 San Sha Forgiveness
+  const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
+  if (monthBadBranches.includes(dayBranch)) {
+    if (score >= 80 || stars.nobleman) {
+      flags.add("Weak San Sha");
+      log.push(`🛡️ Nobleman dissolves San Sha.`);
+    } else {
+      score -= 15;
+      flags.add("San Sha");
+      log.push(`🗡️ Three Killings: ${dayBranch} opposes the Month.`);
+    }
+  }
+
+  // 5.2 Personal Clash
+  if (isPersonalClash) {
+    score += SCORING.PENALTY_PERSONAL_CLASH;
+    flags.add("PERSONAL BREAKER");
+    log.push(
+      `💀 PERSONAL BREAKER: ${dayBranch} clashes with Day Branch. Risk of conflict/injury.`,
+    );
+
+    if (score > SCORING.CAP_PERSONAL_BREAKER) {
+      score = SCORING.CAP_PERSONAL_BREAKER;
+      log.push(`🛑 SCORE CAPPED: Personal Clash overrides positive stars.`);
+    }
+  }
+
+  // 5.3 Month Breaker Cap
+  if (isGeneralMonthClash) {
+    if (score > SCORING.CAP_MONTH_BREAKER) {
+      score = SCORING.CAP_MONTH_BREAKER;
+      log.push(`⚠️ SCORE CAPPED: Month Breaker instability limits potential.`);
+    }
+  }
+
+  // 5.4 Weak Root Cap
+  if (pillarScore <= 20 && score > 75) {
+    score = 75;
+    log.push("⚠️ Score Capped: Day structure is too weak.");
+  }
+
+  // 5.5 Flawed Day Cap
+  if (
+    flags.has("Black Spirit") ||
+    finalIsStarAvoid ||
+    flags.has("5 Yellow") ||
+    flags.has("2 Black")
+  ) {
+    if (score > SCORING.CAP_FLAWED_DAY) {
+      score = SCORING.CAP_FLAWED_DAY;
+      log.push(`🌑 SCORE CAPPED: Flawed Stars prevent Golden status.`);
+    }
+  }
+
+  // =================================================================
+  // PHASE 6: FINAL OUTPUT
+  // =================================================================
+
+  score = Math.min(100, Math.max(0, score));
+
+  let verdictText = "NEUTRAL";
+  let cssClass = "neutral";
+
+  if (score >= 90) {
+    verdictText = "GOLDEN DATE";
+    cssClass = "golden";
+  } else if (score >= 75) {
+    verdictText = "EXCELLENT";
+    cssClass = "excellent";
+  } else if (score >= 60) {
+    verdictText = "GOOD";
+    cssClass = "good";
+  } else if (score < 40) {
+    verdictText = "AVOID";
+    cssClass = "avoid";
+  }
+
+  if (flags.has("PERSONAL BREAKER") || score <= 20) {
+    verdictText = "DANGEROUS";
+    cssClass = "dangerous";
+  }
+
   const userNobleBranches = STEM_NOBLEMAN[userDmClean] || [];
   const userAcademicBranch = ACADEMIC_STAR[userDmClean];
   const userHorseBranch = TRAVELING_HORSE[userYearBranch];
   const userPeachYear = PEACH_BLOSSOM[userYearBranch];
   const userPeachDay = PEACH_BLOSSOM[userDayBranch];
-
   const dayNobleBranches = STEM_NOBLEMAN[dayStemClean] || [];
   const day6HarmonyBranch = SIX_HARMONY[dayBranch];
   const day3HarmonyBranch = THREE_HARMONY[dayBranch] || [];
@@ -549,60 +532,68 @@ export const calculateScore = (
     return { branch, time: timeLabel, tags: hTags };
   });
 
-  // =================================================================
-  // FINAL VERDICT
-  // =================================================================
-  if (pillarScore <= 20 && score > 75) {
-    score = 75;
-    log.push("⚠️ Score Capped: Day structure is too weak.");
+  const unstableOfficers = ["Destruction", "Danger", "Close", "Remove"];
+  const isUnstableDay =
+    unstableOfficers.includes(officerName) || flags.has("PERSONAL BREAKER");
+
+  if (score > 60 && !isUnstableDay) {
+    STANDARD_RULES.forEach((rule) => {
+      if (!rule.officers.includes(officerName)) return;
+      let matches = false;
+      const dayEl = dayData.element;
+      if (rule.type === "wealth" && rules.wealthElements?.includes(dayEl))
+        matches = true;
+      if (rule.type === "career" && rules.careerElements?.includes(dayEl))
+        matches = true;
+      if (rule.type === "health" && rules.healthElements?.includes(dayEl))
+        matches = true;
+
+      if (matches) {
+        specificActions.push({
+          action: rule.action,
+          icon: rule.icon,
+          desc: rule.description,
+        });
+      }
+    });
   }
 
-  score = Math.min(100, Math.max(0, score));
-
-  let verdictText = "NEUTRAL";
-  let cssClass = "neutral";
-  if (score >= 90) {
-    verdictText = "GOLDEN DATE";
-    cssClass = "golden";
-  } else if (score >= 75) {
-    verdictText = "EXCELLENT";
-    cssClass = "excellent";
-  } else if (score >= 60) {
-    verdictText = "GOOD";
-    cssClass = "good";
-  } else if (score < 40) {
-    verdictText = "AVOID";
-    cssClass = "avoid";
-  }
-  if (score <= 0) {
-    verdictText = "DANGEROUS";
-    cssClass = "dangerous";
-  }
+  const officerRec = OFFICER_RECOMMENDATIONS[officerName] || {
+    action: "Proceed",
+    icon: "⚠️",
+    desc: "Proceed with caution.",
+    reality: "The energy is unstable.",
+  };
 
   return {
-    dayType,
-    pillarNote,
-    pillarIcon,
-    pillarScore,
     score,
+    pillarScore,
     verdict: verdictText,
     cssClass,
-    flags,
-    tags: [...new Set(tags)],
+    pillarNote: rootInfo.description,
+    pillarIcon: rootInfo.icon,
+    flags: Array.from(flags),
+    tags: Array.from(tags),
     log,
     specificActions,
     hours,
+
+    dayType,
     tenGodName,
+
     actionTitle: guide.title,
     actionTagline: guide.tagline,
     suitableActions: guide.best,
     cautionAction: guide.caution,
     actionKeywords: guide.keywords,
     officerRec,
-    starQuality,
-    isStarFavorable,
-    isStarAvoid,
-    isAvoidElement,
+    starQuality:
+      starName && CONSTELLATION_DATA[starName]
+        ? CONSTELLATION_DATA[starName].quality
+        : "Mixed",
+    isStarFavorable: isWealthEl || isCareerEl || isHealthEl,
+    isStarAvoid: finalIsStarAvoid,
+    isAvoidElement: isAvoidEl,
     isVoidDay,
   };
 };

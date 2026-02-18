@@ -94,6 +94,7 @@ header {
     display: inline-block;
     width: 26px;
     height: 26px;
+    margin-right: 4px;
     background: url("/Golden-Date-Logo.png") 0 0 no-repeat;
 }
 

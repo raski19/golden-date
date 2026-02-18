@@ -745,24 +745,21 @@ function renderGrid(days) {
           return `<span class="badge" style="background:#d4edda; color:#721c24;"> ${f} </span>`;
 
         // BAD STARS
-        if (
-          f === "5 Yellow" ||
-          f === "Self Punishment" ||
-          f === "San Sha" ||
-          f === "Year Sha"
-        )
+        if (["5 Yellow", "Self Punishment", "San Sha", "Year Sha"].includes(f))
           return `<span class="badge" style="background:#f8d7da; color:#721c24;"> ${f} </span>`;
         if (
-          f === "PERSONAL BREAKER" ||
-          f === "MONTH BREAKER" ||
-          f === "YEAR BREAKER" ||
-          f === "Luck Clash" ||
-          f === "Goat Blade"
+          [
+            "PERSONAL BREAKER",
+            "MONTH BREAKER",
+            "YEAR BREAKER",
+            "Luck Clash",
+            "Goat Blade",
+          ].includes(f)
         )
           return `<span class="badge" style="${worseBadgesStyle}">🗡️ ${f} </span>`;
 
         // Hide unnecessary badges
-        if (f === "Good Star" || f === "Bad Star") return "";
+        if (["Good Star", "Bad Star", "Black Spirit"].includes(f)) return "";
 
         return `<span class="badge"> ${f} </span>`;
       })
