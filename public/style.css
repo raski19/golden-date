@@ -94,7 +94,6 @@ header {
     display: inline-block;
     width: 26px;
     height: 26px;
-    margin-right: 4px;
     background: url("/Golden-Date-Logo.png") 0 0 no-repeat;
 }
 
@@ -722,6 +721,7 @@ header {
         flex-grow: 1;
         gap: 0
     }
+    .brand span { margin-right: 4px }
     .user-controls {
         gap: 8px;
     }

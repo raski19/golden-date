@@ -418,7 +418,7 @@ export const calculateScore = (
   // PHASE 5: SAFETY CAPS & VETOS
   // =================================================================
 
-  // 5.1 San Sha Forgiveness
+  // 5.1 SAN SHA FORGIVENESS
   const monthBadBranches: string[] = SAN_SHA_RULES[monthBranch] || [];
   if (monthBadBranches.includes(dayBranch)) {
     if (score >= 80 || stars.nobleman) {
@@ -431,7 +431,7 @@ export const calculateScore = (
     }
   }
 
-  // 5.2 Personal Clash
+  // 5.2 PERSONAL CLASH (Hard Veto - Day)
   if (isPersonalClash) {
     score += SCORING.PENALTY_PERSONAL_CLASH;
     flags.add("PERSONAL BREAKER");
@@ -445,7 +445,7 @@ export const calculateScore = (
     }
   }
 
-  // 5.3 Month Breaker Cap
+  // 5.3 MONTH BREAKER (Soft Veto)
   if (isGeneralMonthClash) {
     if (score > SCORING.CAP_MONTH_BREAKER) {
       score = SCORING.CAP_MONTH_BREAKER;
@@ -453,13 +453,25 @@ export const calculateScore = (
     }
   }
 
-  // 5.4 Weak Root Cap
+  // 5.4 LUCK CLASH (New Soft Veto)
+  // Fixes the issue where Luck Clashes scored "Golden"
+  if (isLuckClash) {
+    // Use the same cap as Month Breaker (55 - Caution)
+    if (score > SCORING.CAP_MONTH_BREAKER) {
+      score = SCORING.CAP_MONTH_BREAKER;
+      log.push(
+        `☁️ SCORE CAPPED: Luck Pillar Clash creates background friction.`,
+      );
+    }
+  }
+
+  // 5.5 Weak Root Cap
   if (pillarScore <= 20 && score > 75) {
     score = 75;
     log.push("⚠️ Score Capped: Day structure is too weak.");
   }
 
-  // 5.5 Flawed Day Cap
+  // 5.6 Flawed Day Cap (Black Spirit / Bad Stars)
   if (
     flags.has("Black Spirit") ||
     finalIsStarAvoid ||

@@ -759,7 +759,8 @@ function renderGrid(days) {
           return `<span class="badge" style="${worseBadgesStyle}">🗡️ ${f} </span>`;
 
         // Hide unnecessary badges
-        if (["Good Star", "Bad Star", "Black Spirit"].includes(f)) return "";
+        if (["Good Star", "Bad Star", "Black Spirit", "2 Black"].includes(f))
+          return "";
 
         return `<span class="badge"> ${f} </span>`;
       })
