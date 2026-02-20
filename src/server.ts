@@ -16,16 +16,20 @@ import { getWealthRoadmap } from "./utils/wealthEngine";
 const app = express();
 
 // const PORT = config.port || 3333;
-// const MONGO_URI = config.mongoUri || "mongodb://127.0.0.1:27017/goldenDateDB";
+// const MONGO_URI = config.mongoUri || "mongodb://127.0.0.1:27017/";
 
 const PORT = process.env.APP_PORT || 3333;
-const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/goldenDateDB";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/";
 
 mongoose
-  .connect(MONGO_URI)
+  .connect(MONGO_URI, {
+    dbName: "GoldenDate",
+  })
   .then(() => console.log("MongoDB Connected (Pro Mode)"))
   .catch((err) => console.error(err));
+mongoose.connection.on("connecting", () => console.log("Connecting..."));
+mongoose.connection.on("connected", () => console.log("Connected!"));
+mongoose.connection.on("error", (e) => console.log("Error!", e));
 
 app.use(express.json());
 app.use(express.static("public"));

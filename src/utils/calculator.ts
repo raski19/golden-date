@@ -392,25 +392,84 @@ export const calculateScore = (
   // PHASE 4: GOAL-BASED WEIGHTING
   // =================================================================
   if (goal !== "General") {
+    // --- WEALTH ---
     if (goal === "Wealth") {
       if (isWealthEl) score += 20;
       if (tenGodName === "Rob Wealth") score -= 25;
       if (stars.robbingShaDay || stars.robbingShaYear) score -= 20;
       if (nineStar.includes("9 Purple")) score += 15;
-    } else if (goal === "Career") {
+    }
+    // --- CAREER ---
+    else if (goal === "Career") {
       if (isCareerEl) score += 20;
       if (stars.nobleman || stars.academic) score += 15;
       if (officerName === "Destruction") score -= 15;
-    } else if (goal === "Love") {
+    }
+    // --- LOVE (Dating / Romance) ---
+    else if (goal === "Love") {
       if (stars.peachBlossom) score += 30;
       if (is6Harmony) score += 25;
       if (stars.solitaryStar) score -= 25;
       if (isPersonalClash) score -= 30;
-    } else if (goal === "Health") {
+    }
+    // --- HEALTH ---
+    else if (goal === "Health") {
       if (isHealthEl) score += 20;
       if (officerName === "Remove" || officerName === "Balance") score += 15;
       if (nineStar.includes("2 Black") || nineStar.includes("5 Yellow"))
         score -= 30;
+    }
+    // --- WEDDING (High-Stakes Partnership) ---
+    else if (goal === "Wedding") {
+      if (is6Harmony || is3Harmony) {
+        score += 30;
+        log.push("💍 GOAL: Harmony brings perfect union energy.");
+      }
+      if (stars.nobleman) {
+        score += 20;
+        log.push("🕊️ GOAL: Nobleman brings blessings to the marriage.");
+      }
+      if (stars.solitaryStar || isGoatBlade) {
+        score -= 40;
+        log.push("💔 GOAL: Solitary/Blade energy is toxic for weddings.");
+      }
+      if (isVoidDay) {
+        score -= 30;
+        log.push("⚠️ GOAL: Void Day creates an empty foundation for marriage.");
+      }
+      if (isPersonalClash) {
+        score -= 50;
+        log.push("🛑 GOAL: NEVER marry on a Personal Clash day.");
+      }
+    }
+    // --- PRODUCT LAUNCH (Visibility & Market Share) ---
+    else if (goal === "Product Launch") {
+      if (isCareerEl || isWealthEl) {
+        score += 25;
+        log.push("🚀 GOAL: Output/Wealth elements fuel a successful launch.");
+      }
+      if (stars.nobleman) {
+        score += 20;
+        log.push("🌟 GOAL: Nobleman attracts VIPs and strong early adopters.");
+      }
+      if (nineStar.includes("9 Purple")) {
+        score += 20;
+        log.push("🔥 GOAL: 9 Purple star brings maximum visibility and fame.");
+      }
+      if (tenGodName === "Rob Wealth" || stars.robbingShaDay) {
+        score -= 30;
+        log.push(
+          "🚫 GOAL: Rob Wealth/Sha risks lost sales or fierce competition.",
+        );
+      }
+      if (officerName === "Destruction" || officerName === "Close") {
+        score -= 25;
+        log.push("🛑 GOAL: Destructive/Closed officer stalls momentum.");
+      }
+      if (isVoidDay) {
+        score -= 20;
+        log.push("🌌 GOAL: Void Day launches often fail to gain traction.");
+      }
     }
   }
 
@@ -558,6 +617,11 @@ export const calculateScore = (
       if (rule.type === "career" && rules.careerElements?.includes(dayEl))
         matches = true;
       if (rule.type === "health" && rules.healthElements?.includes(dayEl))
+        matches = true;
+      if (
+        rule.type === "love" &&
+        (is6Harmony || is3Harmony || stars.peachBlossom)
+      )
         matches = true;
 
       if (matches) {

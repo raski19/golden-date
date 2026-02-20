@@ -71,6 +71,23 @@ const CLIENT_RULES = [
     icon: "⚖️",
     description: "Resolve conflicts or negotiate terms with partners.",
   },
+  {
+    officers: ["Open", "Success", "Establish"],
+    type: "career",
+    action: "Product Launch",
+    icon: "🚀",
+    description:
+      "Launch new products, apps, or public campaigns for maximum reach.",
+  },
+  // --- LOVE / RELATIONSHIPS ---
+  {
+    officers: ["Success", "Stable", "Open"],
+    type: "love",
+    action: "Wedding",
+    icon: "💍",
+    description:
+      "A perfect day for marriage, proposals, and lifelong commitments.",
+  },
   // --- HEALTH ---
   {
     officers: ["Remove", "Destruction"],
@@ -103,11 +120,15 @@ const SEARCH_GOALS = [
   { value: "Ask for Favors", label: "🤲 Ask for Favors" },
   { value: "Branding & Visibility", label: "🌟 Branding & Visibility" },
 
-  // --- Career ---
+  // --- Career & Business ---
   { value: "Acquire Assets", label: "🏦 Acquire Assets" },
   { value: "Start New Role", label: "🏗️ Start New Role" },
   { value: "Fix Problems", label: "🧹 Fix Problems" },
   { value: "Negotiations", label: "⚖️ Negotiations" },
+  { value: "Product Launch", label: "🚀 Product Launch" },
+
+  // --- Love & Relationships ---
+  { value: "Wedding", label: "💍 Wedding & Marriage" },
 
   // --- Health ---
   { value: "Health & Reset", label: "🧘‍♀️ Health & Reset (Detox)" },

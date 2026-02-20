@@ -621,7 +621,7 @@ export const OFFICER_DATA: Record<string, OfficerDefinition> = {
 
 export interface StandardRule {
   officers: string[];
-  type: "wealth" | "career" | "health";
+  type: "wealth" | "career" | "health" | "love";
   action: string;
   icon: string;
   description: string;
@@ -688,6 +688,23 @@ export const STANDARD_RULES: StandardRule[] = [
     action: "Negotiations",
     icon: "⚖️",
     description: "Resolve conflicts or negotiate terms with partners.",
+  },
+  {
+    officers: ["Open", "Success", "Establish"],
+    type: "career",
+    action: "Product Launch",
+    icon: "🚀",
+    description:
+      "Launch new products, apps, or public campaigns for maximum reach.",
+  },
+  // --- LOVE / RELATIONSHIPS ---
+  {
+    officers: ["Success", "Stable", "Open"],
+    type: "love",
+    action: "Wedding",
+    icon: "💍",
+    description:
+      "A perfect day for marriage, proposals, and lifelong commitments.",
   },
   // --- HEALTH ---
   {
