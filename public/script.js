@@ -7,6 +7,24 @@ let currentUser;
 let currentGuestUser = null;
 let currentMonthDays = [];
 
+// --- ELEMENT MAPPINGS FOR BADGES ---
+const STEM_ELEMENTS = {
+  Jia: "Wood", Yi: "Wood",
+  Bing: "Fire", Ding: "Fire",
+  Wu: "Earth", Ji: "Earth",
+  Geng: "Metal", Xin: "Metal",
+  Ren: "Water", Gui: "Water"
+};
+
+const BRANCH_ELEMENTS = {
+  Tiger: "Wood", Rabbit: "Wood",
+  Snake: "Fire", Horse: "Fire",
+  Monkey: "Metal", Rooster: "Metal",
+  Pig: "Water", Rat: "Water",
+  Dragon: "Earth", Dog: "Earth",
+  Ox: "Earth", Goat: "Earth"
+};
+
 // TODO: Fetch this from Backend
 const CLIENT_RULES = [
   // --- WEALTH ---
@@ -113,6 +131,7 @@ const CLIENT_RULES = [
     description: "Begin a long course of medication or a new fitness regime.",
   },
 ];
+
 const SEARCH_GOALS = [
   // --- Wealth ---
   { value: "Sign Contracts", label: "📝 Sign Contracts" },
@@ -135,6 +154,7 @@ const SEARCH_GOALS = [
   { value: "Adjustment/Therapy", label: "🧘 Adjustment / Therapy" },
   { value: "Start Long-term Treatment", label: "💊 Start Medication" },
 ];
+
 const RELATIONSHIP_WEATHER = {
   Friend: {
     weather: "☀️ Sunny & Social",
@@ -196,6 +216,7 @@ const RELATIONSHIP_WEATHER = {
       "You feel misunderstood. Good for deep talks, bad for superficial small talk. You may read between lines that aren’t there.",
   },
 };
+
 const CLASH_PAIRS = {
   Rat: "Horse",
   Horse: "Rat",
@@ -210,6 +231,7 @@ const CLASH_PAIRS = {
   Snake: "Pig",
   Pig: "Snake",
 };
+
 const COMBO_PAIRS = {
   Rat: "Ox",
   Ox: "Rat",
@@ -342,8 +364,6 @@ async function generateGuestProfile() {
     guestOption.selected = true;
 
     // 3. Show Success & Load
-    // alert(`Profile Generated for ${guestUser.name}...`); // Optional now since UI shows it
-
     await loadCalendar(guestUser);
   } catch (e) {
     alert(e.message);
@@ -394,44 +414,35 @@ async function handleUserChange() {
   const userSelect = document.getElementById("userSelect");
   const selectedValue = userSelect.value;
 
-  // Show Loading
   loadingOverlay("flex");
 
-  // Use a small timeout to let the UI update before the heavy lifting starts
   setTimeout(async () => {
     try {
       if (selectedValue === "guest") {
-        // CASE 1: SWITCHING TO GUEST (Memory)
         if (currentGuestUser) {
-          currentUser = currentGuestUser; // Set global state
-          await loadCalendar(currentGuestUser); // Pass full object to loader
+          currentUser = currentGuestUser;
+          await loadCalendar(currentGuestUser);
         } else {
-          // Safety fallback if memory was cleared
           alert("Guest session expired. Please generate a new profile.");
           userSelect.value = "";
           loadingOverlay("none");
           return;
         }
       } else {
-        // CASE 2: SWITCHING TO DB USER (Server)
-        // We set currentUser to null so loadCalendar knows to fetch from DB
         currentUser = null;
         await loadCalendar();
       }
 
-      populateGoalSelect(); // Reload goals for whoever is selected
+      populateGoalSelect();
     } catch (error) {
       console.error("Error loading profile:", error);
       alert("Failed to load profile. Please try again.");
     } finally {
-      // Hide Loading
       loadingOverlay("none");
     }
 
-    // Clear the wealth container so it reloads on next open
     document.getElementById("wealthContainer").innerHTML = "";
 
-    // If the section is currently open, reload immediately
     const wealthContent = document.getElementById("wealthContent");
     if (wealthContent.style.display !== "none") {
       const userId = document.getElementById("userSelect").value;
@@ -444,10 +455,7 @@ function populateGoalSelect() {
   const select = document.getElementById("goalSelect");
   if (!select) return;
 
-  // Add a default placeholder
   let html = `<option value="" disabled selected>Select a Goal...</option>`;
-
-  // Add options from our list
   html += SEARCH_GOALS.map(
     (g) => `<option value="${g.value}">${g.label}</option>`,
   ).join("");
@@ -467,12 +475,10 @@ async function findDates() {
     return;
   }
 
-  // 1. UI Feedback (Loading)
-  const btn = document.querySelector(".btn-search"); // Ensure your button has this class
+  const btn = document.querySelector(".btn-search");
   if (btn) btn.innerText = "Searching...";
 
   try {
-    // 2. Fetch Data
     const response = await fetch("/api/find-dates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -484,10 +490,7 @@ async function findDates() {
     });
 
     if (!response.ok) throw new Error("Server returned " + response.status);
-
     const data = await response.json();
-
-    // 3. Render
     showSearchResults(data, goal);
   } catch (error) {
     console.error("❌ Search Failed:", error);
@@ -546,20 +549,17 @@ async function loadCalendar(guestUser = null) {
   let url = `/api/calendar?year=${currentYear}&month=${currentMonth}`;
   let options = {};
 
-  // If we have a guest user, we must POST their profile to the calendar engine
   if (guestUser) {
-    url = `/api/calendar/guest?year=${currentYear}&month=${currentMonth}`; // New Endpoint
+    url = `/api/calendar/guest?year=${currentYear}&month=${currentMonth}`;
     options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user: guestUser }),
     };
   } else {
-    // Standard DB User
     const userId = document.getElementById("userSelect").value;
     if (!userId) return;
     url += `&userId=${userId}`;
-    // loadWealthStrategy(userId);
   }
 
   const res = await fetch(url, options);
@@ -572,17 +572,14 @@ async function loadCalendar(guestUser = null) {
   renderBanner(analysis);
   renderGrid(days);
 
-  // Hide Loading
   loadingOverlay("none");
 }
 
 function renderBanner(analysis) {
   const banner = document.getElementById("monthBanner");
-  // Safety check if element exists (you added it to HTML in previous step)
   if (!analysis || !banner) return;
 
   banner.className = `month-banner ${analysis.cssClass}`;
-  // banner.style.display = "flex";
 
   let icon = "📅";
   if (analysis.verdict === "DANGEROUS") icon = "⚠️";
@@ -609,11 +606,8 @@ function renderGrid(days) {
   grid.innerHTML = "";
 
   const firstDayOfWeek = new Date(currentYear, currentMonth - 1, 1).getDay();
-  // Adjust logic if you want Mon start vs Sun start.
   const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
 
-  // Render empty cells based on new offset
-  // for (let i = 0; i < firstDayOfWeek; i++) {
   for (let i = 0; i < startOffset; i++) {
     grid.innerHTML += "<div></div>";
   }
@@ -624,7 +618,6 @@ function renderGrid(days) {
     const card = document.createElement("div");
     const tags = day.analysis.tags || [];
 
-    // Mark today's card
     const isToday = isCurrentMonth && day.day === today.getDate();
     if (isToday) {
       card.classList.add("today");
@@ -635,36 +628,34 @@ function renderGrid(days) {
     let typeStyle = "color:#999; font-size:0.7rem; font-weight:normal;";
 
     if (type === "Wealth")
-      typeStyle = "color:#198754; font-weight:bold; font-size:0.7rem;"; // Green
+      typeStyle = "color:#198754; font-weight:bold; font-size:0.7rem;";
     if (type === "Influence")
-      typeStyle = "color:#0d6efd; font-weight:bold; font-size:0.7rem;"; // Blue
+      typeStyle = "color:#0d6efd; font-weight:bold; font-size:0.7rem;";
     if (type === "Resource")
-      typeStyle = "color:#6610f2; font-weight:bold; font-size:0.7rem;"; // Purple
+      typeStyle = "color:#6610f2; font-weight:bold; font-size:0.7rem;";
     if (type === "Output")
-      typeStyle = "color:#fd7e14; font-weight:bold; font-size:0.7rem;"; // Orange
+      typeStyle = "color:#fd7e14; font-weight:bold; font-size:0.7rem;";
 
     const pScore = day.analysis.pillarScore || 0;
     const pIcon = day.analysis.pillarIcon || "";
     const pNote = day.analysis.pillarNote || "";
     let strongFoundation = false;
 
-    // 1. TRANSLATE SCORE TO SIMPLE ENGLISH
     let supportLabel = "Unsupported";
-    let supportColor = "#dc3545"; // Red
+    let supportColor = "#dc3545";
 
     if (pScore >= 85) {
       supportLabel = "Very Strong";
-      supportColor = "#198754"; // Dark Green
+      supportColor = "#198754";
     } else if (pScore >= 60) {
       supportLabel = "Supported";
-      supportColor = "#0d6efd"; // Blue
+      supportColor = "#0d6efd";
       strongFoundation = true;
     } else if (pScore >= 40) {
       supportLabel = "Weak";
-      supportColor = "#fd7e14"; // Orange
+      supportColor = "#fd7e14";
     }
 
-    // --- CONSTELLATION VISUAL LOGIC ---
     const quality = analysis.starQuality || "Mixed";
     const isFav = analysis.isStarFavorable || false;
     const isAvoid = analysis.isStarAvoid || false;
@@ -674,155 +665,107 @@ function renderGrid(days) {
     let starColor = "#999";
     let starWeight = "400";
 
-    // 1. RED (Avoid)
     if (isAvoid) {
       starIcon = "⛔";
-      starColor = "#dc3545"; // Red
-
-      // BOLD RED CONDITION:
-      // It is bold if it is inherently Bad AND the Element is also Avoided.
-      // (This covers Pleiades: Bad + Fire Clash = Bold Red)
-      // (This exempts Ghost: Bad + Metal Support = Normal Red)
+      starColor = "#dc3545";
       if (quality === "Bad" && isAvoidElement) {
         starWeight = "800";
       }
     }
-    // 2. GREEN (Positive)
     else if (quality === "Good" || (quality === "Mixed" && isFav)) {
       starIcon = "🌟";
-      starColor = "#28a745"; // Green
-
-      // BOLD GREEN CONDITION:
-      // Only if inherent Good AND Favorable Element
+      starColor = "#28a745";
       if (quality === "Good" && isFav) {
         starWeight = "800";
       }
     }
-    // 3. GREY: Mixed & Neutral
     else starColor = "#999";
 
     const starStyle = `color:${starColor}; font-weight:${starWeight}; font-size: 0.75rem;`;
 
-    // --- NINE STAR VISUAL LOGIC (Period 9 Optimized) ---
-    const ns = day.info.nineStar || ""; // e.g. "5 Yellow (Disaster)"
-    const nsNumber = ns.split(" ")[0]; // "5"
-    const nsShort = ns.split("(")[0].trim(); // "5 Yellow"
+    const ns = day.info.nineStar || "";
+    const nsNumber = ns.split(" ")[0];
+    const nsShort = ns.split("(")[0].trim();
 
-    let nsStyle = "color:#7f8c8d;"; // Default Metal Grey
+    let nsStyle = "color:#7f8c8d;";
     let nsIcon = "⭐";
 
-    // Logic based on Period 9 Hierarchy
     if (nsNumber === "9") {
-      // THE KING: Supreme Wealth & Fame (Fire)
-      nsStyle =
-        "color:#8e44ad; font-weight:900; text-shadow: 0px 0px 1px #e056fd;"; // Glowing Purple
+      nsStyle = "color:#8e44ad; font-weight:900; text-shadow: 0px 0px 1px #e056fd;";
       nsIcon = "🔥";
     } else if (nsNumber === "1") {
-      // THE QUEEN: Future Wealth & Nobleman (Water)
-      nsStyle = "color:#2980b9; font-weight:bold;"; // Strong Blue
+      nsStyle = "color:#2980b9; font-weight:bold;";
       nsIcon = "🌊";
     } else if (nsNumber === "8") {
-      // THE RETIREE: Stable Assets (Earth)
-      nsStyle = "color:#27ae60; font-weight:bold;"; // Green
+      nsStyle = "color:#27ae60; font-weight:bold;";
       nsIcon = "💰";
     } else if (nsNumber === "6") {
-      // AUTHORITY: Execution & Status (Metal)
       nsStyle = "color:#7f8c8d; font-weight:bold;";
       nsIcon = "⚙️";
     } else if (nsNumber === "4") {
-      // ACADEMIC: Wisdom & Romance (Wood)
-      nsStyle = "color:#16a085;"; // Teal
+      nsStyle = "color:#16a085;";
       nsIcon = "🎓";
     } else if (nsNumber === "5") {
-      // DISASTER: The Emperor of Bad Luck (Earth)
-      nsStyle = "color:#c0392b; font-weight:900;"; // Deep Red
+      nsStyle = "color:#c0392b; font-weight:900;";
       nsIcon = "☣️";
     } else if (nsNumber === "2") {
-      // SICKNESS: Illness (Earth)
-      nsStyle = "color:#2c3e50; font-weight:bold;"; // Dark Grey/Black
+      nsStyle = "color:#2c3e50; font-weight:bold;";
       nsIcon = "💊";
     } else if (nsNumber === "3" || nsNumber === "7") {
-      // CONFLICT: Robbery & Arguments
-      nsStyle = "color:#d35400; font-weight:bold;"; // Burnt Orange
+      nsStyle = "color:#d35400; font-weight:bold;";
       nsIcon = "⚔️";
     }
 
-    const worseBadgesStyle =
-      "background:#343a40; color:#fff; border:1px solid #000;";
+    const worseBadgesStyle = "background:#343a40; color:#fff; border:1px solid #000;";
 
-    // --- BADGES LOGIC ---
     let badges = day.analysis.flags
       .map((f) => {
-        if (f === "Nobleman")
-          return `<span class="badge" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba;">🌟 ${f} </span>`;
-        if (f === "Travel")
-          return `<span class="badge" style="background:#e2e3e5; color:#383d41;">🐴 ${f} </span>`;
-        if (f === "Social")
-          return `<span class="badge" style="color:#721c24;">🌸 ${f} </span>`;
-        if (f === "Intellect")
-          return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 ${f} </span>`;
-
-        if (f === "3-Harmony" || f === "6-Harmony")
-          return `<span class="badge" style="background:#d4edda; color:#721c24;"> ${f} </span>`;
-
-        // BAD STARS
-        if (["5 Yellow", "Self Punishment", "San Sha", "Year Sha"].includes(f))
-          return `<span class="badge" style="background:#f8d7da; color:#721c24;"> ${f} </span>`;
-        if (
-          [
-            "PERSONAL BREAKER",
-            "MONTH BREAKER",
-            "YEAR BREAKER",
-            "Luck Clash",
-            "Goat Blade",
-          ].includes(f)
-        )
+        if (f === "Nobleman") return `<span class="badge" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba;">🌟 ${f} </span>`;
+        if (f === "Travel") return `<span class="badge" style="background:#e2e3e5; color:#383d41;">🐴 ${f} </span>`;
+        if (f === "Social") return `<span class="badge" style="color:#721c24;">🌸 ${f} </span>`;
+        if (f === "Intellect") return `<span class="badge" style="background:#d1ecf1; color:#0c5460;">🎓 ${f} </span>`;
+        if (f === "3-Harmony" || f === "6-Harmony") return `<span class="badge" style="background:#d4edda; color:#721c24;"> ${f} </span>`;
+        if (["5 Yellow", "Self Punishment", "San Sha", "Year Sha"].includes(f)) return `<span class="badge" style="background:#f8d7da; color:#721c24;"> ${f} </span>`;
+        if (["PERSONAL BREAKER", "MONTH BREAKER", "YEAR BREAKER", "Luck Clash", "Goat Blade"].includes(f))
           return `<span class="badge" style="${worseBadgesStyle}">🗡️ ${f} </span>`;
-
-        // Hide unnecessary badges
-        if (["Good Star", "Bad Star", "Black Spirit", "2 Black"].includes(f))
-          return "";
-
+        if (["Good Star", "Bad Star", "Black Spirit", "2 Black"].includes(f)) return "";
         return `<span class="badge"> ${f} </span>`;
       })
       .join("");
 
-    if (tags.includes("WEALTH"))
-      badges += `<span class="badge" style="background:#d4edda; color:#155724">💰</span>`;
-    if (tags.includes("CAREER"))
-      badges += `<span class="badge" style="background:#cce5ff; color:#004085">🚀</span>`;
-    if (tags.includes("PEOPLE"))
-      badges += `<span class="badge" style="background:#e0cffc; color:#5a32a3">🤝</span>`;
-    if (tags.includes("HEALTH"))
-      badges += `<span class="badge" style="background:#d1e7dd; color:#0f5132">🧘</span>`;
+    if (tags.includes("WEALTH")) badges += `<span class="badge" style="background:#d4edda; color:#155724">💰</span>`;
+    if (tags.includes("CAREER")) badges += `<span class="badge" style="background:#cce5ff; color:#004085">🚀</span>`;
+    if (tags.includes("PEOPLE")) badges += `<span class="badge" style="background:#e0cffc; color:#5a32a3">🤝</span>`;
+    if (tags.includes("HEALTH")) badges += `<span class="badge" style="background:#d1e7dd; color:#0f5132">🧘</span>`;
 
+    // --- ELEMENT EXTRACTION FOR BADGES ---
     const simpleStem = day.info.stem.split(" ")[0];
+    const simpleBranch = day.info.dayBranch.split(" ")[0];
+
+    const stemElement = STEM_ELEMENTS[simpleStem] || "Unknown";
+    const branchElement = BRANCH_ELEMENTS[simpleBranch] || "Unknown";
+
     const tenGods = day.tenGods || { stemGod: "?", branchGod: "?" };
     const stemBadge = tenGods.stemGod || "?";
     const branchBadge = tenGods.branchGod || "?";
 
-    // --- ACTION MATCHES ---
     const actions = day.analysis.specificActions || [];
     let actionHtml = "";
     if (actions.length > 0) {
       actionHtml = `<div class="action-row">${actions[0].icon} ${actions[0].action}</div>`;
     }
 
-    // --- YELLOW/BLACK BELT ---
     const yb = day.info.yellowBlackBelt;
     const ybClass = yb.type === "Yellow" ? "spirit-yellow" : "spirit-black";
 
-    // CALCULATE BAR COLOR & WIDTH
     const dayScore = day.analysis.score || 0;
-    let barColor = "#dc3545"; // Default Red (< 40)
+    let barColor = "#dc3545";
 
-    if (dayScore >= 80)
-      barColor = "#198754"; // Green (Excellent)
-    else if (dayScore >= 60)
-      barColor = "#0d6efd"; // Blue (Good)
-    else if (dayScore >= 40) barColor = "#fd7e14"; // Orange (Average)
+    if (dayScore >= 80) barColor = "#198754";
+    else if (dayScore >= 60) barColor = "#0d6efd";
+    else if (dayScore >= 40) barColor = "#fd7e14";
 
-    const barWidth = Math.min(dayScore, 100); // Cap at 100%
+    const barWidth = Math.min(dayScore, 100);
 
     card.className = `day-card ${cssClass}`;
     card.innerHTML = `
@@ -845,7 +788,7 @@ function renderGrid(days) {
             <div class="pillars-container" style="position:relative;" title="${pNote}">
                 <div class="pillar-row">
                     <span class="pillar-txt">${simpleStem}</span>
-                    <span class="god-badge" data-god="${stemBadge}">${stemBadge}</span>
+                    <span class="god-badge" data-element="${stemElement}">${stemBadge}</span>
                 </div>
                 
                 <div style="text-align:center; line-height:1.2;">
@@ -861,7 +804,7 @@ function renderGrid(days) {
 
                 <div class="pillar-row">
                     <span class="pillar-txt">${day.info.dayBranch}</span>
-                    <span class="god-badge" data-god="${branchBadge}">${branchBadge}</span>
+                    <span class="god-badge" data-element="${branchElement}">${branchBadge}</span>
                 </div>
             </div>
             
@@ -882,12 +825,10 @@ function renderGrid(days) {
     card.onclick = () => showDetails(day);
     grid.appendChild(card);
 
-    // Check if the toggles are ON, and re-apply the visual effects immediately
     if (document.getElementById("architectToggle")?.checked) {
       toggleArchitectMode();
     }
 
-    // Scroll to today
     if (isCurrentMonth) {
       requestAnimationFrame(() => {
         const todayEl = grid.querySelector('[data-today="true"]');
@@ -904,20 +845,15 @@ function renderGrid(days) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // If the bar is visible on screen (even 10%)
           if (entry.isIntersecting) {
-            // Add the class that triggers the CSS transition
             entry.target.classList.add("visible");
-
-            // Stop watching this element (so it doesn't re-animate when you scroll up/down)
             observer.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.1 },
-    ); // Trigger when 10% of the bar is visible
+    );
 
-    // Attach observer to all bars
     const allBars = grid.querySelectorAll(".score-bar-fill");
     allBars.forEach((bar) => observer.observe(bar));
   });
@@ -929,7 +865,6 @@ function showLegend() {
   const userId = document.getElementById("userSelect").value;
   const user = allUsersData ? allUsersData.find((u) => u._id === userId) : null;
 
-  // A. STATIC CONTENT (Colors, Symbols, 12 Officers)
   let html = `
         <div class="grid-dashboard">
             <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
@@ -1021,8 +956,6 @@ function showLegend() {
         </div>
     `;
 
-  // B. DYNAMIC USER RULES
-  // This section changes based on who is selected in the dropdown
   if (user && user.rules) {
     html += `
             <h5 style="margin: 25px 0 15px 0; padding-bottom:10px; border-bottom:1px solid #eee; color:#333; font-weight:bold;">
@@ -1031,17 +964,13 @@ function showLegend() {
             <div class="grid-dashboard">`;
 
     html += CLIENT_RULES.map((rule) => {
-      // 1. Find User's Element for this Rule
       let elements = [];
       if (rule.type === "wealth") elements = user.rules.wealthElements || [];
-      else if (rule.type === "career")
-        elements = user.rules.careerElements || [];
-      else if (rule.type === "health")
-        elements = user.rules.healthElements || [];
+      else if (rule.type === "career") elements = user.rules.careerElements || [];
+      else if (rule.type === "health") elements = user.rules.healthElements || [];
 
       const elString = elements.length > 0 ? elements.join(", ") : "None";
 
-      // 2. Render Card (Exact style you requested)
       return `
                 <div style="background:#fff; border:1px solid #dee2e6; border-left:4px solid #0d6efd; padding:12px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                     <div style="font-weight:bold; color:#0d6efd; font-size:1rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
@@ -1074,7 +1003,6 @@ function showDetails(day) {
   const titleEl = document.getElementById("detailsTitle");
   const bodyEl = document.getElementById("detailsBody");
 
-  // --- 1. Navigation Logic ---
   let currentIndex = currentMonthDays.findIndex(
     (d) => d.fullDate === day.fullDate,
   );
@@ -1093,7 +1021,6 @@ function showDetails(day) {
     `;
   const disabledStyle = `opacity: 0.2; cursor: default;`;
 
-  // Set Title
   titleEl.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
             <button id="btnPrevDay" style="${btnStyle} ${!prevDay ? disabledStyle : ""}" ${!prevDay ? "disabled" : ""}> 
@@ -1111,12 +1038,10 @@ function showDetails(day) {
         </div>
     `;
 
-  // --- 2. Data Preparation ---
   const logs = day.analysis.log || [];
   const score = day.analysis.score || 0;
   const officer = day.info.officer;
 
-  // Traffic Light Status
   let status = {
     color: "#198754",
     bg: "#d1e7dd",
@@ -1151,7 +1076,6 @@ function showDetails(day) {
     };
   }
 
-  // Action Maps
   const bestForMap = {
     Establish: "Proposing Marriage, Starting a Job, or Medical Diagnosis",
     Remove: "Cleaning, Decluttering, or Medical Procedures",
@@ -1182,9 +1106,6 @@ function showDetails(day) {
     Close: "Medical Procedures or Important Meetings",
   };
 
-  // --- 3. HTML Construction ---
-
-  // Executive Summary
   const executiveSummaryHtml = `
   <div style="background: ${status.bg}; border-left: 6px solid ${status.color}; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
@@ -1206,7 +1127,6 @@ function showDetails(day) {
       </div>
   </div>`;
 
-  // Strategy
   const tenGodName = day.tenGods?.stemGod || "F";
   const strategy = getPersonalizedActions(officer, tenGodName);
   const strategyHtml = `
@@ -1229,14 +1149,12 @@ function showDetails(day) {
       </div>
   </div>`;
 
-  // Day Info
   const tenGods = day.tenGods || {};
   const dayInfo = `<div style="padding:0 10px; margin-bottom:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
     <div><strong>Stem:</strong> ${day.info.stem} (${tenGods.stemGod})<br><strong>Branch:</strong> ${day.info.dayBranch} (${tenGods.branchGod})</div>
     <div><strong>Officer:</strong> ${day.info.officer}<br><strong>Element:</strong> ${day.info.element}</div>
   </div>`;
 
-  // Archetype
   const tenGodTitle = day.analysis.tenGodName || "Day Energy";
   const guideTitle = day.analysis.actionTitle || "The Guide";
   const guideTagline = day.analysis.actionTagline || "";
@@ -1278,7 +1196,6 @@ function showDetails(day) {
             </div>
         </div>`;
 
-  // Analysis Pros/Cons
   const pros = [],
     cons = [],
     neutrals = [];
@@ -1328,7 +1245,6 @@ function showDetails(day) {
             ${neutrals.length > 0 ? `<div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 10px;"><div style="font-weight:bold; color:#6c757d; margin-bottom:12px; font-size:0.8rem;">ℹ️ GENERAL CONTEXT</div>${renderAnalysisList(neutrals, "text-muted")}</div>` : ""}
         </div>`;
 
-  // Hourly Grid (Personalized)
   const hoursData = day.analysis.hours || [];
   const formatHourRow = (h) => {
     const positives = ["Nobleman", "Academic", "Horse"];
@@ -1389,7 +1305,6 @@ function showDetails(day) {
             <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">💡 <strong>Tip:</strong> Use "Nobleman" hours for asking favors. Use "Clash" hours for rest.</div>
         </div>`;
 
-  // Cosmic & Energy
   const nineStarName = day.info.nineStar || "Unknown";
   const nineStarDesc = day.info.nineStarDesc || "No specific data.";
   const starDesc = day.info.constellationDesc || "No specific data.";
@@ -1419,13 +1334,11 @@ function showDetails(day) {
 
   const cosmicSection = `<div style="margin-top:20px; padding-top:15px;"><h5 style="color:#444; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eee">🌌 Cosmic Atmosphere</h5><div style="background:${starBg}; padding:10px; border-radius:6px; border-left:4px solid ${starColor};"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:bold; color:${starColor};">🧭 9 Star Qi: ${nineStarName}</div></div><div style="font-size:0.85rem; color:#555; margin-top:4px; font-style:italic;">"${nineStarDesc}"</div></div></div>`;
 
-  // Emotional Weather
   const stemGod = day.analysis.tenGodName || "Friend";
   const cleanGodName = stemGod.split("(")[0].trim();
   const weatherData =
     RELATIONSHIP_WEATHER[cleanGodName] || RELATIONSHIP_WEATHER["Friend"];
 
-  // Spouse Check
   const userSpouseBranch = currentUser ? currentUser.dayBranch : null;
   const db = day.info.dayBranch;
   let spouseStatusHtml = "";
@@ -1458,8 +1371,6 @@ function showDetails(day) {
 
   const weatherWidget = `<div style="margin-top: 15px; background: ${bgTheme}; border-left: 5px solid ${borderTheme}; padding: 15px; border-radius: 4px;"><h5 style="margin: 0 0 10px 0; color: ${borderTheme}; display: flex; align-items: center; gap: 8px;">${weatherData.weather} <span style="font-size:0.8rem; color:#666; font-weight:normal;">(${cleanGodName})</span></h5><div style="display: grid; grid-template-columns: 1fr; gap: 8px;"><div><strong>🧠 Mood:</strong> ${weatherData.mood}</div><div><strong>❤️ Advice:</strong> <i>${weatherData.advice}</i></div></div>${spouseStatusHtml}</div>`;
 
-  // --- 4. Render Initial HTML (Sync Data) ---
-  // We append a container specifically for the Almanac
   const almanacContainerHtml = `<div id="almanac-container"><small style="color:#aaa; display:block; text-align:center; margin-top:20px;">Checking Almanac...</small></div>`;
 
   bodyEl.innerHTML = `
@@ -1475,7 +1386,6 @@ function showDetails(day) {
         ${almanacContainerHtml}
     `;
 
-  // --- 5. Navigation Events ---
   const btnPrev = document.getElementById("btnPrevDay");
   const btnNext = document.getElementById("btnNextDay");
 
@@ -1497,10 +1407,8 @@ function showDetails(day) {
     btnNext.onmouseout = () => (btnNext.style.color = "#555");
   }
 
-  // --- 6. Open Modal & Fetch Async Data ---
   openModalById("detailsModal");
 
-  // Fetch Almanac Data (Lazy Load)
   fetch(`/api/day-details/${day.fullDate}`)
     .then((res) => {
       if (!res.ok) throw new Error("No data");
@@ -1514,17 +1422,14 @@ function showDetails(day) {
     })
     .catch((err) => {
       const container = document.getElementById("almanac-container");
-      if (container) container.innerHTML = ""; // Hide if fails
-      // console.warn("Almanac fetch missing:", err);
+      if (container) container.innerHTML = "";
     });
 }
 
 function getPersonalizedActions(officer, tenGodName) {
-  // 1. CLEAN INPUTS
   const god = tenGodName || "F";
   const off = officer || "Stable";
 
-  // 2. DEFINE THE "TEN GOD" STRATEGY (The "How")
   const godStrategies = {
     F: { style: "Connect", icon: "🤝", verb: "network with" },
     RW: { style: "Compete", icon: "🔥", verb: "rally the team for" },
@@ -1538,7 +1443,6 @@ function getPersonalizedActions(officer, tenGodName) {
     IR: { style: "Intuitive", icon: "🔮", verb: "strategize" },
   };
 
-  // 3. DEFINE THE "OFFICER" CONTEXT (The "What")
   const officerContext = {
     Establish: {
       mood: "New Beginnings",
@@ -1590,8 +1494,6 @@ function getPersonalizedActions(officer, tenGodName) {
   const myGod = godStrategies[god] || godStrategies["F"];
   const myOff = officerContext[off] || officerContext["Stable"];
 
-  // 4. SYNTHESIZE THE SENTENCE
-  // e.g. "Use your [Aggression] (7K) to [Break Bad Habits] (Destruction)"
   const synthesis = `Use your <strong>${myGod.style}</strong> energy to <strong>${myGod.verb}</strong> your <strong>${myOff.tasks}</strong>.`;
 
   return {
@@ -1608,18 +1510,16 @@ function generateAlmanacHTML(data) {
 
   const { summary, advice, technical, hours, directions } = data;
 
-  // Helpers
   const badge = (text, color, bg) =>
     `<span style="display:inline-block; background:${bg}; color:${color}; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; border:1px solid ${color}; white-space:nowrap;">${text}</span>`;
   const renderList = (items) =>
     items && items.length
       ? items
-          .slice(0, 6)
-          .map((i) => `<li style="margin-bottom:4px;">${i}</li>`)
-          .join("")
+        .slice(0, 6)
+        .map((i) => `<li style="margin-bottom:4px;">${i}</li>`)
+        .join("")
       : `<li style="color:#999; font-style:italic;">None</li>`;
 
-  // --- 1. FLYING STARS GRID ---
   const fs = technical.flyingStars || {};
   const gridOrder = ["SE", "S", "SW", "E", "Ctr", "W", "NE", "N", "NW"];
   const fsGridHtml = gridOrder
@@ -1630,7 +1530,6 @@ function generateAlmanacHTML(data) {
     })
     .join("");
 
-  // --- 2. XKDG HTML ---
   const xkdg = technical.xkdg;
   const xkdgHtml = xkdg
     ? `
@@ -1640,8 +1539,6 @@ function generateAlmanacHTML(data) {
     </div>`
     : "";
 
-  // --- 3. QI MEN CHARMS HTML ---
-  // We format this as a clean list of directions
   const charmsHtml = technical.qiMen.charms
     .map((line) => {
       const parts = line.split(":");
@@ -1709,9 +1606,9 @@ function generateAlmanacHTML(data) {
                              <div style="font-size:0.7rem; text-transform:uppercase; color:#888; margin-bottom:5px;">Action (San Yuan)</div>
                              <ul style="margin:0; padding-left:15px; font-size:0.75rem; color:#444;">
                                 ${technical.qiMen.sanYuan
-                                  .slice(0, 4)
-                                  .map((l) => `<li>${l}</li>`)
-                                  .join("")}
+    .slice(0, 4)
+    .map((l) => `<li>${l}</li>`)
+    .join("")}
                              </ul>
                         </div>
                         <div style="padding:10px; background:#fff;">
@@ -1740,8 +1637,8 @@ function generateAlmanacHTML(data) {
                     <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
                         <tbody>
                         ${hours
-                          .map(
-                            (h) => `
+    .map(
+      (h) => `
                             <tr style="border-top:1px solid #f0f0f0;">
                                 <td style="padding:6px; white-space:nowrap; color:#555; vertical-align:top;"><strong>${h.time}</strong><br><span style="font-size:0.7rem;">${h.name}</span></td>
                                 <td style="padding:6px;">
@@ -1749,8 +1646,8 @@ function generateAlmanacHTML(data) {
                                     ${h.badStars.length ? `<div style="color:#dc3545; font-size:0.75rem;">⚠️ ${h.badStars.join(", ")}</div>` : ""}
                                 </td>
                             </tr>`,
-                          )
-                          .join("")}
+    )
+    .join("")}
                         </tbody>
                     </table>
                 </details>
@@ -1765,23 +1662,18 @@ function toggleTool(contentId, btnElement) {
   const content = document.getElementById(contentId);
   const isHidden = content.style.display === "none";
 
-  // 1. Toggle Visibility
   content.style.display = isHidden ? "block" : "none";
 
-  // 2. Rotate Arrow
   if (isHidden) {
     btnElement.classList.add("active");
   } else {
     btnElement.classList.remove("active");
   }
 
-  // 3. Lazy Load Data (Optimization)
-  // Only fetch data when opening the section for the first time
   if (isHidden && contentId === "wealthContent") {
     const userId = document.getElementById("userSelect").value;
     const container = document.getElementById("wealthContainer");
 
-    // Only load if empty (haven't loaded yet)
     if (userId && container.innerHTML.trim() === "") {
       loadWealthStrategy(userId);
     }
@@ -1789,7 +1681,6 @@ function toggleTool(contentId, btnElement) {
 }
 
 async function loadWealthStrategy(userId) {
-  // Ensure you have this container in your HTML modal
   const container = document.getElementById("wealthContainer");
   if (!container) return;
 
@@ -1818,37 +1709,37 @@ async function loadWealthStrategy(userId) {
         <h4 style="margin:20px 0 10px 0; color:#444;">⚡ Next 7 Days: Tactical Plan</h4>
         <div class="daily-scroller">
             ${daily
-              .map(
-                (d) => `
+      .map(
+        (d) => `
                 <div class="daily-card ${d.css}">
                     <div class="daily-date">${d.date}</div>
                     <div class="daily-focus">${d.focus}</div>
                     <div class="daily-advice">${d.advice}</div>
                 </div>
             `,
-              )
-              .join("")}
+      )
+      .join("")}
         </div>
     
         <h4 style="margin:20px 0 10px 0; color:#444;">📅 2026 Campaign Map</h4>
         <div class="month-grid">
             ${monthly
-              .map((m, idx) => {
-                const mNames = [
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                  "Jan '27",
-                ];
-                return `
+      .map((m, idx) => {
+        const mNames = [
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+          "Jan '27",
+        ];
+        return `
                 <div class="month-card ${m.css}">
                     <div class="m-head">
                         <span>${mNames[idx]}</span>
@@ -1858,8 +1749,8 @@ async function loadWealthStrategy(userId) {
                     <div class="m-action">${m.action}</div>
                 </div>
                 `;
-              })
-              .join("")}
+      })
+      .join("")}
         </div>
       `;
 
@@ -1880,17 +1771,14 @@ function toggleArchitectMode() {
 
     if (badges.includes("VOID") || badges.includes("Death God")) {
       if (isModeActive) {
-        // Highlight as GOOD (Purple)
-        card.style.background = "#f3e5f5"; // Light Purple
+        card.style.background = "#f3e5f5";
         card.style.borderColor = "#9c27b0";
         card.style.opacity = "1";
       } else {
-        // Revert to normal (often these are low score days, so maybe grey/red)
         card.style.background = "";
         card.style.borderColor = "";
       }
     } else {
-      // If mode is active, fade out the "Normal" days to focus on Deep Work
       if (isModeActive) {
         card.style.opacity = "0.4";
       } else {
@@ -1901,7 +1789,6 @@ function toggleArchitectMode() {
 }
 
 // --- TEAM SYNERGY LOGIC ---
-// --- 1. RENDER TEAM CHECKBOXES (Better UX) ---
 function renderTeamCheckboxes(users) {
   const container = document.getElementById("teamCheckboxes");
   if (!container) return;
@@ -1909,7 +1796,6 @@ function renderTeamCheckboxes(users) {
   container.innerHTML = "";
 
   users.forEach((u) => {
-    // Create a LABEL element (clicking anywhere toggles the input)
     const label = document.createElement("label");
     label.className = "team-option";
 
@@ -1923,23 +1809,17 @@ function renderTeamCheckboxes(users) {
   });
 }
 
-// --- 2. CALCULATE SYNERGY (Fixing the Selection Logic) ---
 async function calculateTeamSynergy() {
   const container = document.getElementById("teamResults");
 
-  // 1. GATHER DATA
   const checkboxes = document.querySelectorAll(
     "#teamCheckboxes .team-check:checked",
   );
   const selectedIds = Array.from(checkboxes).map((cb) => cb.value);
 
-  // Get current Date context from your header dropdowns
-  const year =
-    document.getElementById("yearInput").value || new Date().getFullYear();
-  const month =
-    document.getElementById("monthSelect").value || new Date().getMonth() + 1;
+  const year = document.getElementById("yearInput").value || new Date().getFullYear();
+  const month = document.getElementById("monthSelect").value || new Date().getMonth() + 1;
 
-  // 2. VALIDATION
   if (selectedIds.length < 2) {
     container.innerHTML = `
             <div style="background:#fff3cd; color:#856404; padding:15px; border-radius:8px; text-align:center; border:1px solid #ffeeba;">
@@ -1948,12 +1828,10 @@ async function calculateTeamSynergy() {
     return;
   }
 
-  // 3. SHOW LOADING STATE
   container.innerHTML =
     '<div style="text-align:center; padding:20px; color:#666;">🔮 Calculating Team Dynamics...</div>';
 
   try {
-    // 4. API CALL (POST)
     const res = await fetch("/api/team-synergy", {
       method: "POST",
       headers: {
@@ -1969,9 +1847,7 @@ async function calculateTeamSynergy() {
     if (!res.ok) throw new Error("Analysis failed");
 
     const data = await res.json();
-
-    // 5. RENDER RESULTS
-    renderTeamResults(data); // Call your render function
+    renderTeamResults(data);
   } catch (e) {
     console.error(e);
     container.innerHTML =
@@ -1979,12 +1855,10 @@ async function calculateTeamSynergy() {
   }
 }
 
-// 3. Render Results Cards
 function renderTeamResults(data) {
   const container = document.getElementById("teamResults");
   container.innerHTML = "";
 
-  // 1. Safety Check
   if (!Array.isArray(data) || data.length === 0) {
     container.innerHTML =
       '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#666; background:#f8f9fa; border-radius:8px;">No synergy dates found matching your criteria.</div>';
@@ -1994,7 +1868,6 @@ function renderTeamResults(data) {
   let html = "";
 
   data.forEach((day) => {
-    // --- 1. HEADER LOGIC (Avg Score Color) ---
     const avg = day.teamMetrics?.avgScore || 0;
     let borderClass;
     let scoreColor;
@@ -2002,24 +1875,22 @@ function renderTeamResults(data) {
     if (avg >= 90) {
       borderClass = "border-left: 5px solid #ffc107;";
       scoreColor = "#b68a00";
-    } // Gold
+    }
     else if (avg >= 80) {
       borderClass = "border-left: 5px solid #28a745;";
       scoreColor = "#155724";
-    } // Green
+    }
     else if (avg >= 60) {
       borderClass = "border-left: 5px solid #0d6efd;";
       scoreColor = "#084298";
-    } // Blue
+    }
     else {
       borderClass = "border-left: 5px solid #dc3545;";
       scoreColor = "#842029";
-    } // Red
+    }
 
-    // --- 2. USER BREAKDOWN ROW GENERATOR ---
     const userRows = day.userBreakdown
       .map((u) => {
-        // Color code the verdict
         let verdictBadge = `background:#eee; color:#555;`;
         if (u.verdict === "GOLDEN DATE")
           verdictBadge = `background:#fff3cd; color:#856404; border:1px solid #ffeeba;`;
@@ -2028,7 +1899,6 @@ function renderTeamResults(data) {
         if (u.verdict === "AVOID")
           verdictBadge = `background:#f8d7da; color:#721c24; border:1px solid #f5c2c7;`;
 
-        // Convert Flags to Icons
         const icons = u.flags
           .map((f) => {
             if (f.includes("Nobleman")) return `<span title="${f}">🌟</span>`;
@@ -2053,7 +1923,6 @@ function renderTeamResults(data) {
       })
       .join("");
 
-    // --- 3. BUILD THE CARD ---
     html += `
             <div style="background:#fff; border:1px solid #e0e0e0; border-radius:12px; padding:0; box-shadow:0 2px 5px rgba(0,0,0,0.05); overflow:hidden; ${borderClass}">
                 
@@ -2087,19 +1956,14 @@ function renderTeamResults(data) {
   container.innerHTML = html;
 }
 
-// 4. Team Modal (The "Click" Action)
 function openTeamModal(dayData) {
-  // 1. Target the Shared Modal Elements (Same as Calendar Grid)
   const titleEl = document.getElementById("detailsTitle");
   const bodyEl = document.getElementById("detailsBody");
 
-  // 2. Set Title
   titleEl.innerText = `${dayData.fullDate} (Team View)`;
 
-  // 3. Sort Users (Best Scores First)
   const sortedUsers = dayData.userBreakdown.sort((a, b) => b.score - a.score);
 
-  // 4. Extract Header Data
   const yb = dayData.dayInfo.yellowBlackBelt || {
     name: "?",
     desc: "",
@@ -2108,7 +1972,6 @@ function openTeamModal(dayData) {
   const ybClass = yb.type === "Yellow" ? "spirit-yellow" : "spirit-black";
   const ns = dayData.dayInfo.nineStar || "";
 
-  // 5. Build HTML (Reusing Calendar Grid Styles)
   bodyEl.innerHTML = `
         <div style="padding:0 10px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:15px;">
              <div>
@@ -2128,16 +1991,15 @@ function openTeamModal(dayData) {
         <h5 style="color:#333; font-weight:700; margin-bottom:15px;">👥 Team Impact Breakdown</h5>
         <div class="grid-dashboard">
             ${sortedUsers
-              .map((u) => {
-                const color = getColorForScore(u.score);
-                const isBad = u.score < 50;
-                // Add note if available (e.g. "Nobleman")
-                const noteHtml =
-                  u.notes.length > 0
-                    ? `<div style="font-size:0.75rem; color:#666; margin-top:2px;">✨ ${u.notes[0]}</div>`
-                    : "";
+    .map((u) => {
+      const color = getColorForScore(u.score);
+      const isBad = u.score < 50;
+      const noteHtml =
+        u.notes.length > 0
+          ? `<div style="font-size:0.75rem; color:#666; margin-top:2px;">✨ ${u.notes[0]}</div>`
+          : "";
 
-                return `
+      return `
                 <div style="background:${isBad ? "#fff5f5" : "#fff"}; border:1px solid ${isBad ? "#f5c6cb" : "#e9ecef"}; border-left:4px solid ${color}; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <div style="font-weight:bold; color:#333;">${u.name}</div>
@@ -2148,8 +2010,8 @@ function openTeamModal(dayData) {
                         ${u.score}
                     </div>
                 </div>`;
-              })
-              .join("")}
+    })
+    .join("")}
         </div>
 
         <div style="background:#e8f4fd; margin-top:20px; padding:15px; border-radius:8px; border:1px solid #b8daff; font-size:0.9rem; color:#004085; display:flex; gap:10px;">
@@ -2162,7 +2024,6 @@ function openTeamModal(dayData) {
         </div>
     `;
 
-  // 6. Open the Shared Modal
   openModalById("detailsModal");
 }
 
@@ -2186,7 +2047,6 @@ async function findMomentum() {
     btn.disabled = true;
   }
 
-  // Clear previous results
   document.getElementById("momentumResults").innerHTML = "";
 
   try {
@@ -2215,7 +2075,6 @@ async function findMomentum() {
 function renderMomentumResults(data) {
   const container = document.getElementById("momentumResults");
 
-  // 1. Handle Empty State
   if (!data.chains || data.chains.length === 0) {
     container.innerHTML = `
         <div style="text-align:center; padding:30px; background:#f8f9fa; border-radius:8px; border:1px dashed #ccc;">
@@ -2228,33 +2087,32 @@ function renderMomentumResults(data) {
     return;
   }
 
-  // 2. Configuration: Map Backend Themes to UI
   const MOMENTUM_UI = {
     LAUNCH: {
       label: "Velocity Sequence",
       icon: "🚀",
-      color: "#0d6efd", // Blue
+      color: "#0d6efd",
       bg: "#e7f1ff",
       desc: "Ideal for starting new projects, ground-breaking, or opening businesses.",
     },
     HARVEST: {
       label: "Harvest Sequence",
       icon: "💰",
-      color: "#198754", // Green
+      color: "#198754",
       bg: "#d1e7dd",
       desc: "Perfect for sales, signing contracts, collecting debts, and banking.",
     },
     FOUNDATION: {
       label: "Foundation Sequence",
       icon: "🏗️",
-      color: "#6610f2", // Purple
+      color: "#6610f2",
       bg: "#e0cffc",
       desc: "Best for internal strategy, long-term planning, and negotiations.",
     },
     CLEANSING: {
       label: "Reset Sequence",
       icon: "✨",
-      color: "#0dcaf0", // Cyan
+      color: "#0dcaf0",
       bg: "#cff4fc",
       desc: "Use for removing obstacles, medical procedures, or ending bad habits.",
     },
@@ -2263,10 +2121,8 @@ function renderMomentumResults(data) {
   let lastMonth = "";
   let html = `<div style="margin-bottom:15px; font-size:0.9rem; color:#666; text-align:right;">Found <strong>${data.summary.totalChainsFound}</strong> streaks in next 6 months.</div>`;
 
-  // 3. Render Chains
   data.chains.forEach((chain) => {
-    // A. Month Headers
-    const d = new Date(chain.startDateObj || chain.startDate); // Handle both date obj or string
+    const d = new Date(chain.startDateObj || chain.startDate);
     const currentMonth = d.toLocaleString("default", {
       month: "long",
       year: "numeric",
@@ -2281,10 +2137,8 @@ function renderMomentumResults(data) {
       lastMonth = currentMonth;
     }
 
-    // B. Get UI Settings (Fallback to Launch if undefined)
     const ui = MOMENTUM_UI[chain.theme] || MOMENTUM_UI["LAUNCH"];
 
-    // C. Build Card
     html += `
         <div style="background:#fff; border:1px solid #e0e0e0; border-left: 5px solid ${ui.color}; border-radius:12px; padding:20px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.02); transition:transform 0.2s;">
             
@@ -2304,16 +2158,15 @@ function renderMomentumResults(data) {
 
             <div style="display:flex; flex-direction:column; gap:0;">
                 ${chain.days
-                  .map((day, index) => {
-                    const isLast = index === chain.days.length - 1;
-                    const scoreColor = getColorForScore(day.score);
+      .map((day, index) => {
+        const isLast = index === chain.days.length - 1;
+        const scoreColor = getColorForScore(day.score);
 
-                    // Determine Day Officer Badge Color
-                    let officerBadge = `background:#f8f9fa; color:#666; border:1px solid #e9ecef;`;
-                    if (day.score >= 80)
-                      officerBadge = `background:#d1e7dd; color:#0f5132; border:1px solid #badbcc;`;
+        let officerBadge = `background:#f8f9fa; color:#666; border:1px solid #e9ecef;`;
+        if (day.score >= 80)
+          officerBadge = `background:#d1e7dd; color:#0f5132; border:1px solid #badbcc;`;
 
-                    return `
+        return `
                     <div style="display:flex; gap:15px;">
                         <div style="display:flex; flex-direction:column; align-items:center; width:20px;">
                             <div style="width:12px; height:12px; background:${ui.color}; border-radius:50%; margin-top:6px; box-shadow: 0 0 0 3px ${ui.bg};"></div>
@@ -2336,8 +2189,8 @@ function renderMomentumResults(data) {
                         </div>
                     </div>
                     `;
-                  })
-                  .join("")}
+      })
+      .join("")}
             </div>
             
             <div style="margin-top:5px; padding-top:10px; border-top:1px dashed #eee; text-align:center;">
@@ -2354,52 +2207,38 @@ function renderMomentumResults(data) {
 }
 
 async function jumpToDateAndShow(dateStr) {
-  // 1. If we are coming from the "Search Modal", we MUST close it
-  // to avoid "Modal over Modal" (stacking).
   const searchModal = document.getElementById("searchModal");
   if (searchModal && searchModal.style.display === "flex") {
     closeModal("searchModal");
   }
 
-  // 2. Parse Date
-  // We use safe parsing to avoid timezone issues
   const targetDate = new Date(dateStr);
-  const targetDay = targetDate.getDate(); // e.g. 16
-  const targetMonth = targetDate.getMonth() + 1; // e.g. 2 (Feb)
-  const targetYear = targetDate.getFullYear(); // e.g. 2026
+  const targetDay = targetDate.getDate();
+  const targetMonth = targetDate.getMonth() + 1;
+  const targetYear = targetDate.getFullYear();
 
-  // 3. Show Loading
   loadingOverlay("flex");
 
   try {
-    // 4. Switch Month if necessary
     if (targetMonth !== currentMonth || targetYear !== currentYear) {
-      // Update Globals
       currentMonth = targetMonth;
       currentYear = targetYear;
 
-      // Sync Dropdowns
       const mSelect = document.getElementById("monthSelect");
       const yInput = document.getElementById("yearInput");
       if (mSelect) mSelect.value = currentMonth;
       if (yInput) yInput.value = currentYear;
 
-      // Load the new month data and WAIT
       await loadCalendar();
     }
 
-    // 5. Scroll the Calendar to the Day (The "Anchor")
-    // We do this inside a small timeout to ensure the DOM is rendered
     setTimeout(() => {
       const dayCards = document.querySelectorAll(".day-card");
       for (const card of dayCards) {
-        // Find the card by the date number displayed inside it
         const dateNum = card.querySelector(".date-num");
         if (dateNum && parseInt(dateNum.innerText) === targetDay) {
-          // A. Scroll it into the center of the viewport
           card.scrollIntoView({ behavior: "smooth", block: "center" });
 
-          // B. Add a brief "Flash" effect so the eye catches it
           card.style.transition = "box-shadow 0.4s ease-out";
           card.style.boxShadow = "0 0 0 4px rgba(13, 110, 253, 0.4)";
           setTimeout(() => {
@@ -2410,8 +2249,6 @@ async function jumpToDateAndShow(dateStr) {
       }
     }, 100);
 
-    // 6. Open the Day Details Modal
-    // We find the full data object from our global array
     const dayData = currentMonthDays.find((d) => d.day === targetDay);
 
     if (dayData) {
@@ -2437,7 +2274,6 @@ let touchStartY = 0;
 const modalContainer = document.getElementById("detailsModal");
 
 if (modalContainer) {
-  // 1. Capture the start of the touch
   modalContainer.addEventListener(
     "touchstart",
     (e) => {
@@ -2445,9 +2281,8 @@ if (modalContainer) {
       touchStartY = e.changedTouches[0].screenY;
     },
     { passive: true },
-  ); // 'passive' improves scrolling performance
+  );
 
-  // 2. Capture the end and calculate direction
   modalContainer.addEventListener(
     "touchend",
     (e) => {
@@ -2464,15 +2299,11 @@ function handleSwipe(startX, startY, endX, endY) {
   const diffX = endX - startX;
   const diffY = endY - startY;
 
-  // Thresholds
-  const minSwipeDistance = 50; // Minimum px to count as a swipe
-  const verticalLimit = 100; // Max vertical deviation allowed (prevents scrolling from triggering swipe)
+  const minSwipeDistance = 50;
+  const verticalLimit = 100;
 
-  // Check if the swipe is primarily horizontal
   if (Math.abs(diffX) > Math.abs(diffY)) {
-    // Check if movement was significant enough
     if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffY) < verticalLimit) {
-      // Ensure your computed style or inline style actually matches "flex"
       const modal = document.getElementById("detailsModal");
       const isVisible =
         modal &&
@@ -2481,14 +2312,12 @@ function handleSwipe(startX, startY, endX, endY) {
 
       if (isVisible) {
         if (diffX > 0) {
-          // SWIPE RIGHT -> Go to Previous Day
           const btn = document.getElementById("btnPrevDay");
           if (btn && !btn.disabled) {
             btn.click();
             animateSwipe("right");
           }
         } else {
-          // SWIPE LEFT -> Go to Next Day
           const btn = document.getElementById("btnNextDay");
           if (btn && !btn.disabled) {
             btn.click();
@@ -2499,11 +2328,10 @@ function handleSwipe(startX, startY, endX, endY) {
     }
   }
 }
-// Add a subtle slide animation to the modal body
+
 function animateSwipe(direction) {
   const bodyEl = document.getElementById("detailsBody");
   if (bodyEl) {
-    // Quick subtle animation
     const start = direction === "left" ? "10px" : "-10px";
     bodyEl.style.transform = `translateX(${start})`;
     bodyEl.style.opacity = "0.8";
@@ -2520,44 +2348,38 @@ function animateSwipe(direction) {
 function loadingOverlay(display) {
   const overlay = document.getElementById("loadingOverlay");
 
-  // 1. Show Loading
   if (overlay) {
     overlay.style.display = display;
-    // Optional: Add a slight fade-in transition logic here if desired
   }
 }
 
-// Open Modal Helper (Handles Animation)
 function openModalById(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
   modal.style.display = "flex";
 
-  // Small delay to allow CSS to catch the display change before animating
   setTimeout(() => {
     modal.classList.add("show");
   }, 10);
 }
 
-// Close Modal Helper
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
   modal.classList.remove("show");
 
-  // Wait for animation to finish before hiding
   setTimeout(() => {
     modal.style.display = "none";
   }, 200);
 }
 
 function getColorForScore(score) {
-  if (score >= 80) return "#28a745"; // Green
-  if (score >= 60) return "#0d6efd"; // Blue
-  if (score >= 40) return "#fd7e14"; // Orange
-  return "#dc3545"; // Red
+  if (score >= 80) return "#28a745";
+  if (score >= 60) return "#0d6efd";
+  if (score >= 40) return "#fd7e14";
+  return "#dc3545";
 }
 
 function getColorBg(cssClass) {
@@ -2572,8 +2394,8 @@ window.onclick = function (event) {
     closeModal(event.target.id);
   }
 };
+
 document.addEventListener("keydown", (e) => {
-  // Only work if modal is open
   const modal = document.getElementById("detailsModal");
   if (modal.style.display === "flex") {
     if (e.key === "ArrowLeft") {

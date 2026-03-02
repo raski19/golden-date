@@ -16,6 +16,10 @@
     --bg-green: #d4edda; --border-green: #c3e6cb; --text-green: #155724;
     --bg-red: #f8d7da; --border-red: #f5c6cb; --text-red: #721c24;
     --bg-blue: #cfe2ff; --border-blue: #b6d4fe; --text-blue: #084298;
+    --bg-brown: #F3E5D8;
+    --text-brown: #5D4037;
+    --bg-silver: #F1F5F9;
+    --text-silver: #475569;
     --bg-neutral: #ffffff; --border-neutral: #dee2e6; --text-neutral: #383d41;
     --bg-dangerous: #f5c6cb; --border-dangerous: #dc3545; --text-dangerous: #721c24;
     --bg-action: #e8f4fd; --border-action: #b8daff; --text-action: #004085;
@@ -323,12 +327,11 @@ header {
     font-size: 0.65rem; padding: 1px 6px;
     border-radius: 10px; font-weight: 700; min-width: 24px; text-align: center;
 }
-.god-badge[data-god="DW"], .god-badge[data-god="IW"] { background: var(--bg-green); color: var(--text-green); }
-.god-badge[data-god="DO"], .god-badge[data-god="7K"] { background: #cce5ff; color: #004085; }
-.god-badge[data-god="EG"], .god-badge[data-god="HO"] { background: var(--bg-gold); color: var(--text-gold); }
-.god-badge[data-god="IR"], .god-badge[data-god="DR"] { background: #e2e3e5; color: #383d41; }
-.god-badge[data-god="RW"], .god-badge[data-god="F"]  { background: var(--bg-red); color: var(--text-red); }
-
+.god-badge[data-element="Wood"] { background: var(--bg-green);color: var(--text-green) }
+.god-badge[data-element="Fire"] { background: var(--bg-red);color: var(--text-red) }
+.god-badge[data-element="Earth"] { background: var(--bg-brown); /* Update these vars to match your theme's earth colors */color: var(--text-brown) }
+.god-badge[data-element="Metal"] { background: var(--bg-silver); /* Or --bg-silver / --bg-gold depending on your theme */color: var(--text-silver) }
+.god-badge[data-element="Water"] { background: var(--bg-blue);color: var(--text-blue) }
 /* =========================================
    4. CALENDAR GRID
    ========================================= */
