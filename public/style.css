@@ -693,6 +693,32 @@ header {
 .hour-table th, .hour-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
 .hour-table th { background: #f9f9f9; }
 
+.fengshui-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px auto 0;
+  max-width: 450px;
+}
+.fengshui-box {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.fengshui-box .badges-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: auto 0;
+}
+
 /* =========================================
    7. MEDIA QUERIES (Mobile Optimized)
    ========================================= */
@@ -795,8 +821,7 @@ header {
         box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
 
-    /* --- 3. CALENDAR GRID (Single Column List View) --- */
-    .calendar-wrapper { padding: 0 3px; gap: 5px }
+    .calendar-wrapper, .fengshui-grid { padding: 0 3px; gap: 5px !important; }
     .pillars-container { margin: 0 }
 
     .day-header { display: none; } /* Hide Mon/Tue/Wed headers */

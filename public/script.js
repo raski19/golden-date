@@ -247,6 +247,36 @@ const COMBO_PAIRS = {
   Goat: "Horse",
 };
 
+// ==========================================
+// FENG SHUI "DO NOT DISTURB" ZONES
+// ==========================================
+
+let fengShuiViewMode = 'month'; // Default to Monthly view
+
+const OPPOSITE_DIRS = {
+  "North": "South", "South": "North", "East": "West", "West": "East",
+  "Northeast": "Southwest", "Southwest": "Northeast",
+  "Northwest": "Southeast", "Southeast": "Northwest"
+};
+
+const ANNUAL_5_YELLOW = {
+  2024: "West", 2025: "Northeast", 2026: "South", 2027: "North",
+  2028: "Southwest", 2029: "East", 2030: "Southeast"
+};
+
+const STAR_5_LOCATIONS = {
+  1: "Southeast", 2: "East", 3: "Southwest", 4: "North", 5: "Center",
+  6: "Northwest", 7: "West", 8: "Northeast", 9: "South"
+};
+
+// Maps Earthly Branches to Compass Directions
+const BRANCH_DIRECTIONS = {
+  "Rat": "North", "Ox": "Northeast", "Tiger": "Northeast",
+  "Rabbit": "East", "Dragon": "Southeast", "Snake": "Southeast",
+  "Horse": "South", "Goat": "Southwest", "Monkey": "Southwest",
+  "Rooster": "West", "Dog": "Northwest", "Pig": "Northwest"
+};
+
 // --- INITIALIZATION ---
 // Fetch users immediately when the script loads
 fetch("/api/users")
@@ -412,7 +442,7 @@ function changeMonth(delta) {
 
 async function handleUserChange() {
   const userSelect = document.getElementById("userSelect");
-  const selectedValue = userSelect.value;
+  const selectedValue = userSelect?.value;
 
   loadingOverlay("flex");
 
@@ -435,8 +465,9 @@ async function handleUserChange() {
 
       populateGoalSelect();
     } catch (error) {
-      console.error("Error loading profile:", error);
-      alert("Failed to load profile. Please try again.");
+      // 🛡️ Print the exact error and line number to the console
+      console.error("❌ Error loading profile. Stack Trace:", error);
+      alert(`Error loading profile.`);
     } finally {
       loadingOverlay("none");
     }
@@ -444,9 +475,9 @@ async function handleUserChange() {
     document.getElementById("wealthContainer").innerHTML = "";
 
     const wealthContent = document.getElementById("wealthContent");
-    if (wealthContent.style.display !== "none") {
+    if (wealthContent && wealthContent.style.display !== "none") {
       const userId = document.getElementById("userSelect").value;
-      loadWealthStrategy(userId);
+      if(userId) loadWealthStrategy(userId);
     }
   }, 10);
 }
@@ -558,21 +589,38 @@ async function loadCalendar(guestUser = null) {
     };
   } else {
     const userId = document.getElementById("userSelect").value;
-    if (!userId) return;
+    if (!userId) {
+      loadingOverlay("none");
+      return;
+    }
     url += `&userId=${userId}`;
   }
 
-  const res = await fetch(url, options);
-  const data = await res.json();
+  try {
+    const res = await fetch(url, options);
 
-  currentUser = data.user;
-  const days = data.days;
-  const analysis = data.monthAnalysis;
+    // If the backend crashes (500) or route is missing (404), throw explicitly
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server returned ${res.status}: ${errText}`);
+    }
 
-  renderBanner(analysis);
-  renderGrid(days);
+    const data = await res.json();
 
-  loadingOverlay("none");
+    currentUser = data.user;
+    const days = data.days;
+    const analysis = data.monthAnalysis;
+
+    renderBanner(analysis);
+    renderGrid(days);
+    renderFengShuiMap();
+
+  } catch (err) {
+    console.error("🔥 Calendar Load Error:", err);
+    throw err; // Pass it up to handleUserChange
+  } finally {
+    loadingOverlay("none");
+  }
 }
 
 function renderBanner(analysis) {
@@ -2262,6 +2310,203 @@ async function jumpToDateAndShow(dateStr) {
   } finally {
     loadingOverlay("none");
   }
+}
+
+function getAnnualCenterStar(year) {
+  let sum = year.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+  while (sum > 9) sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+  let star = 11 - sum;
+  if (star <= 0) star += 9;
+  return star;
+}
+
+// 2. Calculate the Monthly Center Star
+function getMonthlyCenterStar(yearBranch, solarMonthIndex) {
+  let base = 0;
+  if (["Rat", "Horse", "Rabbit", "Rooster"].includes(yearBranch)) base = 8;
+  else if (["Dragon", "Dog", "Ox", "Goat"].includes(yearBranch)) base = 5;
+  else if (["Tiger", "Monkey", "Snake", "Pig"].includes(yearBranch)) base = 2;
+
+  let center = base - (solarMonthIndex - 1);
+  while (center < 1) center += 9;
+  return center;
+}
+
+// 3. Map the 9 Palaces Flight Path (Luo Shu sequence)
+function getFlyingStars(centerStar) {
+  const flightPath = {
+    "Center": 0, "Northwest": 1, "West": 2, "Northeast": 3,
+    "South": 4, "North": 5, "Southwest": 6, "East": 7, "Southeast": 8
+  };
+
+  let stars = {};
+  for (const [sector, offset] of Object.entries(flightPath)) {
+    let star = centerStar + offset;
+    if (star > 9) star -= 9;
+    stars[sector] = star;
+  }
+  return stars;
+}
+
+// 4. Color map for the 9 Stars to make the UI look premium
+const STAR_COLORS = {
+  1: "#0d6efd", // Water (Blue)
+  2: "#343a40", // Earth (Black/Dark) - Illness
+  3: "#198754", // Wood (Green) - Conflict
+  4: "#20c997", // Wood (Teal) - Academic/Romance
+  5: "#d39e00", // Earth (Gold) - Disaster
+  6: "#6c757d", // Metal (Grey) - Authority
+  7: "#dc3545", // Metal (Red) - Robbery
+  8: "#8D6E63", // Earth (Brown) - Wealth
+  9: "#6f42c1"  // Fire (Purple) - Future Wealth/Joy
+};
+
+// --- AFFLICTIONS CALCULATION ---
+function getAfflictions(mode, yearBranch, monthBranch, currentStars) {
+  const targetBranch = mode === 'year' ? yearBranch : monthBranch;
+
+  // 1. Tai Sui (Duke)
+  const duke = Object.keys(BRANCH_ELEMENTS).find(key => key === targetBranch) || targetBranch;
+  const dukeDir = BRANCH_DIRECTIONS[duke] || "Unknown";
+
+  // 2. Year/Month Breaker
+  const breakerDir = OPPOSITE_DIRS[dukeDir] || "Unknown";
+
+  // 3. Three Killings (San Sha)
+  let sanShaDir = "Unknown";
+  if (["Monkey", "Rat", "Dragon"].includes(targetBranch)) sanShaDir = "South";
+  if (["Pig", "Rabbit", "Goat"].includes(targetBranch)) sanShaDir = "West";
+  if (["Tiger", "Horse", "Dog"].includes(targetBranch)) sanShaDir = "North";
+  if (["Snake", "Rooster", "Ox"].includes(targetBranch)) sanShaDir = "East";
+
+  // 4. 5 Yellow (Dynamically found from the active flying stars!)
+  const fiveYellowDir = Object.keys(currentStars).find(sector => currentStars[sector] === 5) || "Center";
+
+  return { duke: dukeDir, breaker: breakerDir, sanSha: sanShaDir, fiveYellow: fiveYellowDir };
+}
+
+window.toggleFengShuiMode = function(mode) {
+  fengShuiViewMode = mode;
+  renderFengShuiMap();
+}
+
+function renderFengShuiMap() {
+  const container = document.getElementById("fengShuiContainer");
+  if (!container) return;
+
+  if (!currentMonthDays || currentMonthDays.length === 0) {
+    container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">Load calendar data first to view Feng Shui map.</div>`;
+    return;
+  }
+
+  const midMonthDay = currentMonthDays.find(d => d.day === 15) || currentMonthDays[0];
+  const yearBranch = (midMonthDay?.info?.yearBranch || "").split(" ")[0] || "Unknown";
+  const monthBranch = (midMonthDay?.info?.monthBranch || "").split(" ")[0] || "Unknown";
+
+  const branchToSolarIndex = {
+    "Tiger": 1, "Rabbit": 2, "Dragon": 3, "Snake": 4, "Horse": 5, "Goat": 6,
+    "Monkey": 7, "Rooster": 8, "Dog": 9, "Pig": 10, "Rat": 11, "Ox": 12
+  };
+  const solarMonthIndex = branchToSolarIndex[monthBranch] || 1;
+
+  // 1. Determine the Active Stars based on the toggle
+  let activeCenterStar = fengShuiViewMode === 'year'
+    ? getAnnualCenterStar(currentYear)
+    : getMonthlyCenterStar(yearBranch, solarMonthIndex);
+
+  const currentStars = getFlyingStars(activeCenterStar);
+
+  // 2. Get Afflictions
+  const afflictions = getAfflictions(fengShuiViewMode, yearBranch, monthBranch, currentStars);
+
+  const gridOrder = [
+    "Southeast", "South", "Southwest",
+    "East",      "Center", "West",
+    "Northeast", "North", "Northwest"
+  ];
+
+  let gridHtml = `<div class="fengshui-grid">`;
+
+  gridOrder.forEach(sector => {
+    let isAfflicted = false;
+    let badges = [];
+
+    const dukeLabel = fengShuiViewMode === 'year' ? '👑 Tai Sui' : '👑 Month Duke';
+    const breakerLabel = fengShuiViewMode === 'year' ? '💥 Year Breaker' : '💥 Month Breaker';
+
+    if (afflictions.duke === sector) {
+      isAfflicted = true;
+      badges.push(`<div style="background:#fff3cd; color:#856404; font-size:0.65rem; padding:2px; border-radius:4px; margin-bottom:4px; border:1px solid #ffeeba;">${dukeLabel}</div>`);
+    }
+    if (afflictions.breaker === sector) {
+      isAfflicted = true;
+      badges.push(`<div style="background:#e2e3e5; color:#383d41; font-size:0.65rem; padding:2px; border-radius:4px; margin-bottom:4px;">${breakerLabel}</div>`);
+    }
+    if (afflictions.sanSha === sector) {
+      isAfflicted = true;
+      badges.push(`<div style="background:#f8d7da; color:#721c24; font-size:0.65rem; padding:2px; border-radius:4px; margin-bottom:4px; border:1px solid #f5c2c7;">🗡️ 3 Killings</div>`);
+    }
+    if (afflictions.fiveYellow === sector) {
+      isAfflicted = true;
+      badges.push(`<div style="background:#333; color:#ffc107; font-size:0.65rem; padding:2px; border-radius:4px; margin-bottom:4px;">☣️ 5 Yellow</div>`);
+    }
+
+    const bg = isAfflicted ? "#fff5f5" : "#f0fff4";
+    const border = isAfflicted ? "border:2px solid #dc3545;" : "border:1px solid #c3e6cb;";
+    const textColor = isAfflicted ? "#dc3545" : "#198754";
+
+    // Grab the actual star number and color for this sector
+    const starNum = currentStars[sector];
+    const starColor = STAR_COLORS[starNum] || "#333";
+
+    gridHtml += `
+            <div class="fengshui-box" style="position:relative; background:${bg}; ${border}">
+                
+                <div style="position:absolute; top:4px; right:6px; font-size:1.1rem; font-weight:900; color:${starColor}; opacity:0.9;" title="Flying Star ${starNum}">
+                    ${starNum}
+                </div>
+
+                <div style="font-weight:900; color:${textColor}; text-transform:uppercase; font-size:0.75rem; margin-bottom:5px;">
+                    ${sector}
+                </div>
+                
+                <div class="badges-container">
+                    ${badges.join("")}
+                </div>
+                
+                ${!isAfflicted ? `<div style="color:#28a745; font-size:1.2rem; margin-top:5px;">✅</div>` : ''}
+            </div>
+        `;
+  });
+
+  gridHtml += `</div>`;
+
+  const adviceHtml = `
+        <div style="margin-top:20px; background:#fff; border:1px solid #eee; border-radius:8px; padding:15px; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+            <h5 style="margin:0 0 10px 0; color:#333;">⚠️ Golden Rules for Afflicted Sectors:</h5>
+            <ul style="font-size:0.85rem; color:#555; padding-left:15px; margin:0; line-height:1.6;">
+                <li><strong>No Groundbreaking:</strong> Do not drill walls, hammer nails, or renovate in these sectors.</li>
+                <li><strong>5 Yellow (☣️):</strong> Place heavy metal objects here to exhaust the bad earth energy. Keep this area quiet.</li>
+                <li><strong>Tai Sui (👑):</strong> Do not face this direction while sitting at your desk (it brings confrontation).</li>
+                <li><strong>Three Killings (🗡️):</strong> Do not sit with your back to this direction (it brings backstabbing and betrayal).</li>
+            </ul>
+        </div>
+    `;
+
+  container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:25px 0 5px;">
+            <div>
+                <h4 style="margin:0 0 2px 0; color:#333;">🏠 ${fengShuiViewMode === 'year' ? currentYear + ' Annual' : 'Monthly'} Safety Map</h4>
+                <p style="font-size:0.8rem; color:#888; margin:0;">Ensure your environment supports your astrology.</p>
+            </div>
+            <div style="background:#e9ecef; padding:3px; border-radius:6px; display:flex; gap:4px;">
+                <button onclick="toggleFengShuiMode('year')" style="border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.75rem; font-weight:bold; transition:all 0.2s; ${fengShuiViewMode === 'year' ? 'background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#0d6efd;' : 'background:transparent; color:#6c757d;'}">Year</button>
+                <button onclick="toggleFengShuiMode('month')" style="border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.75rem; font-weight:bold; transition:all 0.2s; ${fengShuiViewMode === 'month' ? 'background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#0d6efd;' : 'background:transparent; color:#6c757d;'}">Month</button>
+            </div>
+        </div>
+        ${gridHtml}
+        ${adviceHtml}
+    `;
 }
 
 // ==========================================
