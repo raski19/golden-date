@@ -188,6 +188,58 @@ export const HIDDEN_STEMS: Record<string, string[]> = {
   Pig: ["Ren", "Jia"], // Water, Wood
 };
 
+export const HIDDEN_STEMS_WEIGHT: Record<
+  string,
+  { stem: string; weight: number }[]
+> = {
+  Rat: [{ stem: "Gui", weight: 100 }],
+  Ox: [
+    { stem: "Ji", weight: 60 },
+    { stem: "Gui", weight: 30 },
+    { stem: "Xin", weight: 10 },
+  ],
+  Tiger: [
+    { stem: "Jia", weight: 60 },
+    { stem: "Bing", weight: 30 },
+    { stem: "Wu", weight: 10 },
+  ],
+  Rabbit: [{ stem: "Yi", weight: 100 }],
+  Dragon: [
+    { stem: "Wu", weight: 60 },
+    { stem: "Gui", weight: 30 },
+    { stem: "Yi", weight: 10 },
+  ],
+  Snake: [
+    { stem: "Bing", weight: 60 },
+    { stem: "Geng", weight: 30 },
+    { stem: "Wu", weight: 10 },
+  ],
+  Horse: [
+    { stem: "Ding", weight: 70 },
+    { stem: "Ji", weight: 30 },
+  ],
+  Goat: [
+    { stem: "Ji", weight: 60 },
+    { stem: "Ding", weight: 30 },
+    { stem: "Yi", weight: 10 },
+  ],
+  Monkey: [
+    { stem: "Geng", weight: 60 },
+    { stem: "Ren", weight: 30 },
+    { stem: "Wu", weight: 10 },
+  ],
+  Rooster: [{ stem: "Xin", weight: 100 }],
+  Dog: [
+    { stem: "Wu", weight: 60 },
+    { stem: "Xin", weight: 30 },
+    { stem: "Ding", weight: 10 },
+  ],
+  Pig: [
+    { stem: "Ren", weight: 70 },
+    { stem: "Jia", weight: 30 },
+  ],
+};
+
 export const SEASON_BRANCHES: Record<string, string[]> = {
   Spring: ["Tiger", "Rabbit"], // Wood
   Summer: ["Snake", "Horse"], // Fire

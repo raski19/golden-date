@@ -12,6 +12,8 @@ import { calculateTenGods } from "./utils/tenGods";
 import { calculateBaZiProfile } from "./utils/baziHelper";
 import { getDayDetails } from "./data/calendarData";
 import { getWealthRoadmap } from "./utils/wealthEngine";
+import { analyzePersonalFengShui } from "./utils/personalFengShuiEngine";
+import { hasFullBaZiData } from "./utils/validators/baziValidator";
 
 const app = express();
 
@@ -92,7 +94,10 @@ app.get(
 
     // 3. Loop days
     for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
+        2,
+        "0"
+      )}`;
 
       const dayInfo = getDayInfo(dateStr);
       const analysis = calculateScore(user, dayInfo, y);
@@ -101,7 +106,7 @@ app.get(
       const tenGods = calculateTenGods(
         user.dayMaster,
         cleanStem,
-        dayInfo.dayBranch,
+        dayInfo.dayBranch
       );
 
       monthlyData.push({
@@ -118,7 +123,7 @@ app.get(
       monthAnalysis: monthAnalysis,
       days: monthlyData,
     });
-  },
+  }
 );
 app.post("/api/calendar/guest", async (req: Request, res: Response) => {
   // Extract year and month from query, user from body
@@ -144,7 +149,10 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
 
   // 3. Loop days (Exact same logic as your GET route)
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
+      2,
+      "0"
+    )}`;
 
     const dayInfo = getDayInfo(dateStr);
     const analysis = calculateScore(user, dayInfo, y);
@@ -153,7 +161,7 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
     const tenGods = calculateTenGods(
       user.dayMaster,
       cleanStem,
-      dayInfo.dayBranch,
+      dayInfo.dayBranch
     );
 
     monthlyData.push({
@@ -302,7 +310,7 @@ app.post(
 
       // Step B: Sort those Top 5 Chronologically
       const finalResults = topCandidates.sort((a, b) =>
-        a.date.localeCompare(b.date),
+        a.date.localeCompare(b.date)
       );
 
       res.json(finalResults);
@@ -310,15 +318,103 @@ app.post(
       console.error("Search Error:", error);
       res.status(500).json({ error: "Search failed" });
     }
-  },
+  }
 );
+
+app.post("/api/fengshui/personal", async (req: Request, res: Response) => {
+  try {
+    const { userId, guestUser, constructionDate, facingDegree } = req.body;
+
+    if (!constructionDate || facingDegree === undefined) {
+      return res.status(400).json({
+        error: "constructionDate and facingDegree are required",
+      });
+    }
+
+    let user: IUser | null = null;
+
+    // ----------------------------------------------------
+    // 1️⃣ Load Saved User
+    // ----------------------------------------------------
+
+    if (userId) {
+      const userDoc = await User.findById(userId);
+      console.log("Loaded userDoc:", userDoc);
+
+      if (!userDoc) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const raw = userDoc.toObject();
+
+      // ✅ FIX: Assign to outer variable (NO const here)
+      user = {
+        ...raw,
+        _id: raw._id.toString(),
+      } as IUser;
+    }
+
+    // ----------------------------------------------------
+    // 2️⃣ Or Use Guest User
+    // ----------------------------------------------------
+
+    if (!user && guestUser) {
+      user = guestUser as IUser;
+    }
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Provide either userId or guestUser",
+      });
+    }
+
+    // ----------------------------------------------------
+    // 3️⃣ Validate BaZi Data
+    // ----------------------------------------------------
+
+    if (!hasFullBaZiData(user)) {
+      return res.status(400).json({
+        error: "User profile missing required BaZi pillars",
+      });
+    }
+
+    // ----------------------------------------------------
+    // 4️⃣ Run Personal Feng Shui Engine
+    // ----------------------------------------------------
+
+    const result = analyzePersonalFengShui(
+      user,
+      new Date(constructionDate),
+      Number(facingDegree)
+    );
+
+    // ----------------------------------------------------
+    // 5️⃣ Return Full Debug-Friendly Response
+    // ----------------------------------------------------
+
+    res.json({
+      success: true,
+      input: {
+        constructionDate,
+        facingDegree,
+      },
+      result,
+    });
+  } catch (error) {
+    console.error("Feng Shui Analysis Error:", error);
+    res.status(500).json({
+      error: "Feng Shui calculation failed",
+      details: (error as Error).message,
+    });
+  }
+});
 
 app.get(
   "/api/users/:id/wealth-strategy",
   async (req: Request, res: Response) => {
     try {
       const user = (await User.findById(
-        req.params.id,
+        req.params.id
       ).lean()) as unknown as IUser;
       if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -329,7 +425,7 @@ app.get(
     } catch (e) {
       res.status(500).json({ error: (e as Error).message });
     }
-  },
+  }
 );
 
 // 1. ADD TEAM SYNERGY ENDPOINT
@@ -375,7 +471,7 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
         const scoreResult = calculateScore(
           user.toObject() as Omit<IUser, "_id">,
           dayInfo,
-          year,
+          year
         );
         return {
           name: user.name,
@@ -387,14 +483,14 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
             (l) =>
               l.includes("Breaker") ||
               l.includes("Clash") ||
-              l.includes("Nobleman"),
+              l.includes("Nobleman")
           ),
         };
       });
 
       // D. Veto Logic
       const isFatal = userScores.some(
-        (u) => u.verdict === "DANGEROUS" || u.score === 0,
+        (u) => u.verdict === "DANGEROUS" || u.score === 0
       );
 
       if (!isFatal) {
@@ -485,7 +581,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
       const scoreData = calculateScore(
         user.toObject() as Omit<IUser, "_id">,
         dayInfo,
-        year,
+        year
       );
 
       dailyScores.push({
@@ -521,7 +617,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         currDate.setHours(0, 0, 0, 0);
         const diffDays = Math.ceil(
           Math.abs(currDate.getTime() - prevDate.getTime()) /
-            (1000 * 60 * 60 * 24),
+            (1000 * 60 * 60 * 24)
         );
         if (diffDays !== 1) {
           isConsecutive = false;
@@ -536,7 +632,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         (d) =>
           d.score >= 40 &&
           d.verdict !== "DANGEROUS" &&
-          !(Array.isArray(d.flags) && d.flags.includes("PERSONAL BREAKER")),
+          !(Array.isArray(d.flags) && d.flags.includes("PERSONAL BREAKER"))
       );
 
       if (isSafeChain) {
@@ -546,7 +642,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
 
         for (const [key, allowedOfficers] of Object.entries(OFFICER_GROUPS)) {
           const isMatch = potentialChain.every((d) =>
-            allowedOfficers.includes(d.officer),
+            allowedOfficers.includes(d.officer)
           );
           if (isMatch) {
             detectedTheme = key; // Returns "LAUNCH", "HARVEST", etc.
@@ -557,7 +653,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         // Only proceed if a valid theme was found
         if (detectedTheme) {
           const avg = Math.round(
-            potentialChain.reduce((sum, d) => sum + d.score, 0) / durationNum,
+            potentialChain.reduce((sum, d) => sum + d.score, 0) / durationNum
           );
 
           if (avg >= 60) {

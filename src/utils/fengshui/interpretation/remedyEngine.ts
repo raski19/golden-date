@@ -14,11 +14,11 @@ export function getRemedy(star: number) {
   }
 
   if (star === 3) {
-    return "Use red color or Fire element to reduce conflict.";
+    return "Use Fire element to reduce conflict.";
   }
 
   if (star === 7) {
-    return "Use Water element (blue decor) to weaken Metal.";
+    return "Use Water element to weaken Metal.";
   }
 
   return "No major remedy required. Activate with light and movement.";

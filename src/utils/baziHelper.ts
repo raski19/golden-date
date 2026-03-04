@@ -1,10 +1,9 @@
 import {
   ELEMENT_ORDER,
   STEM_ELEMENTS,
-  BRANCH_ELEMENTS,
   CLASH_PAIRS,
-  RESOURCE_ELEMENT,
   STEM_MAP,
+  HIDDEN_STEMS_WEIGHT,
   BRANCH_MAP,
   SELF_PUNISHMENT,
 } from "./constants";
@@ -32,58 +31,105 @@ const getElementRelations = (dmElement: string) => {
 // 3. HELPER ALGORITHMS
 // ==========================================
 
-const calculateDMStrength = (
+export const calculateDMStrength = (
   dmStem: string,
   monthBranch: string,
-  allStems: string[], // Year, Month, Hour
-  allBranches: string[], // Year, Day, Hour
+  allStems: string[], // [Year, Month, Hour]
+  branches: { year: string; day: string; hour: string }
 ) => {
   const dmElement = STEM_ELEMENTS[dmStem];
   if (!dmElement)
     return { strength: "Unknown", score: 0, dmElement: "Unknown" };
 
-  const monthElement = BRANCH_ELEMENTS[monthBranch];
-  const resourceElement = RESOURCE_ELEMENT[dmElement];
-
+  const rel = getElementRelations(dmElement);
   let score = 0;
 
-  // 1. CHECK SEASON (Month Branch) - Weight: 40%
-  // Being born in your season is the biggest factor.
-  if (monthElement === dmElement) {
-    score += 40; // Prosperous (Same Season)
-  } else if (monthElement === resourceElement) {
-    score += 40; // Strong (Resource Season)
-  }
+  // --------------------------------------------------------
+  // 1️⃣ SEASON / MONTH BRANCH (Max ~40)
+  // We apply the hidden stem logic here too! A Dragon month is Earth,
+  // but its hidden Water and Wood drastically change the season's feel.
+  // --------------------------------------------------------
+  const monthHiddenStems = HIDDEN_STEMS_WEIGHT[monthBranch] || [];
 
-  // 2. CHECK STEMS (Year, Month, Hour) - Weight: 10% each
+  monthHiddenStems.forEach(({ stem, weight }) => {
+    const el = STEM_ELEMENTS[stem];
+    const pct = weight / 100; // e.g., 60% = 0.6
+
+    if (el === dmElement) score += 40 * pct;
+    // Prosperous
+    else if (el === rel.Resource) score += 30 * pct;
+    // Supported
+    else if (el === rel.Output) score -= 15 * pct;
+    // Drained by output
+    else if (el === rel.Wealth) score -= 15 * pct;
+    // Drained by wealth
+    else if (el === rel.Influence) score -= 20 * pct; // Attacked by power
+  });
+
+  // --------------------------------------------------------
+  // 2️⃣ STEM SUPPORT (Year, Month, Hour) (Max ~24)
+  // Stems are pure, so they don't have hidden elements.
+  // --------------------------------------------------------
   allStems.forEach((stem) => {
     const el = STEM_ELEMENTS[stem];
-    if (el === dmElement) score += 10; // Friend / Rob Wealth
-    if (el === resourceElement) score += 10; // Direct / Indirect Resource
+    if (el === dmElement) score += 8;
+    else if (el === rel.Resource) score += 8;
+    else if (el === rel.Output) score -= 5;
+    else if (el === rel.Wealth) score -= 5;
+    else if (el === rel.Influence) score -= 7;
   });
 
-  // 3. CHECK BRANCHES (Year, Day, Hour) - Weight: 10% each
-  allBranches.forEach((branch) => {
-    const el = BRANCH_ELEMENTS[branch];
-    if (el === dmElement) score += 10;
-    if (el === resourceElement) score += 10;
-  });
+  // --------------------------------------------------------
+  // 3️⃣ BRANCH SUPPORT (Proximity Weighted + Hidden Stems)
+  // --------------------------------------------------------
+  const scoreBranch = (branch: string, weightMulti: number) => {
+    if (!branch) return; // Safety check if Hour is missing
 
-  // 4. VERDICT
-  // > 50 means you have significant support (Season + 1 Support OR 5 Supports)
-  const strength = score >= 50 ? "Strong" : "Weak";
+    const hiddenStems = HIDDEN_STEMS_WEIGHT[branch] || [];
 
-  return { strength, score, dmElement };
+    hiddenStems.forEach(({ stem, weight }) => {
+      const el = STEM_ELEMENTS[stem];
+      const pct = weight / 100;
+
+      // Multiply the base score by the proximity weight AND the hidden stem percentage
+      if (el === dmElement) score += 8 * weightMulti * pct;
+      else if (el === rel.Resource) score += 8 * weightMulti * pct;
+      else if (el === rel.Output) score -= 5 * weightMulti * pct;
+      else if (el === rel.Wealth) score -= 5 * weightMulti * pct;
+      else if (el === rel.Influence) score -= 6 * weightMulti * pct;
+    });
+  };
+
+  // Day Branch sits directly under DM (Weight 1.5x)
+  scoreBranch(branches.day, 1.5);
+  // Year and Hour are further away (Weight 1x)
+  scoreBranch(branches.year, 1.0);
+  scoreBranch(branches.hour, 1.0);
+
+  // --------------------------------------------------------
+  // Normalize to 0–100
+  // --------------------------------------------------------
+
+  // Shift the base score so neutral sits around 50
+  let finalScore = Math.round(50 + score);
+  finalScore = Math.max(0, Math.min(100, finalScore));
+
+  let strength: string;
+  if (finalScore >= 80) strength = "Extremely Strong";
+  else if (finalScore >= 60) strength = "Strong";
+  else if (finalScore >= 40) strength = "Balanced";
+  else if (finalScore >= 20) strength = "Weak";
+  else strength = "Extremely Weak";
+
+  return { strength, score: finalScore, dmElement };
 };
 
 const generateRules = (
   dmElement: string,
-  strength: "Strong" | "Weak" | "Unknown",
-  userDayBranch: string,
+  strength: string,
+  userDayBranch: string
 ) => {
   const rel = getElementRelations(dmElement);
-
-  // BaZi Self-Punishment Branches
   const isSelfPunishing = SELF_PUNISHMENT.includes(userDayBranch);
 
   const rules = {
@@ -97,33 +143,37 @@ const generateRules = (
     selfPunishment: isSelfPunishing ? userDayBranch : "",
   };
 
-  // --- LOGIC: BALANCING THE CHART ---
-  if (strength === "Strong") {
-    rules.wealthElements = [rel.Wealth];
-    rules.careerElements = [rel.Influence, rel.Output];
-    rules.healthElements = [rel.Wealth];
-    rules.avoidElements = [rel.Resource, rel.Companion];
-  } else {
-    rules.wealthElements = [rel.Companion];
-    rules.careerElements = [rel.Resource];
-    rules.healthElements = [rel.Resource];
-    rules.avoidElements = [rel.Output, rel.Wealth, rel.Influence]; // Updated to Influence
+  // ==========================================================
+  // PROFESSIONAL BALANCING LOGIC
+  // ==========================================================
+
+  switch (strength) {
+    case "Extremely Strong":
+    case "Strong":
+      rules.wealthElements = [rel.Wealth];
+      rules.careerElements = [rel.Output, rel.Influence];
+      rules.healthElements = [rel.Output]; // Output is the "medicine" (vents excess energy)
+      rules.avoidElements = [rel.Resource, rel.Companion]; // Companions steal wealth here
+      break;
+
+    case "Balanced":
+      rules.wealthElements = [rel.Wealth];
+      rules.careerElements = [rel.Influence, rel.Output];
+      rules.healthElements = [rel.Resource, rel.Companion];
+      rules.avoidElements = []; // True balanced charts don't have strict taboos
+      break;
+
+    case "Weak":
+    case "Extremely Weak":
+      rules.wealthElements = [rel.Companion]; // Needs friends/partners to help carry the wealth
+      rules.careerElements = [rel.Resource]; // Relies on knowledge/strategy rather than brute force
+      rules.healthElements = [rel.Resource]; // Resource is the ultimate medicine/shield
+      rules.avoidElements = [rel.Output, rel.Wealth, rel.Influence]; // CRITICAL: Must avoid Influence
+      break;
+
+    default:
+      break;
   }
-
-  // --- POPULATE BRANCHES BASED ON ELEMENTS ---
-  const allFavorableElements = [
-    ...rules.wealthElements,
-    ...rules.careerElements,
-    ...rules.healthElements,
-  ];
-
-  Object.entries(BRANCH_ELEMENTS).forEach(([branch, element]) => {
-    if (allFavorableElements.includes(element)) {
-      rules.favorableBranches.push(branch);
-    } else if (rules.avoidElements.includes(element)) {
-      rules.badBranches.push(branch);
-    }
-  });
 
   return rules;
 };
@@ -136,7 +186,7 @@ export const calculateBaZiProfile = (
   name: string,
   birthDate: Date,
   gender: "male" | "female",
-  hasTime: boolean = true,
+  hasTime: boolean = true
 ) => {
   // 1. Solar Conversion
   const solar = Solar.fromYmdHms(
@@ -145,7 +195,7 @@ export const calculateBaZiProfile = (
     birthDate.getDate(),
     hasTime ? birthDate.getHours() : 12, // Default to noon if no time, just for safety
     hasTime ? birthDate.getMinutes() : 0,
-    0,
+    0
   );
 
   const lunar = solar.getLunar();
@@ -201,18 +251,23 @@ export const calculateBaZiProfile = (
   const chartBranches = [yearBranch, dayBranch];
   if (hourBranch) chartBranches.push(hourBranch);
 
-  const analysis = calculateDMStrength(
-    dayMaster,
-    monthBranch,
-    chartStems,
-    chartBranches,
-  );
+  // const analysis = calculateDMStrength(
+  //   dayMaster,
+  //   monthBranch,
+  //   chartStems,
+  //   chartBranches
+  // );
+  const analysis = calculateDMStrength(dayMaster, monthBranch, chartStems, {
+    year: yearBranch,
+    day: dayBranch,
+    hour: hourBranch || "",
+  });
 
   // 5. Generate Rules
   const rules = generateRules(
     analysis.dmElement,
     (analysis.strength || "Unknown") as "Strong" | "Weak" | "Unknown",
-    dayBranch,
+    dayBranch
   );
 
   return {

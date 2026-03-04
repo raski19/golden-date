@@ -1,4 +1,4 @@
-import { OverlaySector, Sector } from "../core/xuanKongEngine";
+import { MultiOverlaySector, Sector } from "../core/fengshui/xuanKongEngine";
 import { evaluateCombination } from "../interpretation/combinationEngine";
 import { getRemedy } from "../interpretation/remedyEngine";
 
@@ -14,57 +14,43 @@ const GRID_ORDER: Sector[] = [
   "Northwest",
 ];
 
-function getScoreColor(score: number): string {
-  if (score <= -3) return "#ffe5e5";
-  if (score < 0) return "#fff5f5";
-  if (score >= 5) return "#e6ffed";
-  return "#f0fff4";
-}
-
 export function buildFengShuiHtml(
-  overlay: Record<Sector, OverlaySector>,
+  overlay: Record<Sector, MultiOverlaySector>,
   period: number
 ): string {
-  const cellsHtml = GRID_ORDER.map((sector) => {
+  const cells = GRID_ORDER.map((sector) => {
     const data = overlay[sector];
 
     const combo = evaluateCombination(data.mountain, data.water, period);
 
-    const remedy = getRemedy(data.annual);
+    const dynamicStar = data.monthly ?? data.annual ?? 0;
+
+    const remedy = dynamicStar
+      ? getRemedy(dynamicStar)
+      : "No dynamic influence.";
 
     return `
       <div style="
         border:1px solid #ccc;
         padding:12px;
         border-radius:8px;
-        background:${getScoreColor(combo.score)};
-        font-family:Arial, sans-serif;
         font-size:13px;
+        background:${combo.score < 0 ? "#fff5f5" : "#f0fff4"};
       ">
-        <h3 style="margin:0 0 8px 0; font-size:14px;">
-          ${sector}
-        </h3>
+        <h3>${sector}</h3>
 
-        <div>Base: <strong>${data.base}</strong></div>
-        <div>Mountain: <strong>${data.mountain}</strong></div>
-        <div>Water: <strong>${data.water}</strong></div>
-        <div>Annual: <strong>${data.annual}</strong></div>
+        <div>Base: ${data.base}</div>
+        <div>Mountain: ${data.mountain}</div>
+        <div>Water: ${data.water}</div>
 
-        <div style="margin-top:8px;">
-          <strong>Score:</strong> ${combo.score}
+        ${data.annual ? `<div>Annual: ${data.annual}</div>` : ""}
+        ${data.monthly ? `<div>Monthly: ${data.monthly}</div>` : ""}
+
+        <div style="margin-top:6px;">
+          Score: ${combo.score}
         </div>
 
-        <div style="margin-top:5px; font-size:12px;">
-          ${combo.description}
-        </div>
-
-        <div style="
-          margin-top:8px;
-          padding:6px;
-          background:#f8f9fa;
-          border-radius:4px;
-          font-size:12px;
-        ">
+        <div style="margin-top:6px;">
           <strong>Remedy:</strong> ${remedy}
         </div>
       </div>
@@ -72,13 +58,8 @@ export function buildFengShuiHtml(
   }).join("");
 
   return `
-    <div style="
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px;
-      max-width:900px;
-    ">
-      ${cellsHtml}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      ${cells}
     </div>
   `;
 }

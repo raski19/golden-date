@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>GoldenDate - Feng Shui Planner</title>
+    <link rel="stylesheet" href="style.css"></head>
+    <script src="script.js" defer></script>
+<body>
+<h1>Life Dashboard</h1>
+
+<button onclick="load()">Analyze</button>
+
+<div id="result"></div>
+
+<script>
+    async function load() {
+
+        const response = await fetch("/api/fengshui/personal", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                constructionDate: "2025-03-01",
+                facingDegree: 180,
+                yearBranch: "Snake",
+                monthIndex: 5,
+                dayMasterElement: "Fire",
+                favorableElements: ["Wood", "Fire"]
+            })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("result").innerHTML = `
+            <h2>Life Alignment: ${data.lifeAlignment}/100</h2>
+            <p>House Score: ${data.houseIndex}</p>
+            <p>Resonance: ${data.resonanceScore}</p>
+
+            <h3>Best Wealth Sector:</h3>
+            ${data.layout.bestWealthSector}
+
+            <h3>6 Month Plan:</h3>
+            ${data.sixMonthPlan.map(p =>
+                    `<div>Month +${p.monthOffset}: Wealth Focus → ${p.wealthFocus}</div>`
+                ).join("")}
+          `;
+    }
+</script>
+</body>
+</html>

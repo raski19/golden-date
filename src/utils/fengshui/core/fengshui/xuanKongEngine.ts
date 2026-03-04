@@ -1,6 +1,6 @@
 // ============================================================
-// XUAN KONG FLYING STAR ENGINE (TypeScript)
-// Period 8/9 + 24 Mountains + Natal + Annual Overlay
+// XUAN KONG FLYING STAR ENGINE
+// Period 8 & 9 | Li Chun | 24 Mountains | Natal + Annual + Monthly
 // ============================================================
 
 // ------------------------------------------------------------
@@ -36,18 +36,24 @@ export interface NatalChart {
   waterStars: Record<Sector, number>;
 }
 
-export interface OverlaySector {
+export interface MultiOverlaySector {
   base: number;
   mountain: number;
   water: number;
-  annual: number;
+  annual?: number;
+  monthly?: number;
+}
+
+export interface OverlayOptions {
+  includeAnnual?: boolean;
+  includeMonthly?: boolean;
 }
 
 // ------------------------------------------------------------
 // CONSTANTS
 // ------------------------------------------------------------
 
-const LUO_SHU: Sector[] = [
+const LUO_SHU_ORDER: Sector[] = [
   "Center",
   "Northwest",
   "West",
@@ -86,6 +92,12 @@ const MOUNTAINS_24: Mountain[] = [
   { name: "N1", start: 345, end: 360, yinYang: "Yin", sector: "North" },
 ];
 
+const YEAR_GROUPS = {
+  GROUP_8: ["Rat", "Horse", "Rabbit", "Rooster"],
+  GROUP_5: ["Dragon", "Dog", "Ox", "Goat"],
+  GROUP_2: ["Tiger", "Monkey", "Snake", "Pig"],
+};
+
 // ------------------------------------------------------------
 // UTILITIES
 // ------------------------------------------------------------
@@ -103,6 +115,9 @@ const digitalRoot = (year: number): number => {
   return sum;
 };
 
+const normalizeDegree = (degree: number): number =>
+  ((degree % 360) + 360) % 360;
+
 // ------------------------------------------------------------
 // LI CHUN LOGIC
 // ------------------------------------------------------------
@@ -113,44 +128,60 @@ export function getSolarYear(date: Date): number {
 }
 
 // ------------------------------------------------------------
-// PERIOD
+// FULL SAN YUAN PERIOD DETECTION (All 9 Periods)
 // ------------------------------------------------------------
 
 export function getPeriod(date: Date): number {
-  const y = getSolarYear(date);
-  if (y >= 2004 && y <= 2023) return 8;
-  if (y >= 2024 && y <= 2043) return 9;
-  throw new Error("Unsupported period");
+  const solarYear = getSolarYear(date);
+
+  const baseYear = 1864; // Start of Period 1 (San Yuan cycle)
+
+  if (solarYear < baseYear) {
+    throw new Error("Date before start of Xuan Kong cycle (1864)");
+  }
+
+  const yearsSinceBase = solarYear - baseYear;
+
+  const periodIndex = Math.floor(yearsSinceBase / 20);
+
+  // There are 9 periods (1–9), then cycle repeats
+  const period = (periodIndex % 9) + 1;
+
+  return period;
 }
 
 // ------------------------------------------------------------
-// MOUNTAIN RESOLUTION
+// 24 MOUNTAIN RESOLUTION
 // ------------------------------------------------------------
 
 export function resolveMountain(degree: number): Mountain {
-  const normalized = ((degree % 360) + 360) % 360;
+  const normalized = normalizeDegree(degree);
 
   const mountain = MOUNTAINS_24.find(
     (m) => normalized >= m.start && normalized < m.end
   );
 
-  if (!mountain) throw new Error("Invalid facing degree");
+  if (!mountain) {
+    throw new Error("Invalid facing degree");
+  }
 
   return mountain;
 }
 
 // ------------------------------------------------------------
-// FLYING ENGINE
+// FLYING ALGORITHM
 // ------------------------------------------------------------
 
-function fly(center: number, reverse = false): Record<Sector, number> {
-  const result = {} as Record<Sector, number>;
+function fly(centerStar: number, reverse = false): Record<Sector, number> {
+  const chart = {} as Record<Sector, number>;
 
-  LUO_SHU.forEach((sector, index) => {
-    result[sector] = reverse ? wrap9(center - index) : wrap9(center + index);
+  LUO_SHU_ORDER.forEach((sector, index) => {
+    chart[sector] = reverse
+      ? wrap9(centerStar - index)
+      : wrap9(centerStar + index);
   });
 
-  return result;
+  return chart;
 }
 
 // ------------------------------------------------------------
@@ -165,6 +196,7 @@ export function buildNatalChart(
   const mountain = resolveMountain(facingDegree);
 
   const baseChart = fly(period);
+
   const forward = mountain.yinYang === "Yang";
   const facingStar = baseChart[mountain.sector];
 
@@ -181,34 +213,61 @@ export function buildNatalChart(
 }
 
 // ------------------------------------------------------------
-// ANNUAL
+// ANNUAL STARS
 // ------------------------------------------------------------
 
 export function getAnnualStars(date: Date): Record<Sector, number> {
   const solarYear = getSolarYear(date);
   let star = 9 - digitalRoot(solarYear);
+
   if (star <= 0) star = 9;
+
   return fly(star);
 }
 
 // ------------------------------------------------------------
-// OVERLAY
+// MONTHLY STARS
 // ------------------------------------------------------------
 
-export function overlayCharts(
-  natal: NatalChart,
-  annual: Record<Sector, number>
-): Record<Sector, OverlaySector> {
-  const merged = {} as Record<Sector, OverlaySector>;
+export function getMonthlyStars(
+  yearBranch: string,
+  monthIndex: number
+): Record<Sector, number> {
+  let base: number;
 
-  LUO_SHU.forEach((sec) => {
-    merged[sec] = {
-      base: natal.baseChart[sec],
-      mountain: natal.mountainStars[sec],
-      water: natal.waterStars[sec],
-      annual: annual[sec],
+  if (YEAR_GROUPS.GROUP_8.includes(yearBranch)) base = 8;
+  else if (YEAR_GROUPS.GROUP_5.includes(yearBranch)) base = 5;
+  else if (YEAR_GROUPS.GROUP_2.includes(yearBranch)) base = 2;
+  else throw new Error("Invalid year branch");
+
+  const center = wrap9(base - (monthIndex - 1));
+
+  return fly(center);
+}
+
+// ------------------------------------------------------------
+// MULTI-LAYER OVERLAY
+// ------------------------------------------------------------
+
+export function overlayWithOptions(
+  natal: NatalChart,
+  annual: Record<Sector, number> | null,
+  monthly: Record<Sector, number> | null,
+  options: OverlayOptions
+): Record<Sector, MultiOverlaySector> {
+  const result = {} as Record<Sector, MultiOverlaySector>;
+
+  LUO_SHU_ORDER.forEach((sector) => {
+    result[sector] = {
+      base: natal.baseChart[sector],
+      mountain: natal.mountainStars[sector],
+      water: natal.waterStars[sector],
+      ...(options.includeAnnual && annual ? { annual: annual[sector] } : {}),
+      ...(options.includeMonthly && monthly
+        ? { monthly: monthly[sector] }
+        : {}),
     };
   });
 
-  return merged;
+  return result;
 }

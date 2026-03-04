@@ -20,32 +20,19 @@ const getResource = (el: string): string => RESOURCE_ELEMENT[el]; // Mother (Res
 const getWealth = (el: string): string => CONTROL_CYCLE[el]; // Object Controlled (Wealth)
 const getInfluence = (el: string): string => INFLUENCE_ELEMENT[el]; // Controller (Influence)
 
-// Check if a branch supports the Day Master (Same element or produces it)
-function branchSupportsDayMaster(
-  branch: string,
-  dayMaster: string,
-  dayMasterElement: string,
-): boolean {
-  const branchElement = getElement(branch);
-  return (
-    branchElement === dayMasterElement ||
-    branchElement === getResource(dayMasterElement)
-  );
-}
-
 // Get all branches that belong to a list of elements
 function getBranchesForElements(
   elements: string[],
   dayMaster: string,
   isStrong: boolean,
   monthBranch: string,
-  existingBranches: string[] = [],
+  existingBranches: string[] = []
 ): string[] {
   // Define Seasonality
   const isWinterBorn = ["Pig", "Rat", "Ox"].includes(monthBranch);
 
   const allBranches = Object.keys(ELEMENT_MAP).filter((k) =>
-    BRANCHES_LIST.includes(k),
+    BRANCHES_LIST.includes(k)
   );
 
   return allBranches.filter((branch) => {
@@ -114,7 +101,7 @@ export function generateUserProfile(
   yearBranch: string, // e.g. "Rabbit"
   luckBranch: string, // e.g. "Tiger"
   birthYear: number,
-  gender: "male" | "female",
+  gender: "male" | "female"
 ): IUser {
   // Get elements
   const dmElement = getElement(dayMaster);
@@ -156,7 +143,9 @@ export function generateUserProfile(
   // Determine strength: Strong if majority of pillars support
   const isStrong = supportCount >= Math.ceil(totalPillars / 2); // At least 2 out of 4
 
-  const profileName = `${isStrong ? "Strong" : "Weak"} ${dayMaster} ${dmElement}`;
+  const profileName = `${
+    isStrong ? "Strong" : "Weak"
+  } ${dayMaster} ${dmElement}`;
 
   // Calculate Favorable Elements
   let wealthEl: string[],
@@ -215,7 +204,7 @@ export function generateUserProfile(
     dayMaster,
     isStrong,
     monthBranch,
-    allUserBranches, // Pass all branches for clash checking
+    allUserBranches // Pass all branches for clash checking
   );
 
   const badBranches = getBranchesForElements(
@@ -223,7 +212,7 @@ export function generateUserProfile(
     dayMaster,
     isStrong,
     monthBranch,
-    allUserBranches, // Also check clashes for bad branches
+    allUserBranches // Also check clashes for bad branches
   );
 
   // Construct Description with strength details
