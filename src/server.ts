@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
-// import { config } from "./config";
-import express, { Request, Response } from "express";
+import express, { Router, Request, Response } from "express";
+import { ParsedQs } from "qs";
+import { trackVisit } from "./middlewares/trackVisit";
 import mongoose from "mongoose";
 import User from "./models/User";
 import { IUser } from "./types";
@@ -16,6 +17,8 @@ import { analyzePersonalFengShui } from "./utils/personalFengShuiEngine";
 import { hasFullBaZiData } from "./utils/validators/baziValidator";
 
 const app = express();
+const router = Router();
+app.use(router);
 
 // const PORT = config.port || 3333;
 // const MONGO_URI = config.mongoUri || "mongodb://127.0.0.1:27017/";
@@ -37,11 +40,11 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Get Users
-app.get("/api/users", async (req: Request, res: Response) => {
+router.get("/api/users", async (req: Request, res: Response) => {
   const users = await User.find({}, "name dayMaster strength dayBranch");
   res.json(users);
 });
-app.post("/api/generate-guest", (req: Request, res: Response) => {
+router.post("/api/generate-guest", (req: Request, res: Response) => {
   try {
     const { name, birthDate, gender, hasTime = true } = req.body;
 
@@ -62,22 +65,28 @@ app.post("/api/generate-guest", (req: Request, res: Response) => {
 });
 
 // Get Calendar Data
-interface CalendarData {
+interface CalendarData extends ParsedQs {
   userId: string;
   year: string;
   month: string;
 }
-app.get(
+router.get(
   "/api/calendar",
+  trackVisit,
   async (req: Request<{}, {}, {}, CalendarData>, res: Response) => {
     const { userId, year, month } = req.query;
 
     if (!userId || !year || !month) {
-      return res.status(400).json({ error: "Missing parameters" });
+      res.status(400).json({ error: "Missing parameters" });
+      return;
     }
 
     const user = (await User.findById(userId).lean()) as unknown as IUser;
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      // ✅ FIX: Send the response, THEN return empty
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
 
     const y = parseInt(year as string);
     const m = parseInt(month as string);
@@ -96,7 +105,7 @@ app.get(
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
         2,
-        "0"
+        "0",
       )}`;
 
       const dayInfo = getDayInfo(dateStr);
@@ -106,7 +115,7 @@ app.get(
       const tenGods = calculateTenGods(
         user.dayMaster,
         cleanStem,
-        dayInfo.dayBranch
+        dayInfo.dayBranch,
       );
 
       monthlyData.push({
@@ -123,9 +132,10 @@ app.get(
       monthAnalysis: monthAnalysis,
       days: monthlyData,
     });
-  }
+  },
 );
-app.post("/api/calendar/guest", async (req: Request, res: Response) => {
+
+router.post("/api/calendar/guest", async (req: Request, res: Response) => {
   // Extract year and month from query, user from body
   const { year, month } = req.query;
   const user = req.body.user as IUser; // The generated guest profile
@@ -151,7 +161,7 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
       2,
-      "0"
+      "0",
     )}`;
 
     const dayInfo = getDayInfo(dateStr);
@@ -161,7 +171,7 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
     const tenGods = calculateTenGods(
       user.dayMaster,
       cleanStem,
-      dayInfo.dayBranch
+      dayInfo.dayBranch,
     );
 
     monthlyData.push({
@@ -181,7 +191,7 @@ app.post("/api/calendar/guest", async (req: Request, res: Response) => {
   });
 });
 
-app.get("/api/day-details/:date", (req, res) => {
+router.get("/api/day-details/:date", (req, res) => {
   const { date } = req.params; // Expects YYYY-MM-DD
   const details = getDayDetails(date);
 
@@ -200,7 +210,7 @@ interface FindDatesBody {
   year?: string;
   month?: string;
 }
-app.post(
+router.post(
   "/api/find-dates",
   async (req: Request<{}, {}, FindDatesBody>, res: Response) => {
     try {
@@ -310,7 +320,7 @@ app.post(
 
       // Step B: Sort those Top 5 Chronologically
       const finalResults = topCandidates.sort((a, b) =>
-        a.date.localeCompare(b.date)
+        a.date.localeCompare(b.date),
       );
 
       res.json(finalResults);
@@ -318,10 +328,10 @@ app.post(
       console.error("Search Error:", error);
       res.status(500).json({ error: "Search failed" });
     }
-  }
+  },
 );
 
-app.post("/api/fengshui/personal", async (req: Request, res: Response) => {
+router.post("/api/fengshui/personal", async (req: Request, res: Response) => {
   try {
     const { userId, guestUser, constructionDate, facingDegree } = req.body;
 
@@ -385,7 +395,7 @@ app.post("/api/fengshui/personal", async (req: Request, res: Response) => {
     const result = analyzePersonalFengShui(
       user,
       new Date(constructionDate),
-      Number(facingDegree)
+      Number(facingDegree),
     );
 
     // ----------------------------------------------------
@@ -409,12 +419,12 @@ app.post("/api/fengshui/personal", async (req: Request, res: Response) => {
   }
 });
 
-app.get(
+router.get(
   "/api/users/:id/wealth-strategy",
   async (req: Request, res: Response) => {
     try {
       const user = (await User.findById(
-        req.params.id
+        req.params.id,
       ).lean()) as unknown as IUser;
       if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -425,11 +435,11 @@ app.get(
     } catch (e) {
       res.status(500).json({ error: (e as Error).message });
     }
-  }
+  },
 );
 
 // 1. ADD TEAM SYNERGY ENDPOINT
-app.post("/api/team-synergy", async (req: Request, res: Response) => {
+router.post("/api/team-synergy", async (req: Request, res: Response) => {
   try {
     const { userIds } = req.body;
 
@@ -471,7 +481,7 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
         const scoreResult = calculateScore(
           user.toObject() as Omit<IUser, "_id">,
           dayInfo,
-          year
+          year,
         );
         return {
           name: user.name,
@@ -483,14 +493,14 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
             (l) =>
               l.includes("Breaker") ||
               l.includes("Clash") ||
-              l.includes("Nobleman")
+              l.includes("Nobleman"),
           ),
         };
       });
 
       // D. Veto Logic
       const isFatal = userScores.some(
-        (u) => u.verdict === "DANGEROUS" || u.score === 0
+        (u) => u.verdict === "DANGEROUS" || u.score === 0,
       );
 
       if (!isFatal) {
@@ -537,7 +547,7 @@ app.post("/api/team-synergy", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/api/momentum", async (req: Request, res: Response) => {
+router.post("/api/momentum", async (req: Request, res: Response) => {
   try {
     const { userId, duration = 2 } = req.body;
     const durationNum = parseInt(duration, 10);
@@ -581,7 +591,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
       const scoreData = calculateScore(
         user.toObject() as Omit<IUser, "_id">,
         dayInfo,
-        year
+        year,
       );
 
       dailyScores.push({
@@ -617,7 +627,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         currDate.setHours(0, 0, 0, 0);
         const diffDays = Math.ceil(
           Math.abs(currDate.getTime() - prevDate.getTime()) /
-            (1000 * 60 * 60 * 24)
+            (1000 * 60 * 60 * 24),
         );
         if (diffDays !== 1) {
           isConsecutive = false;
@@ -632,7 +642,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         (d) =>
           d.score >= 40 &&
           d.verdict !== "DANGEROUS" &&
-          !(Array.isArray(d.flags) && d.flags.includes("PERSONAL BREAKER"))
+          !(Array.isArray(d.flags) && d.flags.includes("PERSONAL BREAKER")),
       );
 
       if (isSafeChain) {
@@ -642,7 +652,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
 
         for (const [key, allowedOfficers] of Object.entries(OFFICER_GROUPS)) {
           const isMatch = potentialChain.every((d) =>
-            allowedOfficers.includes(d.officer)
+            allowedOfficers.includes(d.officer),
           );
           if (isMatch) {
             detectedTheme = key; // Returns "LAUNCH", "HARVEST", etc.
@@ -653,7 +663,7 @@ app.post("/api/momentum", async (req: Request, res: Response) => {
         // Only proceed if a valid theme was found
         if (detectedTheme) {
           const avg = Math.round(
-            potentialChain.reduce((sum, d) => sum + d.score, 0) / durationNum
+            potentialChain.reduce((sum, d) => sum + d.score, 0) / durationNum,
           );
 
           if (avg >= 60) {

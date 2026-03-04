@@ -45,6 +45,14 @@ export interface IUser {
   rules: UserRules;
 }
 
+export interface IVisit {
+  _id?: string;
+  ip: string;
+  country: string;
+  visitCount: string;
+  lastVisit: string;
+}
+
 export interface YellowBlackBelt {
   name: string;
   type: "Yellow" | "Black";
